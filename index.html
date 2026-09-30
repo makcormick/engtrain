@@ -3,81 +3,297 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Лента: прототип v2</title>
+<title>Тренажёры английского</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap">
 <style>
-:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+
+[hidden]{display:none!important}
+html,body{margin:0}
+#launcher{--bg:#f4f1ec;--card:#fff;--ink:#1d2433;--mut:#5f6878;--line:#ddd7cc;--acc:#2f5bea;min-height:100dvh;background:var(--bg);color:var(--ink);font:500 17px/1.5 "Manrope",system-ui,sans-serif;padding:max(24px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom));box-sizing:border-box}
+@media (prefers-color-scheme:dark){#launcher{--bg:#12161f;--card:#1b2130;--ink:#e9edf7;--mut:#9aa5bb;--line:#2b3447;--acc:#7c9bff}}
+#launcher .lw{max-width:560px;margin:0 auto}
+#launcher h1{font-size:30px;line-height:1.15;margin:12px 0 6px}
+#launcher .lsub{color:var(--mut);margin:0 0 22px}
+#launcher .pick{display:block;width:100%;text-align:left;background:var(--card);border:2px solid var(--line);border-radius:20px;padding:18px;margin-bottom:14px;color:inherit;font:inherit;cursor:pointer}
+#launcher .pick:hover,#launcher .pick:focus-visible{border-color:var(--acc);outline:none}
+#launcher .pick .e{font-size:32px;line-height:1}
+#launcher .pick b{display:block;font-size:21px;margin:8px 0 4px}
+#launcher .pick small{display:block;color:var(--mut);font-size:15px;line-height:1.45}
+#t1{--bg:#f3f6f4;--card:#fff;--ink:#1c2b26;--mut:#5d6f68;--line:#d5dfda;--acc:#1f7a5c;--accbg:#dff1ea;--ok:#1f7a5c;--okbg:#dff1ea;--bad:#b3341f;--badbg:#f8e1dc;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){#t1{--bg:#14201c;--card:#1d2c26;--ink:#e6f0eb;--mut:#9db2a9;--line:#2f443b;--acc:#5fcfa5;--accbg:#22392f;--ok:#5fcfa5;--okbg:#22392f;--bad:#ff8f7a;--badbg:#3d2622}}
+#t1[data-theme="dark"]{--bg:#14201c;--card:#1d2c26;--ink:#e6f0eb;--mut:#9db2a9;--line:#2f443b;--acc:#5fcfa5;--accbg:#22392f;--ok:#5fcfa5;--okbg:#22392f;--bad:#ff8f7a;--badbg:#3d2622}
+#t1{scroll-padding-top:env(safe-area-inset-top,0px)}
+#t1 *{box-sizing:border-box}
+#t1{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 Georgia,serif}
+#t1 main{max-width:720px;margin:0 auto;padding:20px 16px 48px}
+#t1 h1{font-size:26px;margin:4px 0}
+#t1 .sub{color:var(--mut);margin:0 0 14px;font-size:15px}
+#t1 button,#t1 input{font-family:system-ui,sans-serif}
+#t1 button:focus-visible,#t1 input:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+#t1 .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:12px}
+#t1 .top{display:flex;gap:14px;align-items:center}
+#t1 .pic{font-size:52px;line-height:1;background:var(--accbg);border-radius:12px;padding:10px 12px}
+#t1 .w{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#t1 .en{font-size:26px;font-weight:700}
+#t1 .ru{color:var(--acc);font:600 17px system-ui,sans-serif}
+#t1 .def,#t1 .ex{margin:8px 0 0}
+#t1 .ex{font-style:italic}
+#t1 .tr{font:15px system-ui,sans-serif;color:var(--mut);font-style:normal}
+#t1 .col{margin:8px 0 0;padding-left:18px;font:15px system-ui,sans-serif}
+#t1 .as{margin-top:10px;display:grid;gap:6px;font:15px system-ui,sans-serif}
+#t1 .tag{display:inline-block;background:var(--accbg);color:var(--acc);font-weight:700;border-radius:6px;padding:1px 8px;margin-right:4px;font-size:13px}
+#t1 .spk{border:1px solid var(--line);background:none;color:var(--ink);border-radius:8px;padding:2px 8px;cursor:pointer;font-size:15px}
+#t1 .bar{display:flex;justify-content:space-between;align-items:center;gap:8px;font:14px system-ui,sans-serif;color:var(--mut);margin-bottom:8px}
+#t1 .lnk{background:none;border:0;color:var(--acc);cursor:pointer;font:600 14px system-ui,sans-serif;padding:0}
+#t1 .prog{height:6px;background:var(--line);border-radius:3px;margin-bottom:14px;overflow:hidden}
+#t1 .prog i{display:block;height:100%;background:var(--acc)}
+#t1 .q{font-size:30px;font-weight:700;margin:6px 0 4px}
+#t1 .qs{font-size:20px;margin:6px 0 4px}
+#t1 .hint{color:var(--mut);font:14px system-ui,sans-serif;margin:4px 0 12px}
+#t1 .opts{display:grid;gap:8px}
+#t1 .opt,#t1 .btn{font:600 16px system-ui,sans-serif;padding:12px 14px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;text-align:left}
+#t1 .btn{background:var(--acc);color:var(--bg);border-color:var(--acc);text-align:center}
+#t1 .btn.sec{background:var(--card);color:var(--ink);border-color:var(--line)}
+#t1 .btn:disabled{opacity:.4;cursor:not-allowed}
+#t1 .opt:hover:not(:disabled){border-color:var(--acc)}
+#t1 .opt.ok{background:var(--okbg);border-color:var(--ok);color:var(--ok)}
+#t1 .opt.bad{background:var(--badbg);border-color:var(--bad);color:var(--bad)}
+#t1 .slots{display:flex;gap:6px;flex-wrap:wrap;min-height:48px;margin:8px 0 12px}
+#t1 .slot{width:36px;height:44px;border-bottom:3px solid var(--line);font:700 24px system-ui,sans-serif;text-align:center}
+#t1 .letters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+#t1 .letters button{width:44px;height:48px;font:700 22px system-ui,sans-serif;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+#t1 .letters button:disabled{opacity:.25}
+#t1 input[type=text]{width:100%;font:600 20px system-ui,sans-serif;padding:12px;border-radius:8px;border:2px solid var(--line);background:var(--card);color:var(--ink);margin-bottom:10px}
+#t1 .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+#t1 .fb{margin-top:14px;padding:12px 14px;border-radius:8px;font:15px/1.5 system-ui,sans-serif}
+#t1 .fb.ok{background:var(--okbg);color:var(--ok)}
+#t1 .fb.bad{background:var(--badbg);color:var(--bad)}
+#t1 .fb em{color:var(--ink)}
+#t1 .mrow{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer;font-family:system-ui,sans-serif}
+#t1 .mrow input{width:22px;height:22px;margin-top:2px;accent-color:var(--acc)}
+#t1 .mrow small{color:var(--mut)}
+#t1 .ml{margin:8px 0 16px}
+#t1 .hid{background:var(--line);color:transparent;border-radius:4px;cursor:pointer;padding:0 6px;user-select:none}
+#t1 .hid.sh{background:var(--accbg);color:var(--acc);font-weight:700}
+#t1 .seg{display:flex;gap:6px;margin-bottom:12px}
+#t1 .seg button{flex:1;font:600 15px system-ui,sans-serif;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+#t1 .seg .on{background:var(--acc);color:var(--bg);border-color:var(--acc)}
+#t1 .slot.wd{width:auto;min-width:36px;padding:0 8px;font-size:20px}
+#t1 .letters.wd button{width:auto;padding:0 12px;font-size:17px}
+#t1 .big{font-size:44px;font-weight:700;margin:4px 0}
+#t1{min-height:100dvh}
+#t2{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
 --bg:#eef2f9;--card:#fff;--ink:#14213d;--mute:#5d6a85;--line:#d5dcea;--acc:#2f5bea;--acc-t:#e3eaff;--ok:#16825a;--ok-t:#d9f3e8;--bad:#c93a54;--bad-t:#fbe1e6}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1526;--card:#172038;--ink:#e8edf9;--mute:#93a0bf;--line:#2a3554;--acc:#7c9bff;--acc-t:#22305a;--ok:#4fd39a;--ok-t:#143a2e;--bad:#ff7b93;--bad-t:#45202b}}
-:root[data-theme="dark"]{--bg:#0e1526;--card:#172038;--ink:#e8edf9;--mute:#93a0bf;--line:#2a3554;--acc:#7c9bff;--acc-t:#22305a;--ok:#4fd39a;--ok-t:#143a2e;--bad:#ff7b93;--bad-t:#45202b}
-*{box-sizing:border-box}
-html,body{height:100%;margin:0}
-body{background:var(--bg);color:var(--ink);font:500 17px/1.45 "Manrope",system-ui,sans-serif;display:flex;justify-content:center;overscroll-behavior:none}
-#app{width:100%;max-width:480px;height:100%;display:flex;flex-direction:column;padding:14px 16px 12px}
-.top{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--mute)}
-.bar{flex:1;height:6px;border-radius:3px;background:var(--line);overflow:hidden}
-.bar i{display:block;height:100%;background:var(--acc);transition:width .3s}
-.stage{flex:1;position:relative;margin:14px 0 10px;touch-action:none;overflow:hidden;min-height:0}
-.card{position:absolute;inset:0;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px 20px;display:flex;flex-direction:column;gap:14px;overflow:auto;transition:transform .25s ease,opacity .25s ease;user-select:none;touch-action:none}
-.card.out{transform:translateY(-110%);opacity:0}
-.tag{align-self:flex-start;font-size:13px;font-weight:700;padding:4px 10px;border-radius:99px;background:var(--acc-t);color:var(--acc)}
-.tag.p{background:var(--line);color:var(--mute)}
-.item{font-size:34px;font-weight:800;line-height:1.1}
-.tr{color:var(--mute);margin-top:-8px}
-.scene{border-left:4px solid var(--acc);padding:2px 0 2px 14px;font-size:18px}
-.scene b{color:var(--mute);font-weight:700;margin-right:6px}
-.ex{margin:0;padding-left:20px}
-.tip{background:var(--acc-t);border-radius:12px;padding:10px 12px;font-size:15px}
-.q{font-size:20px;font-weight:700}
-.opts{display:grid;gap:9px}
-button{font:inherit;font-weight:700;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:14px;padding:13px 14px;text-align:left;cursor:pointer}
-button:hover:not(:disabled){border-color:var(--acc)}
-button:focus-visible,input:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
-button.ok{background:var(--ok-t);border-color:var(--ok)}
-button.bad{background:var(--bad-t);border-color:var(--bad)}
-button.sel{border-color:var(--acc);background:var(--acc-t)}
-button.main{background:var(--acc);border-color:var(--acc);color:#fff;text-align:center}
-button:disabled{cursor:default}
-.ans,.pool{display:flex;flex-wrap:wrap;gap:8px}
-.ans{min-height:56px;border-bottom:2px solid var(--line);padding-bottom:10px;align-content:flex-start}
-.chip{padding:8px 12px;border-radius:12px;text-align:center}
-.cols{display:grid;grid-template-columns:1fr 1fr;gap:9px 12px}
-.cols button{padding:10px 12px;font-size:15px}
-input.txt{font:inherit;font-weight:700;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:14px;padding:13px 14px;width:100%;user-select:text}
-.row{display:flex;gap:8px;align-items:stretch}
-.row input.txt{flex:1;min-width:0}
-.mic{flex:none;width:54px;padding:0;display:grid;place-items:center;color:var(--acc)}
-.mic svg{width:24px;height:24px}
-.mic.on{background:var(--bad-t);border-color:var(--bad);color:var(--bad);animation:pulse 1.1s infinite}
-.mic:disabled{opacity:.45}
+@media (prefers-color-scheme:dark){#t2{--bg:#0e1526;--card:#172038;--ink:#e8edf9;--mute:#93a0bf;--line:#2a3554;--acc:#7c9bff;--acc-t:#22305a;--ok:#4fd39a;--ok-t:#143a2e;--bad:#ff7b93;--bad-t:#45202b}}
+#t2[data-theme="dark"]{--bg:#0e1526;--card:#172038;--ink:#e8edf9;--mute:#93a0bf;--line:#2a3554;--acc:#7c9bff;--acc-t:#22305a;--ok:#4fd39a;--ok-t:#143a2e;--bad:#ff7b93;--bad-t:#45202b}
+#t2 *{box-sizing:border-box}
+#t2,#t2{height:100%;margin:0}
+#t2{background:var(--bg);color:var(--ink);font:500 17px/1.45 "Manrope",system-ui,sans-serif;display:flex;justify-content:center;overscroll-behavior:none}
+#t2 #app{width:100%;max-width:480px;height:100%;display:flex;flex-direction:column;padding:14px 16px 12px}
+#t2 .top{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--mute)}
+#t2 .bar{flex:1;height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+#t2 .bar i{display:block;height:100%;background:var(--acc);transition:width .3s}
+#t2 .stage{flex:1;position:relative;margin:14px 0 10px;touch-action:none;overflow:hidden;min-height:0}
+#t2 .card{position:absolute;inset:0;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px 20px;display:flex;flex-direction:column;gap:14px;overflow:auto;transition:transform .25s ease,opacity .25s ease;user-select:none;touch-action:none}
+#t2 .card.out{transform:translateY(-110%);opacity:0}
+#t2 .tag{align-self:flex-start;font-size:13px;font-weight:700;padding:4px 10px;border-radius:99px;background:var(--acc-t);color:var(--acc)}
+#t2 .tag.p{background:var(--line);color:var(--mute)}
+#t2 .item{font-size:34px;font-weight:800;line-height:1.1}
+#t2 .tr{color:var(--mute);margin-top:-8px}
+#t2 .scene{border-left:4px solid var(--acc);padding:2px 0 2px 14px;font-size:18px}
+#t2 .scene b{color:var(--mute);font-weight:700;margin-right:6px}
+#t2 .ex{margin:0;padding-left:20px}
+#t2 .tip{background:var(--acc-t);border-radius:12px;padding:10px 12px;font-size:15px}
+#t2 .q{font-size:20px;font-weight:700}
+#t2 .opts{display:grid;gap:9px}
+#t2 button{font:inherit;font-weight:700;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:14px;padding:13px 14px;text-align:left;cursor:pointer}
+#t2 button:hover:not(:disabled){border-color:var(--acc)}
+#t2 button:focus-visible,#t2 input:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+#t2 button.ok{background:var(--ok-t);border-color:var(--ok)}
+#t2 button.bad{background:var(--bad-t);border-color:var(--bad)}
+#t2 button.sel{border-color:var(--acc);background:var(--acc-t)}
+#t2 button.main{background:var(--acc);border-color:var(--acc);color:#fff;text-align:center}
+#t2 button:disabled{cursor:default}
+#t2 .ans,#t2 .pool{display:flex;flex-wrap:wrap;gap:8px}
+#t2 .ans{min-height:56px;border-bottom:2px solid var(--line);padding-bottom:10px;align-content:flex-start}
+#t2 .chip{padding:8px 12px;border-radius:12px;text-align:center}
+#t2 .cols{display:grid;grid-template-columns:1fr 1fr;gap:9px 12px}
+#t2 .cols button{padding:10px 12px;font-size:15px}
+#t2 input.txt{font:inherit;font-weight:700;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:14px;padding:13px 14px;width:100%;user-select:text}
+#t2 .row{display:flex;gap:8px;align-items:stretch}
+#t2 .row input.txt{flex:1;min-width:0}
+#t2 .mic{flex:none;width:54px;padding:0;display:grid;place-items:center;color:var(--acc)}
+#t2 .mic svg{width:24px;height:24px}
+#t2 .mic.on{background:var(--bad-t);border-color:var(--bad);color:var(--bad);animation:pulse 1.1s infinite}
+#t2 .mic:disabled{opacity:.45}
 @keyframes pulse{50%{box-shadow:0 0 0 6px var(--bad-t)}}
-.hint{font-size:14px;color:var(--mute);min-height:20px}
-@media (prefers-reduced-motion:reduce){.mic.on{animation:none}}
-.fb{border-radius:14px;padding:12px 14px;font-size:16px}
-.fb.ok{background:var(--ok-t);color:var(--ok)}
-.fb.bad{background:var(--bad-t);color:var(--bad)}
-.fb span{display:block;color:var(--ink);font-weight:500;margin-top:4px}
-.foot{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:14px;color:var(--mute)}
-.foot button{padding:9px 14px;border-radius:99px;text-align:center;font-size:14px}
-.foot div{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-pre.json{position:absolute;inset:0;margin:0;padding:16px;background:var(--card);border:1px solid var(--line);border-radius:22px;overflow:auto;font:12px/1.5 ui-monospace,Menlo,monospace;color:var(--ink);z-index:2;user-select:text;white-space:pre-wrap}
-.end{align-items:flex-start;justify-content:center}
-.end h2{font-size:30px;margin:0}
-.stat{display:flex;gap:10px;flex-wrap:wrap}
-.stat div{flex:1;min-width:90px;border:1px solid var(--line);border-radius:14px;padding:10px 12px}
-.stat b{display:block;font-size:26px}
-.units{width:100%;display:grid;gap:6px;font-size:15px}
-.units div{display:flex;justify-content:space-between}
-@media (prefers-reduced-motion:reduce){.card,.bar i{transition:none}}
+#t2 .hint{font-size:14px;color:var(--mute);min-height:20px}
+@media (prefers-reduced-motion:reduce){#t2 .mic.on{animation:none}}
+#t2 .fb{border-radius:14px;padding:12px 14px;font-size:16px}
+#t2 .fb.ok{background:var(--ok-t);color:var(--ok)}
+#t2 .fb.bad{background:var(--bad-t);color:var(--bad)}
+#t2 .fb span{display:block;color:var(--ink);font-weight:500;margin-top:4px}
+#t2 .foot{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:14px;color:var(--mute)}
+#t2 .foot button{padding:9px 14px;border-radius:99px;text-align:center;font-size:14px}
+#t2 .foot div{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+#t2 pre.json{position:absolute;inset:0;margin:0;padding:16px;background:var(--card);border:1px solid var(--line);border-radius:22px;overflow:auto;font:12px/1.5 ui-monospace,Menlo,monospace;color:var(--ink);z-index:2;user-select:text;white-space:pre-wrap}
+#t2 .end{align-items:flex-start;justify-content:center}
+#t2 .end h2{font-size:30px;margin:0}
+#t2 .stat{display:flex;gap:10px;flex-wrap:wrap}
+#t2 .stat div{flex:1;min-width:90px;border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+#t2 .stat b{display:block;font-size:26px}
+#t2 .units{width:100%;display:grid;gap:6px;font-size:15px}
+#t2 .units div{display:flex;justify-content:space-between}
+@media (prefers-reduced-motion:reduce){#t2 .card,#t2 .bar i{transition:none}}
+#t2 .backb{flex:none;border:0!important;background:none!important;color:var(--acc)!important;padding:4px 6px!important;font-size:14px;border-radius:8px}
+#t2{height:100dvh}
 </style>
 </head>
 <body>
-<div id="app">
-  <div class="top"><span id="cnt"></span><div class="bar"><i id="prog"></i></div><span id="score"></span></div>
+<section id="launcher"><div class="lw">
+<h1>Тренажёры английского</h1>
+<p class="lsub">Выберите, как сегодня заниматься.</p>
+<button class="pick" id="pick1"><span class="e">📖</span><b>Тренажёр слов</b><small>Слова, выражения и сочетания. Обучение парами или повторение, разные режимы: перевод, сборка из букв, вписывание, пропуски, произнесение вслух.</small></button>
+<button class="pick" id="pick2"><span class="e">⚡</span><b>Лента карточек</b><small>Короткие карточки по фразовым глаголам в формате ленты. Свайп вверх пропускает карточку, есть голосовой ввод и звук при верном ответе.</small></button>
+</div></section>
+<div id="t1" hidden><main><button class="lnk" id="back1">← Выбор тренажёра</button><h1>Тренажёр слов</h1><div id="t1app"></div></main></div>
+<div id="t2" hidden><div id="app">
+  <div class="top"><button class="backb" id="back2" aria-label="К выбору тренажёра">← Меню</button><span id="cnt"></span><div class="bar"><i id="prog"></i></div><span id="score"></span></div>
   <div class="stage" id="stage"></div>
   <div class="foot"><span>Свайп вверх = пропуск</span><div><button id="snd">Звук: вкл</button><button id="jsn">Данные</button><button id="skip">Пропустить</button></div></div>
-</div>
-<script>
+</div></div>
+<script>(function(){
+
+const WORDS=[
+{em:"🏆",en:"achieve",ru:"достигать",def:"to succeed in doing something good, usually after hard work",defru:"добиться чего-то хорошего, обычно после тяжёлой работы",ex:"She worked hard to [achieve] her goal.",exru:"Она много работала, чтобы [достичь] своей цели.",col:[["achieve a goal","достичь цели"],["achieve success","добиться успеха"],["achieve results","получить результаты"]],as:[["Созвучие","«ачивка» в играх — награда за достижение"],["Образ","альпинист с флагом на вершине"],["Синоним","reach, succeed"]]},
+{em:"🚧",en:"avoid",ru:"избегать",def:"to stay away from something or not let it happen",defru:"держаться подальше от чего-то или не допустить этого",ex:"I try to [avoid] sugar in the evening.",exru:"Я стараюсь [избегать] сахара вечером.",col:[["avoid problems","избегать проблем"],["avoid mistakes","избегать ошибок"],["avoid traffic","объехать пробки"]],as:[["Созвучие","«эвойд» — «обойду» стороной"],["Образ","человек обходит большую лужу"],["Антоним","face — столкнуться лицом к лицу"]]},
+{em:"📈",en:"improve",ru:"улучшать",def:"to make something better",defru:"сделать что-то лучше",ex:"I want to [improve] my English this year.",exru:"Я хочу [улучшить] свой английский в этом году.",col:[["improve your skills","улучшить навыки"],["improve your health","улучшить здоровье"],["improve quickly","быстро улучшаться"]],as:[["Созвучие","«импрув» — «в прок»: всё идёт на пользу"],["Образ","график, который идёт вверх"],["Синоним / антоним","get better / get worse"]]},
+{em:"💡",en:"suggest",ru:"предлагать",def:"to give an idea for someone to think about",defru:"предложить идею, над которой другой человек может подумать",ex:"Can you [suggest] a good restaurant?",exru:"Можете [посоветовать] хороший ресторан?",col:[["suggest an idea","предложить идею"],["suggest a solution","предложить решение"],["I suggest that…","я предлагаю, чтобы…"]],as:[["Созвучие","«саджест» — подсказки в поисковой строке"],["Образ","человек с лампочкой над головой"],["Синоним","recommend, propose"]]},
+{em:"🤹",en:"manage",ru:"справляться, суметь",def:"to succeed in doing something difficult",defru:"суметь сделать что-то трудное",ex:"I [managed] to finish the project on time.",exru:"Мне [удалось] закончить проект вовремя.",col:[["manage to do","суметь сделать"],["manage a team","управлять командой"],["manage stress","справляться со стрессом"]],as:[["Созвучие","«менеджер» — тот, кто со всем справляется"],["Образ","жонглёр с десятком шаров"],["Синоним","cope, succeed in"]]},
+{em:"📋",en:"require",ru:"требовать, нуждаться",def:"to need something, or to make something necessary",defru:"нуждаться в чём-то или делать что-то необходимым",ex:"This job [requires] a lot of patience.",exru:"Эта работа [требует] много терпения.",col:[["require time","требовать времени"],["require attention","требовать внимания"],["require experience","требовать опыта"]],as:[["Созвучие","«реквизит» — без него спектакль не сыграть"],["Образ","список требований в вакансии"],["Синоним","need"]]},
+{em:"🚪",en:"opportunity",ru:"возможность",def:"a chance to do something good",defru:"шанс сделать что-то хорошее",ex:"Living abroad is a great [opportunity] to learn.",exru:"Жизнь за границей — отличная [возможность] учиться.",col:[["a great opportunity","отличная возможность"],["miss an opportunity","упустить возможность"],["have the opportunity to","иметь возможность"]],as:[["Созвучие","«оппортунист» — тот, кто ловит случай"],["Образ","приоткрытая дверь со светом"],["Синоним","chance"]]},
+{em:"💪",en:"effort",ru:"усилие",def:"the energy you use to do something",defru:"энергия, которую вы тратите, чтобы что-то сделать",ex:"It takes a lot of [effort] to learn a language.",exru:"Чтобы выучить язык, нужно много [усилий].",col:[["make an effort","постараться"],["put effort into","вкладывать усилия в"],["a waste of effort","напрасные усилия"]],as:[["Созвучие","effort → effect: из усилия рождается эффект"],["Образ","человек толкает камень в гору"],["Синоним","hard work"]]},
+{em:"🌳",en:"environment",ru:"окружающая среда, обстановка",def:"the place and conditions around you",defru:"место и условия вокруг вас",ex:"I work better in a quiet [environment].",exru:"Я лучше работаю в тихой [обстановке].",col:[["work environment","рабочая обстановка"],["protect the environment","защищать природу"],["a friendly environment","дружелюбная атмосфера"]],as:[["Созвучие","«инвайронмент» — «вокруг», как в environs"],["Образ","лес или комната вокруг вас"],["Синоним","surroundings"]]},
+{em:"📬",en:"receive",ru:"получать",def:"to get something that someone gives or sends",defru:"получить то, что кто-то даёт или присылает",ex:"I [received] your message this morning.",exru:"Я [получил] ваше сообщение сегодня утром.",col:[["receive a letter","получить письмо"],["receive an email","получить e-mail"],["receive a gift","получить подарок"]],as:[["Созвучие","«ресивер» — приёмник, он получает сигнал"],["Образ","почтовый ящик с письмом"],["Антоним","send — отправлять"]]}
+];
+const PHR=[
+{type:"phrase",em:"⏰",en:"I'm running late",ru:"я опаздываю",def:"I will arrive later than planned",defru:"я приду позже, чем планировалось",ex:"Sorry, I'm [running] late.",exru:"Извини, я [опаздываю].",sit:"Вы стоите в пробке и пишете другу, что задержитесь.",col:[["I'll be a bit late","я немного опоздаю"],["Sorry I'm late","простите за опоздание"]],as:[["Буквально","«бегу с опозданием»: бежите, но не успеваете"],["Русский аналог","«опаздываю»"],["Образ","человек бежит к автобусу и смотрит на часы"]]},
+{type:"phrase",em:"🤷",en:"It's up to you",ru:"решай сам",def:"you can choose, I don't mind",defru:"выбирай ты, мне всё равно",ex:"Pizza or sushi? It's [up] to you.",exru:"Пицца или суши? Тебе [решать].",sit:"Друг спрашивает, куда пойти ужинать, а вам подходит любой вариант.",col:[["It's your call","тебе решать"],["I don't mind","мне всё равно"]],as:[["Буквально","«это вверх к тебе»: выбор поднят к тебе"],["Русский аналог","«тебе решать»"],["Образ","мяч, который вы передаёте другу"]]},
+{type:"phrase",em:"📞",en:"I'll get back to you",ru:"я отвечу вам позже",def:"I will contact you later with an answer",defru:"я свяжусь с вами позже с ответом",ex:"I need to check, but I'll [get] back to you.",exru:"Мне нужно проверить, но я вам [отвечу] позже.",sit:"Коллега задал вопрос, а вам нужно сначала уточнить информацию.",col:[["I'll let you know","я дам знать"],["Let me get back to you","дайте я отвечу позже"]],as:[["Буквально","«я вернусь к вам»"],["Русский аналог","«я к вам вернусь с ответом»"],["Образ","человек уходит проверить и возвращается с ответом"]]},
+{type:"phrase",em:"😌",en:"No worries",ru:"ничего страшного",def:"it's OK, don't worry about it",defru:"всё в порядке, не переживайте",ex:"Sorry I'm late! No [worries].",exru:"Простите за опоздание! Ничего [страшного].",sit:"Перед вами извиняются за небольшую оплошность, и вы отвечаете легко.",col:[["No problem","без проблем"],["It's fine","всё нормально"]],as:[["Буквально","«никаких тревог»"],["Русский аналог","«не переживай»"],["Образ","человек машет рукой и улыбается"]]},
+{type:"phrase",em:"🙋",en:"Do you mind if I sit here?",ru:"вы не против, если я тут сяду?",def:"a polite way to ask permission",defru:"вежливый способ попросить разрешения",ex:"Do you mind if I [open] the window?",exru:"Вы не против, если я [открою] окно?",sit:"В автобусе вы хотите сесть на свободное место рядом с незнакомцем.",col:[["Is it okay if I sit here?","ничего, если я тут сяду?"],["Would you mind if I sat here?","вы не возражали бы, если бы я сел?"]],as:[["Буквально","«вы возражаете, если я…?» (ответ «No» значит «не против»)"],["Русский аналог","«вы не против, если…»"],["Образ","человек вежливо показывает на свободный стул"]]},
+{type:"phrase",em:"🏳️",en:"give up",ru:"сдаваться, бросать",def:"to stop trying to do something",defru:"перестать пытаться что-то сделать",ex:"Don't [give] up, you're almost there.",exru:"Не [сдавайся], ты почти у цели.",sit:"Друг хочет бросить изучение языка, потому что устал.",col:[["give up smoking","бросить курить"],["never give up","никогда не сдавайся"]],as:[["Буквально","«отдать вверх»: отдаёшь борьбу"],["Русский аналог","«опустить руки»"],["Образ","бегун останавливается и поднимает руки"]]},
+{type:"phrase",em:"🧩",en:"figure out",ru:"разобраться, понять",def:"to understand or solve something after thinking",defru:"понять или решить что-то после размышлений",ex:"I can't [figure] out how this app works.",exru:"Не могу [разобраться], как работает это приложение.",sit:"Вы не понимаете, как включить новый телевизор.",col:[["figure out a problem","разобраться с проблемой"],["I'll figure it out","я разберусь"]],as:[["Буквально","«вычислить наружу»: достать ответ из головоломки"],["Русский аналог","«докопаться до сути»"],["Образ","пазл, который наконец сложился"]]},
+{type:"phrase",em:"🎉",en:"look forward to",ru:"ждать с нетерпением",def:"to feel happy about something that will happen",defru:"радоваться тому, что скоро случится",ex:"I'm [looking] forward to the weekend.",exru:"Я с нетерпением [жду] выходных.",sit:"Вы рады предстоящему отпуску.",col:[["look forward to seeing you","жду встречи с вами"],["I look forward to it","жду этого"]],as:[["Буквально","«смотреть вперёд к…»"],["Русский аналог","«с нетерпением жду»"],["Образ","человек смотрит вдаль на календарь с отметкой"]]},
+{type:"phrase",em:"🪫",en:"run out of",ru:"у меня закончилось",def:"to have no more of something",defru:"когда чего-то больше не осталось",ex:"We've [run] out of milk.",exru:"У нас [закончилось] молоко.",sit:"Вы открываете холодильник, а молока нет.",col:[["run out of time","закончилось время"],["run out of ideas","закончились идеи"]],as:[["Буквально","«выбежать из»: всё выбежало из стакана"],["Русский аналог","«закончилось»"],["Образ","пустая банка и перевёрнутая кружка"]]},
+{type:"phrase",em:"🔉",en:"turn down",ru:"отклонить, сделать тише",def:"to say no to an offer, or to make something quieter",defru:"отказаться от предложения или сделать тише",ex:"She [turned] down the job offer.",exru:"Она [отклонила] предложение о работе.",sit:"Вам предложили работу, но она вам не подходит.",col:[["turn down the music","сделать музыку тише"],["turn down an invitation","отклонить приглашение"]],as:[["Буквально","«повернуть вниз»: ручку громкости или ответ «нет»"],["Русский аналог","«отказать» или «убавить звук»"],["Образ","ручка громкости, повёрнутая вниз"]]}
+];
+const COL=[
+{type:"phrase",em:"🤔",en:"make a decision",ru:"принять решение",def:"to choose what to do after thinking",defru:"выбрать, что делать, после размышлений",ex:"It's time to [make] a decision.",exru:"Пора [принять] решение.",sit:"Вы долго выбирали между двумя вариантами и наконец готовы выбрать.",col:[["make a choice","сделать выбор"],["make up your mind","решиться"]],as:[["Буквально","«сделать решение»: по-английски решение «делают», а не «принимают»"],["Русский аналог","«принять решение»"],["Образ","человек ставит галочку у одного из двух вариантов"]]},
+{type:"phrase",em:"☕",en:"take a break",ru:"сделать перерыв",def:"to stop working for a short time to rest",defru:"ненадолго прекратить работу, чтобы отдохнуть",ex:"Let's [take] a break for ten minutes.",exru:"Давайте [сделаем] перерыв на десять минут.",sit:"Вы работаете уже три часа и устали.",col:[["have a break","сделать перерыв"],["take a rest","отдохнуть"]],as:[["Буквально","«взять перерыв»"],["Русский аналог","«сделать перерыв»"],["Образ","чашка кофе рядом с ноутбуком"]]},
+{type:"phrase",em:"👀",en:"pay attention",ru:"обращать внимание",def:"to listen or look carefully",defru:"внимательно слушать или смотреть",ex:"Please [pay] attention to the instructions.",exru:"Пожалуйста, [обращайте] внимание на инструкции.",sit:"Учитель просит класс внимательно послушать объяснение.",col:[["pay attention to details","обращать внимание на детали"],["pay no attention","не обращать внимания"]],as:[["Буквально","«платить вниманием»: внимание как деньги"],["Русский аналог","«уделять внимание»"],["Образ","монетки, которые вы кладёте на важный предмет"]]},
+{type:"phrase",em:"🤧",en:"catch a cold",ru:"простудиться",def:"to get a common illness with a runny nose",defru:"заболеть лёгкой простудой с насморком",ex:"I [caught] a cold after the rain.",exru:"Я [простудился] после дождя.",sit:"Вы промокли под дождём, а на следующий день у вас насморк.",col:[["have a cold","быть простуженным"],["catch the flu","заболеть гриппом"]],as:[["Буквально","«поймать простуду», как мяч"],["Русский аналог","«подхватить простуду»"],["Образ","человек в шарфе ловит летящий вирус-мячик"]]},
+{type:"phrase",em:"🍽️",en:"do the dishes",ru:"мыть посуду",def:"to wash plates, cups and forks after a meal",defru:"мыть тарелки, чашки и вилки после еды",ex:"I always [do] the dishes after dinner.",exru:"Я всегда [мою] посуду после ужина.",sit:"Вы поужинали, и на столе остались грязные тарелки.",col:[["do the laundry","стирать бельё"],["do the shopping","ходить за покупками"]],as:[["Буквально","«делать посуду»: с домашними делами говорят do"],["Русский аналог","«помыть посуду»"],["Образ","стопка тарелок и губка"]]},
+{type:"phrase",em:"❌",en:"make a mistake",ru:"совершить ошибку",def:"to do something wrong by accident",defru:"случайно сделать что-то неправильно",ex:"Everyone [makes] mistakes.",exru:"Все [совершают] ошибки.",sit:"Друг расстроился из-за ошибки, и вы его успокаиваете.",col:[["make a big mistake","совершить большую ошибку"],["by mistake","по ошибке"]],as:[["Буквально","«сделать ошибку»"],["Русский аналог","«допустить ошибку»"],["Образ","красный крестик в тетради"]]},
+{type:"phrase",em:"📱",en:"keep in touch",ru:"поддерживать связь",def:"to stay in contact with someone",defru:"оставаться на связи с кем-то",ex:"Let's [keep] in touch after the course.",exru:"Давайте [будем] на связи после курса.",sit:"Вы прощаетесь с новым знакомым после отпуска.",col:[["get in touch","связаться"],["lose touch","потерять связь"]],as:[["Буквально","«держать в касании»"],["Русский аналог","«не пропадай»"],["Образ","две руки тянутся друг к другу через экран телефона"]]},
+{type:"phrase",em:"🔍",en:"have a look",ru:"взглянуть",def:"to look at something for a short time",defru:"ненадолго посмотреть на что-то",ex:"Can I [have] a look at your phone?",exru:"Можно [взглянуть] на твой телефон?",sit:"Друг показывает новую игру, и вам интересно посмотреть.",col:[["take a look","взглянуть"],["have a look around","осмотреться"]],as:[["Буквально","«иметь взгляд»"],["Русский аналог","«бросить взгляд»"],["Образ","лупа над предметом"]]},
+{type:"phrase",em:"⏱️",en:"save time",ru:"экономить время",def:"to use less time to do something",defru:"потратить меньше времени на что-то",ex:"Cooking on Sunday [saves] time during the week.",exru:"Готовка в воскресенье [экономит] время в течение недели.",sit:"Вы советуете другу готовить еду заранее.",col:[["save money","экономить деньги"],["waste time","тратить время впустую"]],as:[["Буквально","«спасать время»"],["Русский аналог","«сэкономить время»"],["Образ","часы в спасательном круге"]]},
+{type:"phrase",em:"🤝",en:"keep a promise",ru:"сдержать обещание",def:"to do what you said you would do",defru:"сделать то, что вы обещали",ex:"He always [keeps] his promises.",exru:"Он всегда [сдерживает] обещания.",sit:"Друг ни разу вас не подвёл, и вы им гордитесь.",col:[["break a promise","нарушить обещание"],["make a promise","дать обещание"]],as:[["Буквально","«держать обещание»"],["Русский аналог","«держать слово»"],["Образ","рукопожатие"]]}
+];
+const DATA={word:WORDS,phrase:PHR,colloc:COL};
+const MS={word:[["en2ru","EN → RU","Видите английское слово, выбираете перевод"],["ru2en","RU → EN","Видите перевод, выбираете английское слово"],["letters","Буквы","Собрать слово из перемешанных букв"],["type","Вписать","Вспомнить и написать слово без подсказок"],["cloze","Пропуск","Вставить слово в предложение в нужной форме"],["speak","Говорить","Произнести вслух английские фразы по русским подсказкам"]],phrase:[["en2ru","EN → RU","Видите фразу, выбираете перевод"],["ru2en","RU → EN","Видите перевод, выбираете фразу"],["words","Сборка","Собрать фразу из перемешанных слов"],["type","Вписать","Вспомнить и написать фразу без подсказок"],["cloze","Пропуск","Вставить ключевое слово в предложение"],["situ","Ситуация","Выбрать фразу, подходящую к ситуации"],["speak","Говорить","Сказать фразу вслух по ситуации"]]};
+MS.colloc=MS.phrase;
+const SELS={word:new Set(MS.word.map(m=>m[0])),phrase:new Set(MS.phrase.map(m=>m[0])),colloc:new Set(MS.phrase.map(m=>m[0]))};
+const norm=s=>s.toLowerCase().replace(/[’]/g,"'").replace(/[?.!,]/g,"").replace(/\s+/g," ").trim();
+const R=document.getElementById("t1"),$=s=>R.querySelector(s),sh=a=>[...a].sort(()=>Math.random()-.5);
+const form=w=>(w.ex.match(/\[(.+?)\]/)||[])[1]||w.en;
+const sent=w=>w.ex.replace(/\[(.+?)\]/,"<b>$1</b>");
+const say=t=>{try{const u=new SpeechSynthesisUtterance(t);u.lang="en-US";speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}};
+let flow="learn",showCards=true,kind="word",MODES=MS.word,W=WORDS,sel=SELS.word,steps=[],si=0,score=0,total=0,wrong=[],busy=false;
+const trS=w=>w.exru.replace(/\[(.+?)\]/,"$1");
+const hid=t=>`<span class="hid" tabindex="0" role="button" onclick="this.classList.add('sh')" onkeydown="if(event.key==='Enter')this.classList.add('sh')">${t}</span>`;
+const trH=w=>w.exru.replace(/\[(.+?)\]/,(_,t)=>hid(t));
+const spk=w=>`<button class="spk" data-say="${w.en}" onclick="t1.say(this.dataset.say)" aria-label="Произнести">🔊</button>`;
+const card=w=>`<div class="card"><div class="top"><div class="pic">${w.em}</div><div><div class="w"><span class="en">${w.en}</span>${spk(w)}</div><div class="ru">${w.ru}</div></div></div><p class="def">${w.def}<br><span class="tr">${w.defru}</span></p><p class="ex">${sent(w)}<br><span class="tr">${trS(w)}</span></p>${w.sit?`<p class="def"><b>Когда говорят:</b> ${w.sit}</p>`:""}<ul class="col">${w.col.map(c=>`<li><b>${c[0]}</b> — ${c[1]}</li>`).join("")}</ul><div class="as">${w.as.map(a=>`<div><span class="tag">${a[0]}</span>${a[1]}</div>`).join("")}</div></div>`;
+
+function menu(){
+const rv=flow==="review";
+$("#t1app").innerHTML=`<div class="seg"><button data-k="word" class="${kind==="word"?"on":""}">Слова</button><button data-k="phrase" class="${kind==="phrase"?"on":""}">Выражения</button><button data-k="colloc" class="${kind==="colloc"?"on":""}">Сочетания</button></div><div class="seg"><button data-f="learn" class="${rv?"":"on"}">Обучение</button><button data-f="review" class="${rv?"on":""}">Повторение</button></div><p class="sub">${rv?"Все "+W.length+({word:" слов",phrase:" выражений",colloc:" сочетаний"})[kind]+" сразу, в случайном порядке: задания вперемешку с обучающими карточками. Карточка показывает только русский перевод, английское слово нужно вспомнить. После карточки всегда идёт задание.":"Карточки идут парами: сначала знакомство с двумя словами, затем задания на них в случайном порядке, потом следующая пара."}</p><div class="card">${rv?`<label class="mrow"><input type="checkbox" id="sc"><span><b>Показывать обучающие карточки</b><br><small>Если выключить, будут только задания</small></span></label>`:""}<div class="row" style="margin:10px 0 0"><button class="btn sec" id="all">Включить все</button><button class="btn sec" id="no">Отключить все</button></div><div class="ml">${MODES.map(m=>`<label class="mrow"><input type="checkbox" value="${m[0]}"><span><b>${m[1]}</b><br><small>${m[2]}</small></span></label>`).join("")}</div><button class="btn" id="go" style="width:100%">Начать</button><p class="hint" id="wn"></p></div>`;
+R.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{if(b.dataset.f)flow=b.dataset.f;else{kind=b.dataset.k;W=DATA[kind];MODES=MS[kind];sel=SELS[kind]}menu()});
+const cb=[...R.querySelectorAll(".ml input")];
+const sync=()=>{cb.forEach(c=>c.checked=sel.has(c.value));$("#go").disabled=!sel.size;$("#wn").textContent=sel.size?"":"Выберите хотя бы один режим, чтобы продолжить."};
+cb.forEach(c=>c.onchange=()=>{c.checked?sel.add(c.value):sel.delete(c.value);sync()});
+if(rv){$("#sc").checked=showCards;$("#sc").onchange=e=>showCards=e.target.checked}
+$("#all").onclick=()=>{MODES.forEach(m=>sel.add(m[0]));sync()};
+$("#no").onclick=()=>{sel.clear();sync()};
+$("#go").onclick=()=>{steps=rv?buildReview():build();si=0;score=0;total=0;wrong=[];run()};sync()}
+
+function build(){const st=[],ws=sh(W),n=ws.length/2,ms=MODES.filter(m=>sel.has(m[0]));
+for(let k=0;k<ws.length;k+=2){const p=ws.slice(k,k+2),g=`Обучение, пара ${k/2+1} из ${n}`;
+st.push({t:"s",p,g:g+": знакомство"});
+sh(ms.flatMap(m=>p.map(w=>({t:"q",m:m[0],w,g:g+": "+m[1]})))).forEach(x=>st.push(x))}
+return st}
+
+function buildReview(){const ms=MODES.filter(m=>sel.has(m[0]));
+const T=sh(W.flatMap(w=>ms.map(m=>({t:"q",m:m[0],w,g:"Повторение: "+m[1]}))));
+if(showCards){const pos=sh(T.map((_,i)=>i)).slice(0,W.length).sort((x,y)=>y-x);
+sh(W).forEach((w,k)=>T.splice(pos[k],0,{t:"r",w,g:"Повторение: карточка"}))}
+return T}
+
+function run(){busy=false;if(si>=steps.length)return result();const s=steps[si];
+const pr=`<div class="bar"><span>${s.g}</span><button class="lnk" onclick="t1.start()">В меню</button></div><div class="prog"><i style="width:${si/steps.length*100}%"></i></div>`;
+window.scrollTo(0,0);
+if(s.t==="s"){$("#t1app").innerHTML=pr+s.p.map(card).join("")+`<button class="btn" id="nx" style="width:100%">Перейти к заданиям</button>`;$("#nx").onclick=()=>{si++;run()};return}
+if(s.t==="r"){const w=s.w;$("#t1app").innerHTML=`<div id="rc">${pr}<div class="card"><p class="hint">Вспомните английский вариант</p><div class="q">${w.ru}</div></div><button class="btn" id="nx" style="width:100%">Дальше</button></div>`;
+$("#nx").onclick=()=>{$("#rc").innerHTML=pr+card(w)+`<button class="btn" id="n2" style="width:100%">Дальше</button>`;$("#n2").onclick=()=>{si++;run()};window.scrollTo(0,0)};return}
+$("#t1app").innerHTML=`<div class="card">${pr}<div id="q"></div></div>`;
+({en2ru:w=>choice(w,w.en,x=>x.ru,true),ru2en:w=>choice(w,w.ru,x=>x.en,false),letters,type:typing,cloze,speak,words:w=>letters(w,true),situ:w=>choice(w,w.sit,x=>x.en,false,"qs")})[s.m](s.w)}
+
+function choice(w,prompt,pick,sp,cls="q"){
+const o=sh([w,...sh(W.filter(x=>x!==w)).slice(0,3)]);
+$("#q").innerHTML=`<div class="${cls}">${prompt} ${sp?spk(w):""}</div><p class="hint">Выберите правильный вариант</p><div class="opts">${o.map((x,k)=>`<button class="opt" data-k="${k}">${pick(x)}</button>`).join("")}</div>`;
+R.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{if(busy)return;const ok=o[b.dataset.k]===w;
+R.querySelectorAll(".opt").forEach(c=>{if(o[c.dataset.k]===w)c.classList.add("ok");c.disabled=true});
+if(!ok)b.classList.add("bad");done(ok,w)})}
+
+function letters(w,wd){const U=wd?w.en.split(" "):w.en.split(""),L=sh(U),built=[],j=wd?" ":"";
+$("#q").innerHTML=`<div class="q">${w.ru}</div>${w.sit?`<p class="hint">${w.sit}</p>`:""}<p class="hint">${wd?"Соберите фразу из слов":"Соберите слово из букв"}</p><div class="slots" id="sl"></div><div class="letters${wd?" wd":""}" id="lt"></div><div class="row"><button class="btn sec" id="er">Стереть</button></div>`;
+const draw=()=>{$("#sl").innerHTML=U.map((_,k)=>`<div class="slot${wd?" wd":""}">${built[k]!==undefined?L[built[k]]:""}</div>`).join("");
+$("#lt").innerHTML=L.map((c,k)=>`<button ${built.includes(k)?"disabled":""} data-k="${k}">${c}</button>`).join("");
+R.querySelectorAll("#lt button").forEach(b=>b.onclick=()=>{if(busy)return;built.push(+b.dataset.k);draw();
+if(built.length===U.length)done(norm(built.map(k=>L[k]).join(j))===norm(w.en),w)})};
+$("#er").onclick=()=>{if(!busy){built.pop();draw()}};draw()}
+
+function typing(w){
+$("#q").innerHTML=`<div class="q">${w.ru}</div><p class="hint" id="h">Напишите по-английски без подсказок</p><input type="text" id="in" autocomplete="off" autocapitalize="off" spellcheck="false"><div class="row"><button class="btn" id="ck">Проверить</button><button class="btn sec" id="hn">Первая буква</button></div>`;
+const inp=$("#in");inp.focus();
+$("#hn").onclick=()=>{$("#h").textContent="Начинается на «"+w.en[0]+"», букв: "+w.en.length};
+const chk=()=>{if(!busy&&inp.value.trim())done(norm(inp.value)===norm(w.en),w)};
+$("#ck").onclick=chk;inp.onkeydown=e=>{if(e.key==="Enter")chk()}}
+
+function cloze(w){const f=form(w);
+$("#q").innerHTML=`<div class="qs">${w.ex.replace(/\[.+?\]/,"_____")}</div><p class="hint">${trH(w)}<br>Вставьте пропущенное слово в нужной форме. Нажмите на закрытое слово в переводе, если нужна подсказка. Букв: ${f.length}, начало: ${f[0]}…</p><input type="text" id="in" autocomplete="off" autocapitalize="off" spellcheck="false"><div class="row"><button class="btn" id="ck">Проверить</button></div>`;
+const inp=$("#in");inp.focus();
+const chk=()=>{if(!busy&&inp.value.trim())done(inp.value.trim().toLowerCase()===f,w)};
+$("#ck").onclick=chk;inp.onkeydown=e=>{if(e.key==="Enter")chk()}}
+
+function speak(w){const it=w.sit?[["Фраза",w.en],...w.col]:w.col;
+$("#q").innerHTML=`<div class="top"><div class="pic">${w.em}</div><div class="q">${w.ru}</div></div>${w.sit?`<p class="hint">${w.sit}</p>`:""}<p class="def">Скажите вслух по-английски ${w.sit?"фразу и её варианты":"каждое словосочетание"}. Потом нажмите на закрытую фразу, чтобы проверить себя.</p><ul class="col">${it.map(c=>w.sit&&c[0]==="Фраза"?`<li><b>Фраза</b> — ${hid(c[1])}</li>`:`<li>${c[1]} — ${hid(c[0])}</li>`).join("")}</ul><p class="hint" style="margin-top:12px">Получилось сказать всё?</p><div class="row"><button class="btn" id="y">Да</button><button class="btn sec" id="n">Ещё потренируюсь</button></div>`;
+$("#y").onclick=()=>{total++;score++;si++;run()};$("#n").onclick=()=>{total++;wrong.push({m:"speak",w});si++;run()}}
+
+function done(ok,w){busy=true;total++;if(ok)score++;else wrong.push({m:steps[si].m,w});
+$("#q").insertAdjacentHTML("beforeend",`<div class="fb ${ok?"ok":"bad"}">${w.em} ${ok?"Верно!":"Правильно: <b>"+(steps[si].m==="cloze"?form(w):w.en)+"</b>"}<br><em>${sent(w)}</em><br>${trS(w)}</div><div class="row"><button class="btn" id="nx">Дальше</button></div>`);
+$("#nx").focus();$("#nx").onclick=()=>{si++;run()}}
+
+function result(){const p=total?Math.round(score/total*100):0,ws=[...new Set(wrong.map(x=>x.w.en))];
+$("#t1app").innerHTML=`<div class="card"><p class="hint">Результат</p><div class="big">${score} из ${total}</div><p>${p>=90?"Отлично, слова сидят крепко.":p>=60?"Хорошо. Ошибки лучше повторить сразу.":"Пока сложно, и это нормально. Повторите знакомство со словами."}</p>${ws.length?`<p class="hint">Ошибки: ${ws.join(", ")}</p>`:""}<div class="row">${wrong.length?`<button class="btn" id="rw">Повторить ошибки</button>`:""}<button class="btn sec" onclick="t1.start()">В меню</button></div></div>`;
+if(wrong.length)$("#rw").onclick=()=>{steps=sh(wrong).map(x=>({t:"q",m:x.m,w:x.w,g:"Повторение ошибок"}));si=0;score=0;total=0;wrong=[];run()}}
+window.t1={start:menu,say:say};
+menu();
+})();</script>
+<script>(function(){
+
 /* ============ ДАННЫЕ (то, что лежало бы в БД) ============ */
 // units: учебные единицы. Повторения считаются по ним, а не по карточкам.
 var UNITS={
@@ -353,8 +569,18 @@ window.addEventListener('pointercancel',endSwipe);
 document.getElementById('skip').onclick=skip;
 document.getElementById('snd').onclick=function(){soundOn=!soundOn;this.textContent=soundOn?'Звук: вкл':'Звук: выкл';if(soundOn)chime()};
 document.getElementById('jsn').onclick=function(){showJson=!showJson;drawJson()};
-document.addEventListener('keydown',function(e){if(e.key==='ArrowUp'&&document.activeElement.tagName!=='INPUT')skip()});
+document.addEventListener('keydown',function(e){if(e.key==='ArrowUp'&&!document.getElementById('t2').hidden&&document.activeElement.tagName!=='INPUT')skip()});
+window.t2={start:reset,stop:function(){stopMic()}};
 reset();
-</script>
+})();</script>
+<script>(function(){
+var L=document.getElementById('launcher'),A=document.getElementById('t1'),B=document.getElementById('t2');
+function show(w){L.hidden=w!=='l';A.hidden=w!=='1';B.hidden=w!=='2';window.scrollTo(0,0)}
+function home(){try{t2.stop()}catch(e){}try{speechSynthesis.cancel()}catch(e){}show('l')}
+document.getElementById('pick1').onclick=function(){show('1');t1.start()};
+document.getElementById('pick2').onclick=function(){show('2');t2.start()};
+document.getElementById('back1').onclick=home;
+document.getElementById('back2').onclick=home;
+})();</script>
 </body>
 </html>
