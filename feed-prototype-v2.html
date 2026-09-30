@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Лента: прототип v2</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#eef2f9;--card:#fff;--ink:#14213d;--mute:#5d6a85;--line:#d5dcea;--acc:#2f5bea;--acc-t:#e3eaff;--ok:#16825a;--ok-t:#d9f3e8;--bad:#c93a54;--bad-t:#fbe1e6}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1526;--card:#172038;--ink:#e8edf9;--mute:#93a0bf;--line:#2a3554;--acc:#7c9bff;--acc-t:#22305a;--ok:#4fd39a;--ok-t:#143a2e;--bad:#ff7b93;--bad-t:#45202b}}
+:root[data-theme="dark"]{--bg:#0e1526;--card:#172038;--ink:#e8edf9;--mute:#93a0bf;--line:#2a3554;--acc:#7c9bff;--acc-t:#22305a;--ok:#4fd39a;--ok-t:#143a2e;--bad:#ff7b93;--bad-t:#45202b}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:500 17px/1.45 "Manrope",system-ui,sans-serif;display:flex;justify-content:center}
+#app{width:100%;max-width:480px;height:100%;display:flex;flex-direction:column;padding:14px 16px 12px}
+.top{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--mute)}
+.bar{flex:1;height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--acc);transition:width .3s}
+.stage{flex:1;position:relative;margin:14px 0 10px;touch-action:none;overflow:hidden;min-height:0}
+.card{position:absolute;inset:0;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px 20px;display:flex;flex-direction:column;gap:14px;overflow:auto;transition:transform .25s ease,opacity .25s ease;user-select:none}
+.card.out{transform:translateY(-110%);opacity:0}
+.tag{align-self:flex-start;font-size:13px;font-weight:700;padding:4px 10px;border-radius:99px;background:var(--acc-t);color:var(--acc)}
+.tag.p{background:var(--line);color:var(--mute)}
+.item{font-size:34px;font-weight:800;line-height:1.1}
+.tr{color:var(--mute);margin-top:-8px}
+.scene{border-left:4px solid var(--acc);padding:2px 0 2px 14px;font-size:18px}
+.scene b{color:var(--mute);font-weight:700;margin-right:6px}
+.ex{margin:0;padding-left:20px}
+.tip{background:var(--acc-t);border-radius:12px;padding:10px 12px;font-size:15px}
+.q{font-size:20px;font-weight:700}
+.opts{display:grid;gap:9px}
+button{font:inherit;font-weight:700;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:14px;padding:13px 14px;text-align:left;cursor:pointer}
+button:hover:not(:disabled){border-color:var(--acc)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+button.ok{background:var(--ok-t);border-color:var(--ok)}
+button.bad{background:var(--bad-t);border-color:var(--bad)}
+button.sel{border-color:var(--acc);background:var(--acc-t)}
+button.main{background:var(--acc);border-color:var(--acc);color:#fff;text-align:center}
+button:disabled{cursor:default}
+.ans,.pool{display:flex;flex-wrap:wrap;gap:8px}
+.ans{min-height:56px;border-bottom:2px solid var(--line);padding-bottom:10px;align-content:flex-start}
+.chip{padding:8px 12px;border-radius:12px;text-align:center}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:9px 12px}
+.cols button{padding:10px 12px;font-size:15px}
+input.txt{font:inherit;font-weight:700;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:14px;padding:13px 14px;width:100%;user-select:text}
+.row{display:flex;gap:8px;align-items:stretch}
+.row input.txt{flex:1;min-width:0}
+.mic{flex:none;width:54px;padding:0;display:grid;place-items:center;color:var(--acc)}
+.mic svg{width:24px;height:24px}
+.mic.on{background:var(--bad-t);border-color:var(--bad);color:var(--bad);animation:pulse 1.1s infinite}
+.mic:disabled{opacity:.45}
+@keyframes pulse{50%{box-shadow:0 0 0 6px var(--bad-t)}}
+.hint{font-size:14px;color:var(--mute);min-height:20px}
+@media (prefers-reduced-motion:reduce){.mic.on{animation:none}}
+.fb{border-radius:14px;padding:12px 14px;font-size:16px}
+.fb.ok{background:var(--ok-t);color:var(--ok)}
+.fb.bad{background:var(--bad-t);color:var(--bad)}
+.fb span{display:block;color:var(--ink);font-weight:500;margin-top:4px}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:14px;color:var(--mute)}
+.foot button{padding:9px 14px;border-radius:99px;text-align:center;font-size:14px}
+.foot div{display:flex;gap:8px}
+pre.json{position:absolute;inset:0;margin:0;padding:16px;background:var(--card);border:1px solid var(--line);border-radius:22px;overflow:auto;font:12px/1.5 ui-monospace,Menlo,monospace;color:var(--ink);z-index:2;user-select:text;white-space:pre-wrap}
+.end{align-items:flex-start;justify-content:center}
+.end h2{font-size:30px;margin:0}
+.stat{display:flex;gap:10px;flex-wrap:wrap}
+.stat div{flex:1;min-width:90px;border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.stat b{display:block;font-size:26px}
+.units{width:100%;display:grid;gap:6px;font-size:15px}
+.units div{display:flex;justify-content:space-between}
+@media (prefers-reduced-motion:reduce){.card,.bar i{transition:none}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="top"><span id="cnt"></span><div class="bar"><i id="prog"></i></div><span id="score"></span></div>
+  <div class="stage" id="stage"></div>
+  <div class="foot"><span>Свайп вверх = пропуск</span><div><button id="jsn">Данные</button><button id="skip">Пропустить</button></div></div>
+</div>
+<script>
+/* ============ ДАННЫЕ (то, что лежало бы в БД) ============ */
+// units: учебные единицы. Повторения считаются по ним, а не по карточкам.
+var UNITS={
+ put_off:{kind:'phrasal_verb',title:'put off',data:{tr:'отложить, перенести'}},
+ pick_up:{kind:'phrasal_verb',title:'pick up',data:{tr:'забрать, подобрать'}},
+ figure_out:{kind:'phrasal_verb',title:'figure out',data:{tr:'разобраться, понять'}},
+ run_out_of:{kind:'phrasal_verb',title:'run out of',data:{tr:'у меня закончилось'}}
+};
+// card = { kind, units[{id,role}], blocks[{type,payload}], tasks[{type,payload,answer_spec,feedback}] }
+var CARDS=[
+ {id:1,kind:'lesson',units:[{id:'put_off',role:'teaches'}],
+  blocks:[{type:'dialog',payload:{lines:[['A','Can we meet on Monday?'],['B','I’m busy. Let’s put off the meeting until Tuesday.']]}},
+          {type:'tip',payload:{text:'Не путать с put on («надеть»). Отложить = put off.'}}],
+  tasks:[{type:'choice',payload:{prompt:'Что значит put off?',options:['отложить','надеть','выключить']},answer_spec:{correct:'отложить'}}]},
+ {id:2,kind:'practice',units:[{id:'put_off',role:'tests'}],blocks:[],
+  tasks:[{type:'fill_gap',payload:{prompt:'We had to ___ the trip because of the storm.',options:['put off','put on','put out']},answer_spec:{correct:'put off'},feedback:{wrong:'put on значит «надеть», put out значит «потушить».'}}]},
+ {id:3,kind:'lesson',units:[{id:'pick_up',role:'teaches'}],
+  blocks:[{type:'dialog',payload:{lines:[['A','Can you pick me up at six?'],['B','Sure, I’ll be at the station.']]}},
+          {type:'example_list',payload:{items:['I’ll pick up the kids from school.','She picked up some Spanish in Madrid.','I picked up a cold on the trip.']}}],
+  tasks:[{type:'choice',payload:{prompt:'Как сказать «Заберёшь меня в шесть?»',options:['Can you pick me up at six?','Can you put me off at six?','Can you take me out at six?']},answer_spec:{correct:'Can you pick me up at six?'}}]},
+ {id:4,kind:'practice',units:[{id:'put_off',role:'tests'}],blocks:[],
+  tasks:[{type:'build',payload:{prompt:'Соберите: «Давай отложим встречу»',words:['the','Let’s','meeting','put','off']},answer_spec:{accept:['Let’s put off the meeting']}}]},
+ {id:5,kind:'lesson',units:[{id:'figure_out',role:'teaches'}],
+  blocks:[{type:'dialog',payload:{lines:[['A','Why isn’t it working?'],['B','I can’t figure it out. Let’s ask Sam.']]}},
+          {type:'text',payload:{text:'figure out + что-то, или figure it out. Часто про задачи и проблемы.'}}],
+  tasks:[{type:'choice',payload:{prompt:'I finally ___ how to fix it.',options:['figured out','picked out','put off']},answer_spec:{correct:'figured out'}}]},
+ {id:6,kind:'practice',units:[{id:'figure_out',role:'tests'}],blocks:[],
+  tasks:[{type:'type_word',payload:{prompt:'Впишите глагол: I can’t ___ it out.',placeholder:'одно слово'},answer_spec:{accept:['figure']},feedback:{right:'Верно'}}]},
+ {id:7,kind:'lesson',units:[{id:'run_out_of',role:'teaches'}],
+  blocks:[{type:'dialog',payload:{lines:[['A','Is there any coffee?'],['B','No, we ran out of it yesterday.']]}},
+          {type:'text',payload:{text:'run out of + что заканчивается: time, money, milk.'}}],
+  tasks:[{type:'self_check',payload:{prompt:'Скажите вслух: “We ran out of time.”'},answer_spec:{}}]},
+ {id:8,kind:'practice',units:[{id:'run_out_of',role:'tests'}],blocks:[],
+  tasks:[{type:'type_word',payload:{prompt:'Впишите: У нас закончилось молоко. We ___ milk.',placeholder:'глагол + предлог'},answer_spec:{accept:['ran out of']}}]},
+ {id:9,kind:'practice',units:[{id:'put_off',role:'tests'},{id:'pick_up',role:'tests'},{id:'figure_out',role:'tests'},{id:'run_out_of',role:'tests'}],blocks:[],
+  tasks:[{type:'match',payload:{prompt:'Соедините глагол и значение',pairs:[['put off','отложить'],['pick up','забрать'],['figure out','разобраться'],['run out of','закончиться']]},answer_spec:{}}]}
+];
+
+/* ============ УТИЛИТЫ ============ */
+function el(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+function shuffle(a){a=a.slice();for(var k=a.length-1;k>0;k--){var j=Math.floor(Math.random()*(k+1)),t=a[k];a[k]=a[j];a[j]=t}return a}
+function norm(s){return String(s).toLowerCase().replace(/[’‘`]/g,"'").replace(/[.,!?;:]+$/,'').replace(/\s+/g,' ').trim()}
+function lev(a,b){var d=[],i,j;for(i=0;i<=a.length;i++){d[i]=[i]}for(j=1;j<=b.length;j++)d[0][j]=j;
+ for(i=1;i<=a.length;i++)for(j=1;j<=b.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[a.length][b.length]}
+
+/* ============ РЕЕСТР БЛОКОВ КОНТЕНТА: type -> отрисовка ============ */
+var BLOCKS={
+ text:function(p){return el('div','',p.text)},
+ tip:function(p){return el('div','tip',p.text)},
+ dialog:function(p){var d=el('div','scene');p.lines.forEach(function(l){var r=el('div');r.appendChild(el('b','',l[0]+':'));r.appendChild(document.createTextNode(l[1]));d.appendChild(r)});return d},
+ example_list:function(p){var u=el('ul','ex');p.items.forEach(function(t){u.appendChild(el('li','',t))});return u}
+};
+
+/* ============ РЕЕСТР ЗАДАНИЙ: type -> render + check + show ============ */
+// render(task, box, submit) -> mark(result, task, extra) | check(answer, answer_spec) -> {ok, score, note} | show(spec) -> эталон текстом
+/* ===== Голосовой ввод (Web Speech API): кнопка рядом с полем, текст пишется в поле ===== */
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+var stopMic=function(){};
+function micButton(inp,hint,lang){
+  var b=el('button','mic');b.type='button';b.setAttribute('aria-label','Говорить');
+  b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg>';
+  if(!SR){b.disabled=true;b.title='Голосовой ввод не поддерживается в этом браузере';hint.textContent='Голосовой ввод здесь недоступен, печатайте ответ.';return b}
+  var rec=null,on=false;
+  function stop(){if(rec&&on)rec.stop()}
+  b.stop=stop;
+  b.onclick=function(){
+    if(on){stop();return}
+    rec=new SR();rec.lang=lang||'en-US';rec.interimResults=true;rec.continuous=false;rec.maxAlternatives=1;
+    rec.onstart=function(){on=true;b.classList.add('on');hint.textContent='Слушаю... нажмите ещё раз, чтобы закончить'};
+    rec.onresult=function(e){var t='';for(var k=0;k<e.results.length;k++)t+=e.results[k][0].transcript;inp.value=t.trim()};
+    rec.onerror=function(e){hint.textContent=(e.error==='not-allowed'||e.error==='service-not-allowed')?'Нет доступа к микрофону. Разрешите его в браузере или печатайте ответ.':e.error==='no-speech'?'Речь не услышана, попробуйте ещё раз.':'Ошибка распознавания ('+e.error+').'};
+    rec.onend=function(){on=false;b.classList.remove('on');if(hint.textContent.indexOf('Слушаю')===0)hint.textContent=''};
+    try{rec.start();stopMic=stop}catch(err){}
+  };
+  return b;
+}
+
+var TASKS={};
+TASKS.choice={
+ render:function(t,box,submit){
+  box.appendChild(el('div','q',t.payload.prompt));var o=el('div','opts');
+  shuffle(t.payload.options).forEach(function(v){var b=el('button','',v);b.onclick=function(){submit(v,b)};o.appendChild(b)});
+  box.appendChild(o);
+  return function(res,t,chosen){[].forEach.call(o.children,function(x){x.disabled=true;if(x.textContent===t.answer_spec.correct)x.className='ok'});if(!res.ok&&chosen)chosen.className='bad'};
+ },
+ check:function(a,s){return {ok:a===s.correct,score:a===s.correct?1:0}},
+ show:function(s){return s.correct}
+};
+TASKS.fill_gap=TASKS.choice; // тот же способ ответа, другой смысл в аналитике
+TASKS.build={
+ render:function(t,box,submit){
+  box.appendChild(el('div','q',t.payload.prompt));
+  var ans=el('div','ans'),pool=el('div','pool'),locked=false,chk=el('button','main','Проверить');
+  shuffle(t.payload.words).forEach(function(w){var b=el('button','chip',w);b.onclick=function(){if(!locked)(b.parentNode===pool?ans:pool).appendChild(b)};pool.appendChild(b)});
+  chk.onclick=function(){submit([].map.call(ans.children,function(x){return x.textContent}).join(' '))};
+  box.appendChild(ans);box.appendChild(pool);box.appendChild(chk);
+  return function(res){locked=true;chk.remove();ans.style.borderColor=res.ok?'var(--ok)':'var(--bad)';[].forEach.call(box.querySelectorAll('.chip'),function(x){x.disabled=true})};
+ },
+ check:function(a,s){var ok=s.accept.some(function(x){return norm(x)===norm(a)});return {ok:ok,score:ok?1:0}},
+ show:function(s){return s.accept[0]}
+};
+TASKS.type_word={
+ render:function(t,box,submit){
+  box.appendChild(el('div','q',t.payload.prompt));
+  var inp=el('input','txt');inp.placeholder=t.payload.placeholder||'';inp.autocomplete='off';inp.autocapitalize='off';inp.spellcheck=false;
+  var b=el('button','main','Проверить'),hint=el('div','hint'),row=el('div','row'),mic=micButton(inp,hint,'en-US');
+  b.onclick=function(){mic.stop&&mic.stop();if(inp.value.trim())submit(inp.value)};
+  inp.onkeydown=function(e){if(e.key==='Enter')b.onclick()};
+  row.appendChild(inp);row.appendChild(mic);
+  box.appendChild(row);box.appendChild(hint);box.appendChild(b);
+  return function(res){inp.disabled=true;mic.disabled=true;b.remove();hint.textContent='';inp.style.borderColor=res.ok?'var(--ok)':'var(--bad)'};
+ },
+ check:function(a,s){var n=norm(a);
+  if(s.accept.some(function(x){return norm(x)===n}))return {ok:true,score:1};
+  if(n.length>3&&s.accept.some(function(x){return lev(n,norm(x))<=1}))return {ok:true,score:.8,note:'Почти: в слове опечатка.'};
+  return {ok:false,score:0}},
+ show:function(s){return s.accept[0]}
+};
+TASKS.match={
+ render:function(t,box,submit){
+  box.appendChild(el('div','q',t.payload.prompt));
+  var pairs=t.payload.pairs,map={},sel=null,n=0,cols=el('div','cols'),L=[],R=[];
+  var left=pairs.map(function(p){return p[0]}),right=shuffle(pairs.map(function(p){return p[1]}));
+  var lc=el('div','opts'),rc=el('div','opts');cols.appendChild(lc);cols.appendChild(rc);
+  left.forEach(function(v){var b=el('button','',v);b.onclick=function(){if(b.disabled)return;if(sel)sel.className='';sel=b;b.className='sel'};lc.appendChild(b);L.push(b)});
+  right.forEach(function(v){var b=el('button','',v);b.onclick=function(){if(b.disabled||!sel)return;
+    map[sel.textContent]=v;sel.disabled=b.disabled=true;sel.className=b.className='sel';sel=null;
+    if(++n===left.length)submit(map)};rc.appendChild(b);R.push(b)});
+  box.appendChild(cols);
+  return function(res,t){var truth={};pairs.forEach(function(p){truth[p[0]]=p[1]});
+   L.forEach(function(b){var good=map[b.textContent]===truth[b.textContent];b.className=good?'ok':'bad';
+     R.forEach(function(r){if(r.textContent===map[b.textContent])r.className=good?'ok':'bad'})})};
+ },
+ check:function(a,s,t){var c=0;t.payload.pairs.forEach(function(p){if(a[p[0]]===p[1])c++});var sc=c/t.payload.pairs.length;
+  return {ok:sc===1,score:sc,note:sc<1?'Верно '+c+' из '+t.payload.pairs.length:''}},
+ show:function(s,t){return t.payload.pairs.map(function(p){return p.join(' = ')}).join('; ')}
+};
+TASKS.self_check={
+ render:function(t,box,submit){
+  box.appendChild(el('div','q',t.payload.prompt));var o=el('div','opts');
+  var y=el('button','','Сказал(а), получилось'),n=el('button','','Не получилось, повторю позже');
+  y.onclick=function(){submit('yes',y)};n.onclick=function(){submit('no',n)};o.appendChild(y);o.appendChild(n);box.appendChild(o);
+  return function(res,t,chosen){y.disabled=n.disabled=true;chosen.className=res.ok?'ok':'bad'};
+ },
+ check:function(a){return {ok:a==='yes',score:a==='yes'?1:0}},
+ show:function(){return ''}
+};
+
+/* ============ ДВИЖОК ленты ============ */
+var stage=document.getElementById('stage');
+var queue,i,ti,st,wrong,answered,showJson=false;
+function reset(){queue=CARDS.map(function(c){return Object.assign({},c)});i=0;st={ok:0,bad:0,skip:0,prog:{}};for(var u in UNITS)st.prog[u]=0;draw()}
+function head(){
+  document.getElementById('cnt').textContent=Math.min(i+1,queue.length)+' / '+queue.length;
+  document.getElementById('prog').style.width=(i/queue.length*100)+'%';
+  document.getElementById('score').textContent='Верно: '+st.ok;
+}
+function draw(){
+  head();stage.innerHTML='';
+  if(i>=queue.length){
+    var e=el('div','card end');e.appendChild(el('h2','','Готово на сегодня'));
+    var s=el('div','stat');
+    [['Верно',st.ok],['Ошибки',st.bad],['Пропуски',st.skip]].forEach(function(p){var d=el('div');d.appendChild(el('b','',p[1]));d.appendChild(el('span','',p[0]));s.appendChild(d)});
+    e.appendChild(s);e.appendChild(el('div','','Сила знания по единицам:'));
+    var us=el('div','units');
+    for(var u in UNITS){var r=el('div');r.appendChild(el('span','',UNITS[u].title));var v=st.prog[u];r.appendChild(el('span','',new Array(v+1).join('●')+new Array(4-v).join('○')));us.appendChild(r)}
+    e.appendChild(us);
+    var b=el('button','main','Пройти заново');b.onclick=reset;e.appendChild(b);stage.appendChild(e);return;
+  }
+  ti=0;wrong=false;answered=false;
+  var c=queue[i],card=el('div','card');card.id='card';
+  card.appendChild(el('span','tag'+(c.kind==='practice'?' p':''),c.kind==='lesson'?'Новое':'Тренировка'));
+  c.units.filter(function(x){return x.role==='teaches'}).forEach(function(x){
+    card.appendChild(el('div','item',UNITS[x.id].title));card.appendChild(el('div','tr',UNITS[x.id].data.tr))});
+  c.blocks.forEach(function(b){card.appendChild(BLOCKS[b.type](b.payload))});
+  var box=el('div');box.id='task';box.style.cssText='display:flex;flex-direction:column;gap:12px';card.appendChild(box);
+  stage.appendChild(card);drawJson();showTask();
+}
+function drawJson(){var o=document.getElementById('json');if(o)o.remove();
+  if(showJson&&queue[i]){var p=el('pre','json',JSON.stringify(queue[i],null,1));p.id='json';stage.appendChild(p)}}
+function showTask(){
+  var c=queue[i],t=c.tasks[ti],box=document.getElementById('task');box.innerHTML='';answered=false;
+  var mark=TASKS[t.type].render(t,box,function(a,extra){
+    if(answered)return;answered=true;
+    var res=TASKS[t.type].check(a,t.answer_spec||{},t);
+    if(mark)mark(res,t,extra);finish(res,t);
+  });
+}
+function finish(res,t){
+  var c=queue[i],box=document.getElementById('task'),T=TASKS[t.type],fb=t.feedback||{};
+  if(res.ok)st.ok++;else{st.bad++;wrong=true}
+  c.units.forEach(function(x){var v=st.prog[x.id];st.prog[x.id]=Math.max(0,Math.min(3,v+(res.ok?1:-1)))});
+  var msg=res.ok?(fb.right||'Верно'):(t.type==='self_check'?'Вернёмся к этому позже':(res.score>0?'':'')+'Правильный ответ: '+T.show(t.answer_spec||{},t));
+  var f=el('div','fb '+(res.ok?'ok':'bad'),msg);
+  var extra=[res.note,!res.ok&&fb.wrong].filter(Boolean).join(' ');if(extra)f.appendChild(el('span','',extra));
+  box.appendChild(f);
+  var last=ti>=c.tasks.length-1,b=el('button','main',last?'Дальше':'Следующее задание');
+  b.onclick=function(){if(last)advance('done');else{ti++;showTask()}};box.appendChild(b);head();b.focus();
+}
+function advance(kind){
+  var c=queue[i],card=document.getElementById('card');if(!card)return;
+  if(kind==='skip')st.skip++;
+  if((kind==='skip'||wrong)&&!c.rq)queue.splice(Math.min(i+4,queue.length),0,Object.assign({},c,{rq:true}));
+  stopMic();card.classList.add('out');var j=document.getElementById('json');if(j)j.remove();
+  setTimeout(function(){i++;draw()},220);
+}
+function skip(){if(i<queue.length)advance(answered?'done':'skip')}
+
+/* свайп вверх = пропуск */
+var sy=null,dy=0;
+stage.addEventListener('pointerdown',function(e){if(e.target.closest('button,input,pre'))return;sy=e.clientY;dy=0});
+window.addEventListener('pointermove',function(e){if(sy===null)return;dy=Math.min(0,e.clientY-sy);var c=document.getElementById('card');if(c){c.style.transition='none';c.style.transform='translateY('+dy+'px)'}});
+window.addEventListener('pointerup',function(){if(sy===null)return;var c=document.getElementById('card');sy=null;if(!c)return;c.style.transition='';
+  if(dy<-80)skip();else c.style.transform=''});
+document.getElementById('skip').onclick=skip;
+document.getElementById('jsn').onclick=function(){showJson=!showJson;drawJson()};
+document.addEventListener('keydown',function(e){if(e.key==='ArrowUp'&&document.activeElement.tagName!=='INPUT')skip()});
+reset();
+</script>
+</body>
+</html>
