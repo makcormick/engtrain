@@ -134,38 +134,51 @@ var BLOCKS={
 /* ============ РЕЕСТР ЗАДАНИЙ: type -> render + check + show ============ */
 // render(task, box, submit) -> mark(result, task, extra) | check(answer, answer_spec) -> {ok, score, note} | show(spec) -> эталон текстом
 /* ===== Голосовой ввод (Web Speech API) ===== */
+// Правило: в каждый момент живёт не больше одной сессии. Новая стартует только после полного конца старой.
 var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-var curRec=null,userStop=false;
-function killRec(){if(curRec){var r=curRec;curRec=null;r.onstart=r.onresult=r.onerror=r.onend=null;try{r.abort()}catch(e){}}}
-var stopMic=function(){userStop=true;killRec()};
+var RC={rec:null,tm:null};
+function rcKill(){
+  return new Promise(function(res){
+    clearTimeout(RC.tm);
+    var r=RC.rec;RC.rec=null;if(!r){res();return}
+    var done=false;function fin(){if(!done){done=true;res()}}
+    r.onstart=r.onresult=r.onerror=null;r.onend=fin;
+    try{r.abort()}catch(e){fin()}
+    setTimeout(fin,700);
+  });
+}
+var stopMic=function(){rcKill()};
 function micButton(inp,hint,lang){
   var b=el('button','mic');b.type='button';b.setAttribute('aria-label','Говорить');
   b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg>';
   if(!SR){b.disabled=true;b.title='Голосовой ввод не поддерживается в этом браузере';hint.textContent='Голосовой ввод здесь недоступен, печатайте ответ.';return b}
-  var on=false,retried=false,after=null;
+  var on=false,busy=false,after=null;
   function ui(v){on=v;b.classList.toggle('on',v)}
-  function begin(){
-    var rec=new SR();curRec=rec;
-    rec.lang=lang||'en-US';rec.interimResults=true;rec.continuous=false;rec.maxAlternatives=1;
-    rec.onstart=function(){ui(true);hint.textContent='Слушаю... нажмите ещё раз, чтобы закончить'};
-    rec.onresult=function(e){var t='';for(var k=0;k<e.results.length;k++)t+=e.results[k][0].transcript;inp.value=t.trim()};
-    rec.onerror=function(e){
-      if(e.error==='aborted'){ // браузер оборвал сессию сам: один раз тихо пробуем снова
-        if(!userStop&&!retried){retried=true;killRec();setTimeout(begin,350)}
-        return}
-      hint.textContent=(e.error==='not-allowed'||e.error==='service-not-allowed')?'Нет доступа к микрофону. Разрешите его в браузере или печатайте ответ.':e.error==='no-speech'?'Речь не услышана, попробуйте ещё раз.':'Ошибка распознавания ('+e.error+').'};
-    rec.onend=function(){if(curRec===rec)curRec=null;ui(false);
-      if(hint.textContent.indexOf('Слушаю')===0)hint.textContent='';
-      if(after){var f=after;after=null;f()}};
-    try{rec.start()}catch(err){ui(false);hint.textContent='Не удалось начать запись, попробуйте ещё раз.'}
+  function say(t){hint.textContent=t}
+  function start(){
+    if(busy)return;busy=true;say('Запускаю микрофон...');
+    var guard=setTimeout(function(){if(busy){busy=false;say('Микрофон не запустился, нажмите ещё раз.');rcKill()}},4000);
+    rcKill().then(function(){return new Promise(function(r){setTimeout(r,150)})}).then(function(){
+      var rec=new SR();RC.rec=rec;var got=false;
+      rec.lang=lang||'en-US';rec.interimResults=true;rec.continuous=false;rec.maxAlternatives=1;
+      rec.onstart=function(){clearTimeout(guard);busy=false;ui(true);say('Слушаю... нажмите ещё раз, чтобы закончить');
+        RC.tm=setTimeout(function(){b.stop()},10000)};
+      rec.onresult=function(e){got=true;var t='';for(var k=0;k<e.results.length;k++)t+=e.results[k][0].transcript;inp.value=t.trim()};
+      rec.onerror=function(e){clearTimeout(guard);busy=false;
+        if(e.error==='aborted'){if(!got)say('Запись прервана браузером (aborted). Нажмите на микрофон ещё раз.');return}
+        say((e.error==='not-allowed'||e.error==='service-not-allowed')?'Нет доступа к микрофону. Разрешите его в браузере или печатайте ответ.':e.error==='no-speech'?'Речь не услышана, попробуйте ещё раз.':'Ошибка распознавания: '+e.error+(e.message?' ('+e.message+')':''))};
+      rec.onend=function(){clearTimeout(guard);clearTimeout(RC.tm);busy=false;if(RC.rec===rec)RC.rec=null;ui(false);
+        if(hint.textContent.indexOf('Слушаю')===0||hint.textContent.indexOf('Запускаю')===0)say('');
+        if(after){var f=after;after=null;f()}};
+      try{rec.start()}catch(err){clearTimeout(guard);busy=false;ui(false);say('Не удалось начать запись: '+err.name)}
+    });
   }
-  // stop(cb): останавливает запись и вызывает cb после получения последнего текста
-  b.stop=function(cb){if(on&&curRec){after=cb||null;userStop=true;try{curRec.stop()}catch(e){}}else if(cb)cb()};
-  b.onclick=function(){
-    if(on){b.stop();return}
-    userStop=false;retried=false;
-    if(curRec){killRec();setTimeout(begin,300)}else begin();
-  };
+  // stop(cb): останавливает запись, ждёт последний текст и вызывает cb (с запасным выходом, если конец не пришёл)
+  b.stop=function(cb){
+    if(on&&RC.rec){after=cb||null;try{RC.rec.stop()}catch(e){}
+      setTimeout(function(){if(after){var f=after;after=null;rcKill().then(f)}},1500);
+    }else if(cb)cb()};
+  b.onclick=function(){if(on){b.stop();return}start()};
   return b;
 }
 
@@ -254,6 +267,7 @@ function chime(){
       o.type='sine';o.frequency.value=n[0];o.connect(g);g.connect(C.destination);
       g.gain.setValueAtTime(0.0001,s);g.gain.exponentialRampToValueAtTime(0.2,s+0.02);g.gain.exponentialRampToValueAtTime(0.0001,s+0.5);
       o.start(s);o.stop(s+0.55)});
+    setTimeout(function(){try{C.close()}catch(e){}if(actx===C)actx=null},900);
   }catch(e){}
 }
 
