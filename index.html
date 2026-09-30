@@ -12,13 +12,13 @@
 :root[data-theme="dark"]{--bg:#0e1526;--card:#172038;--ink:#e8edf9;--mute:#93a0bf;--line:#2a3554;--acc:#7c9bff;--acc-t:#22305a;--ok:#4fd39a;--ok-t:#143a2e;--bad:#ff7b93;--bad-t:#45202b}
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
-body{background:var(--bg);color:var(--ink);font:500 17px/1.45 "Manrope",system-ui,sans-serif;display:flex;justify-content:center}
+body{background:var(--bg);color:var(--ink);font:500 17px/1.45 "Manrope",system-ui,sans-serif;display:flex;justify-content:center;overscroll-behavior:none}
 #app{width:100%;max-width:480px;height:100%;display:flex;flex-direction:column;padding:14px 16px 12px}
 .top{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--mute)}
 .bar{flex:1;height:6px;border-radius:3px;background:var(--line);overflow:hidden}
 .bar i{display:block;height:100%;background:var(--acc);transition:width .3s}
 .stage{flex:1;position:relative;margin:14px 0 10px;touch-action:none;overflow:hidden;min-height:0}
-.card{position:absolute;inset:0;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px 20px;display:flex;flex-direction:column;gap:14px;overflow:auto;transition:transform .25s ease,opacity .25s ease;user-select:none}
+.card{position:absolute;inset:0;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px 20px;display:flex;flex-direction:column;gap:14px;overflow:auto;transition:transform .25s ease,opacity .25s ease;user-select:none;touch-action:none}
 .card.out{transform:translateY(-110%);opacity:0}
 .tag{align-self:flex-start;font-size:13px;font-weight:700;padding:4px 10px;border-radius:99px;background:var(--acc-t);color:var(--acc)}
 .tag.p{background:var(--line);color:var(--mute)}
@@ -59,7 +59,7 @@ input.txt{font:inherit;font-weight:700;color:var(--ink);background:var(--card);b
 .fb span{display:block;color:var(--ink);font-weight:500;margin-top:4px}
 .foot{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:14px;color:var(--mute)}
 .foot button{padding:9px 14px;border-radius:99px;text-align:center;font-size:14px}
-.foot div{display:flex;gap:8px}
+.foot div{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 pre.json{position:absolute;inset:0;margin:0;padding:16px;background:var(--card);border:1px solid var(--line);border-radius:22px;overflow:auto;font:12px/1.5 ui-monospace,Menlo,monospace;color:var(--ink);z-index:2;user-select:text;white-space:pre-wrap}
 .end{align-items:flex-start;justify-content:center}
 .end h2{font-size:30px;margin:0}
@@ -75,7 +75,7 @@ pre.json{position:absolute;inset:0;margin:0;padding:16px;background:var(--card);
 <div id="app">
   <div class="top"><span id="cnt"></span><div class="bar"><i id="prog"></i></div><span id="score"></span></div>
   <div class="stage" id="stage"></div>
-  <div class="foot"><span>Свайп вверх = пропуск</span><div><button id="jsn">Данные</button><button id="skip">Пропустить</button></div></div>
+  <div class="foot"><span>Свайп вверх = пропуск</span><div><button id="snd">Звук: вкл</button><button id="jsn">Данные</button><button id="skip">Пропустить</button></div></div>
 </div>
 <script>
 /* ============ ДАННЫЕ (то, что лежало бы в БД) ============ */
@@ -133,24 +133,38 @@ var BLOCKS={
 
 /* ============ РЕЕСТР ЗАДАНИЙ: type -> render + check + show ============ */
 // render(task, box, submit) -> mark(result, task, extra) | check(answer, answer_spec) -> {ok, score, note} | show(spec) -> эталон текстом
-/* ===== Голосовой ввод (Web Speech API): кнопка рядом с полем, текст пишется в поле ===== */
+/* ===== Голосовой ввод (Web Speech API) ===== */
 var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-var stopMic=function(){};
+var curRec=null,userStop=false;
+function killRec(){if(curRec){var r=curRec;curRec=null;r.onstart=r.onresult=r.onerror=r.onend=null;try{r.abort()}catch(e){}}}
+var stopMic=function(){userStop=true;killRec()};
 function micButton(inp,hint,lang){
   var b=el('button','mic');b.type='button';b.setAttribute('aria-label','Говорить');
   b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg>';
   if(!SR){b.disabled=true;b.title='Голосовой ввод не поддерживается в этом браузере';hint.textContent='Голосовой ввод здесь недоступен, печатайте ответ.';return b}
-  var rec=null,on=false;
-  function stop(){if(rec&&on)rec.stop()}
-  b.stop=stop;
-  b.onclick=function(){
-    if(on){stop();return}
-    rec=new SR();rec.lang=lang||'en-US';rec.interimResults=true;rec.continuous=false;rec.maxAlternatives=1;
-    rec.onstart=function(){on=true;b.classList.add('on');hint.textContent='Слушаю... нажмите ещё раз, чтобы закончить'};
+  var on=false,retried=false,after=null;
+  function ui(v){on=v;b.classList.toggle('on',v)}
+  function begin(){
+    var rec=new SR();curRec=rec;
+    rec.lang=lang||'en-US';rec.interimResults=true;rec.continuous=false;rec.maxAlternatives=1;
+    rec.onstart=function(){ui(true);hint.textContent='Слушаю... нажмите ещё раз, чтобы закончить'};
     rec.onresult=function(e){var t='';for(var k=0;k<e.results.length;k++)t+=e.results[k][0].transcript;inp.value=t.trim()};
-    rec.onerror=function(e){hint.textContent=(e.error==='not-allowed'||e.error==='service-not-allowed')?'Нет доступа к микрофону. Разрешите его в браузере или печатайте ответ.':e.error==='no-speech'?'Речь не услышана, попробуйте ещё раз.':'Ошибка распознавания ('+e.error+').'};
-    rec.onend=function(){on=false;b.classList.remove('on');if(hint.textContent.indexOf('Слушаю')===0)hint.textContent=''};
-    try{rec.start();stopMic=stop}catch(err){}
+    rec.onerror=function(e){
+      if(e.error==='aborted'){ // браузер оборвал сессию сам: один раз тихо пробуем снова
+        if(!userStop&&!retried){retried=true;killRec();setTimeout(begin,350)}
+        return}
+      hint.textContent=(e.error==='not-allowed'||e.error==='service-not-allowed')?'Нет доступа к микрофону. Разрешите его в браузере или печатайте ответ.':e.error==='no-speech'?'Речь не услышана, попробуйте ещё раз.':'Ошибка распознавания ('+e.error+').'};
+    rec.onend=function(){if(curRec===rec)curRec=null;ui(false);
+      if(hint.textContent.indexOf('Слушаю')===0)hint.textContent='';
+      if(after){var f=after;after=null;f()}};
+    try{rec.start()}catch(err){ui(false);hint.textContent='Не удалось начать запись, попробуйте ещё раз.'}
+  }
+  // stop(cb): останавливает запись и вызывает cb после получения последнего текста
+  b.stop=function(cb){if(on&&curRec){after=cb||null;userStop=true;try{curRec.stop()}catch(e){}}else if(cb)cb()};
+  b.onclick=function(){
+    if(on){b.stop();return}
+    userStop=false;retried=false;
+    if(curRec){killRec();setTimeout(begin,300)}else begin();
   };
   return b;
 }
@@ -184,7 +198,8 @@ TASKS.type_word={
   box.appendChild(el('div','q',t.payload.prompt));
   var inp=el('input','txt');inp.placeholder=t.payload.placeholder||'';inp.autocomplete='off';inp.autocapitalize='off';inp.spellcheck=false;
   var b=el('button','main','Проверить'),hint=el('div','hint'),row=el('div','row'),mic=micButton(inp,hint,'en-US');
-  b.onclick=function(){mic.stop&&mic.stop();if(inp.value.trim())submit(inp.value)};
+  function go(){if(inp.value.trim())submit(inp.value)}
+  b.onclick=function(){if(mic.stop)mic.stop(go);else go()};
   inp.onkeydown=function(e){if(e.key==='Enter')b.onclick()};
   row.appendChild(inp);row.appendChild(mic);
   box.appendChild(row);box.appendChild(hint);box.appendChild(b);
@@ -225,6 +240,22 @@ TASKS.self_check={
  check:function(a){return {ok:a==='yes',score:a==='yes'?1:0}},
  show:function(){return ''}
 };
+
+/* ===== Приятный звук при верном ответе (WebAudio, без файлов) ===== */
+var soundOn=true,actx=null;
+function chime(){
+  if(!soundOn)return;
+  try{
+    var C=actx||(actx=new (window.AudioContext||window.webkitAudioContext)());
+    if(C.state==='suspended')C.resume();
+    var t=C.currentTime;
+    [[659.25,0],[783.99,.09],[1046.5,.18]].forEach(function(n){
+      var o=C.createOscillator(),g=C.createGain(),s=t+n[1];
+      o.type='sine';o.frequency.value=n[0];o.connect(g);g.connect(C.destination);
+      g.gain.setValueAtTime(0.0001,s);g.gain.exponentialRampToValueAtTime(0.2,s+0.02);g.gain.exponentialRampToValueAtTime(0.0001,s+0.5);
+      o.start(s);o.stop(s+0.55)});
+  }catch(e){}
+}
 
 /* ============ ДВИЖОК ленты ============ */
 var stage=document.getElementById('stage');
@@ -268,7 +299,7 @@ function showTask(){
 }
 function finish(res,t){
   var c=queue[i],box=document.getElementById('task'),T=TASKS[t.type],fb=t.feedback||{};
-  if(res.ok)st.ok++;else{st.bad++;wrong=true}
+  if(res.ok){st.ok++;chime()}else{st.bad++;wrong=true}
   c.units.forEach(function(x){var v=st.prog[x.id];st.prog[x.id]=Math.max(0,Math.min(3,v+(res.ok?1:-1)))});
   var msg=res.ok?(fb.right||'Верно'):(t.type==='self_check'?'Вернёмся к этому позже':(res.score>0?'':'')+'Правильный ответ: '+T.show(t.answer_spec||{},t));
   var f=el('div','fb '+(res.ok?'ok':'bad'),msg);
@@ -286,13 +317,27 @@ function advance(kind){
 }
 function skip(){if(i<queue.length)advance(answered?'done':'skip')}
 
-/* свайп вверх = пропуск */
-var sy=null,dy=0;
-stage.addEventListener('pointerdown',function(e){if(e.target.closest('button,input,pre'))return;sy=e.clientY;dy=0});
-window.addEventListener('pointermove',function(e){if(sy===null)return;dy=Math.min(0,e.clientY-sy);var c=document.getElementById('card');if(c){c.style.transition='none';c.style.transform='translateY('+dy+'px)'}});
-window.addEventListener('pointerup',function(){if(sy===null)return;var c=document.getElementById('card');sy=null;if(!c)return;c.style.transition='';
-  if(dy<-80)skip();else c.style.transform=''});
+/* свайп вверх = пропуск (работает, даже если жест начат на кнопке) */
+var sy=null,s0=0,ov=0,moved=false;
+function curCard(){return document.getElementById('card')}
+stage.addEventListener('pointerdown',function(e){
+  if(e.target.closest('input,pre')||(e.pointerType==='mouse'&&e.button!==0))return;
+  var c=curCard();if(!c)return;sy=e.clientY;s0=c.scrollTop;ov=0;moved=false});
+window.addEventListener('pointermove',function(e){
+  if(sy===null)return;var c=curCard();if(!c)return;var d=e.clientY-sy;
+  if(Math.abs(d)>10)moved=true;if(!moved)return;
+  var max=c.scrollHeight-c.clientHeight,want=Math.max(0,s0-d);
+  ov=want>max?want-max:0;c.scrollTop=Math.min(want,max);
+  c.style.transition='none';c.style.transform='translateY('+(-ov)+'px)'});
+function endSwipe(){
+  if(sy===null)return;var c=curCard();sy=null;
+  if(moved){var h=function(ev){ev.stopPropagation();ev.preventDefault()};window.addEventListener('click',h,true);setTimeout(function(){window.removeEventListener('click',h,true)},80)}
+  if(!c)return;c.style.transition='';
+  if(ov>80)skip();else c.style.transform=''}
+window.addEventListener('pointerup',endSwipe);
+window.addEventListener('pointercancel',endSwipe);
 document.getElementById('skip').onclick=skip;
+document.getElementById('snd').onclick=function(){soundOn=!soundOn;this.textContent=soundOn?'Звук: вкл':'Звук: выкл';if(soundOn)chime()};
 document.getElementById('jsn').onclick=function(){showJson=!showJson;drawJson()};
 document.addEventListener('keydown',function(e){if(e.key==='ArrowUp'&&document.activeElement.tagName!=='INPUT')skip()});
 reset();
