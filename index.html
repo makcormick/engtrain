@@ -350,14 +350,16 @@ var BLOCKS={
 /* ============ РЕЕСТР ЗАДАНИЙ: type -> render + check + show ============ */
 // render(task, box, submit) -> mark(result, task, extra) | check(answer, answer_spec) -> {ok, score, note} | show(spec) -> эталон текстом
 /* ===== Голосовой ввод (Web Speech API) ===== */
-// Правило: в каждый момент живёт не больше одной сессии. Новая стартует только после полного конца старой.
+// Правила: одна живая сессия; пауза между сессиями (Chrome на телефоне освобождает микрофон не сразу); журнал событий для диагностики.
 var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-var RC={rec:null,tm:null};
+var RC={rec:null,tm:null,lastEnd:0,log:[]};
+function rcLog(e){RC.log.push(e);if(RC.log.length>16)RC.log.shift()}
 function rcKill(){
   return new Promise(function(res){
     clearTimeout(RC.tm);
     var r=RC.rec;RC.rec=null;if(!r){res();return}
-    var done=false;function fin(){if(!done){done=true;res()}}
+    rcLog('kill');
+    var done=false;function fin(){if(!done){done=true;RC.lastEnd=Date.now();res()}}
     r.onstart=r.onresult=r.onerror=null;r.onend=fin;
     try{r.abort()}catch(e){fin()}
     setTimeout(fin,700);
@@ -368,33 +370,38 @@ function micButton(inp,hint,lang){
   var b=el('button','mic');b.type='button';b.setAttribute('aria-label','Говорить');
   b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg>';
   if(!SR){b.disabled=true;b.title='Голосовой ввод не поддерживается в этом браузере';hint.textContent='Голосовой ввод здесь недоступен, печатайте ответ.';return b}
-  var on=false,busy=false,after=null;
+  var KB=' Можно продиктовать через значок микрофона на клавиатуре телефона.';
+  var on=false,busy=false,after=null,userStop=false,retried=false;
   function ui(v){on=v;b.classList.toggle('on',v)}
-  function say(t){hint.textContent=t}
+  function say(t,dbg){hint.textContent=t;if(dbg){var s=document.createElement('small');s.style.display='block';s.textContent='Диагностика: '+RC.log.join(' ');hint.appendChild(s)}}
   function start(){
     if(busy)return;busy=true;say('Запускаю микрофон...');
-    var guard=setTimeout(function(){if(busy){busy=false;say('Микрофон не запустился, нажмите ещё раз.');rcKill()}},4000);
-    rcKill().then(function(){return new Promise(function(r){setTimeout(r,150)})}).then(function(){
-      var rec=new SR();RC.rec=rec;var got=false;
+    var guard=setTimeout(function(){if(busy){busy=false;say('Микрофон не запустился, нажмите ещё раз.'+KB,1);rcKill()}},5000);
+    rcKill().then(function(){var w=Math.max(150,900-(Date.now()-RC.lastEnd));return new Promise(function(r){setTimeout(r,w)})}).then(function(){
+      var rec=new SR();RC.rec=rec;var got=false,bad=false,t0=Date.now();
       rec.lang=lang||'en-US';rec.interimResults=true;rec.continuous=false;rec.maxAlternatives=1;
-      rec.onstart=function(){clearTimeout(guard);busy=false;ui(true);say('Слушаю... нажмите ещё раз, чтобы закончить');
+      ['audiostart','soundstart','speechstart','speechend','soundend','audioend'].forEach(function(n){rec['on'+n]=function(){rcLog(n)}});
+      rec.onstart=function(){rcLog('start');clearTimeout(guard);busy=false;ui(true);say('Слушаю... нажмите ещё раз, чтобы закончить');
         RC.tm=setTimeout(function(){b.stop()},10000)};
-      rec.onresult=function(e){got=true;var t='';for(var k=0;k<e.results.length;k++)t+=e.results[k][0].transcript;inp.value=t.trim()};
-      rec.onerror=function(e){clearTimeout(guard);busy=false;
-        if(e.error==='aborted'){if(!got)say('Запись прервана браузером (aborted). Нажмите на микрофон ещё раз.');return}
-        say((e.error==='not-allowed'||e.error==='service-not-allowed')?'Нет доступа к микрофону. Разрешите его в браузере или печатайте ответ.':e.error==='no-speech'?'Речь не услышана, попробуйте ещё раз.':'Ошибка распознавания: '+e.error+(e.message?' ('+e.message+')':''))};
-      rec.onend=function(){clearTimeout(guard);clearTimeout(RC.tm);busy=false;if(RC.rec===rec)RC.rec=null;ui(false);
+      rec.onresult=function(e){rcLog('result');got=true;var t='';for(var k=0;k<e.results.length;k++)t+=e.results[k][0].transcript;inp.value=t.trim()};
+      rec.onerror=function(e){rcLog('error:'+e.error);clearTimeout(guard);busy=false;bad=true;
+        if(e.error==='aborted'){if(!got)say('Запись прервана браузером (aborted). Нажмите на микрофон ещё раз.'+KB,1);return}
+        say((e.error==='not-allowed'||e.error==='service-not-allowed')?'Нет доступа к микрофону. Разрешите его в браузере или печатайте ответ.':e.error==='no-speech'?'Речь не услышана, попробуйте ещё раз.':'Ошибка распознавания: '+e.error+(e.message?' ('+e.message+')':'')+'.'+KB,e.error!=='no-speech'&&e.error!=='not-allowed')};
+      rec.onend=function(){rcLog('end');clearTimeout(guard);clearTimeout(RC.tm);busy=false;RC.lastEnd=Date.now();if(RC.rec===rec)RC.rec=null;ui(false);
+        if(!got&&!bad&&!userStop&&!retried&&Date.now()-t0<1500){retried=true;rcLog('retry');start();return}
         if(hint.textContent.indexOf('Слушаю')===0||hint.textContent.indexOf('Запускаю')===0)say('');
+        if(!got&&!bad&&!userStop)say('Речь не распозналась. Попробуйте ещё раз.'+KB,1);
         if(after){var f=after;after=null;f()}};
-      try{rec.start()}catch(err){clearTimeout(guard);busy=false;ui(false);say('Не удалось начать запись: '+err.name)}
+      try{rec.start()}catch(err){clearTimeout(guard);busy=false;ui(false);say('Не удалось начать запись: '+err.name+'.'+KB,1)}
     });
   }
   // stop(cb): останавливает запись, ждёт последний текст и вызывает cb (с запасным выходом, если конец не пришёл)
   b.stop=function(cb){
+    userStop=true;
     if(on&&RC.rec){after=cb||null;try{RC.rec.stop()}catch(e){}
       setTimeout(function(){if(after){var f=after;after=null;rcKill().then(f)}},1500);
     }else if(cb)cb()};
-  b.onclick=function(){if(on){b.stop();return}start()};
+  b.onclick=function(){if(on){b.stop();return}userStop=false;retried=false;RC.log=[];start()};
   return b;
 }
 
