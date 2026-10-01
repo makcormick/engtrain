@@ -14,6 +14,10 @@ html,body{margin:0}
 #launcher .lw{max-width:560px;margin:0 auto}
 #launcher h1{font-size:30px;line-height:1.15;margin:12px 0 6px}
 #launcher .lsub{color:var(--mut);margin:0 0 22px}
+#launcher .lh{font-size:20px;margin:26px 0 12px}
+#launcher .srow{display:flex;justify-content:space-between;align-items:center;gap:14px;background:var(--card);border:2px solid var(--line);border-radius:16px;padding:12px 16px;margin-bottom:10px;cursor:pointer}
+#launcher .srow small{display:block;color:var(--mut);font-size:14px;line-height:1.35;margin-top:2px}
+#launcher .srow input{flex:none;width:24px;height:24px;accent-color:var(--acc)}
 #launcher .pick{display:block;width:100%;text-align:left;background:var(--card);border:2px solid var(--line);border-radius:20px;padding:18px;margin-bottom:14px;color:inherit;font:inherit;cursor:pointer}
 #launcher .pick:hover,#launcher .pick:focus-visible{border-color:var(--acc);outline:none}
 #launcher .pick .e{font-size:32px;line-height:1}
@@ -115,7 +119,7 @@ html,body{margin:0}
 #t2 .mic svg{pointer-events:none}
 #t2 .ans.top{margin-top:2px}
 #t2.kb .top,#t2.kb .foot{display:none}
-#t2.kb .card>*:not(.prompt):not(.dock){display:none}
+#t2.kb .card>*:not(.prompt):not(.dock):not(.fb):not(.trow){display:none}
 #t2.kb .stage{margin:8px 0}
 #t2 .heard{font-size:24px;font-weight:800;min-height:34px}
 #t2 .heard .ok{color:var(--ok)}
@@ -162,7 +166,16 @@ html,body{margin:0}
 #t2 .dock{margin:auto -20px -22px;padding:12px 20px 22px;position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;flex-direction:column;gap:12px;z-index:1}
 #t2 .q.prompt{margin-top:2px}
 #t2 .hrow{display:flex;gap:8px;flex-wrap:wrap}
-#t2 button.hintb{padding:7px 12px;font-size:14px;border-radius:99px;color:var(--mute)}
+#t2 .hcol{display:flex;flex-direction:column;gap:8px}
+#t2 button.hintb{display:grid;width:100%;text-align:left;padding:9px 14px;font-size:14px;border-radius:12px;color:var(--mute)}
+#t2 .hintb>span{grid-area:1/1}
+#t2 .hintb .r{visibility:hidden}
+#t2 .hintb.sh{color:var(--ink)}
+#t2 .hintb.sh .l{visibility:hidden}
+#t2 .hintb.sh .r{visibility:visible}
+#t2 .trow{display:flex;justify-content:space-between;align-items:center}
+#t2 button.repb{padding:6px 12px;border-radius:99px;font-size:18px;line-height:1;text-align:center}
+#t2 .fb .nx{font-size:13px;opacity:.7;margin-top:6px}
 #t2 .hint.sh{color:var(--ink);font-weight:700}
 #t2 .chip.l{min-width:42px;padding:9px 10px;font-size:20px}
 #t2 #kbp{position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;border:0;padding:0;pointer-events:none}
@@ -174,12 +187,18 @@ html,body{margin:0}
 <p class="lsub">Выберите, как сегодня заниматься.</p>
 <button class="pick" id="pick1"><span class="e">📖</span><b>Тренажёр слов</b><small>Слова, выражения и сочетания. Обучение парами или повторение, разные режимы: перевод, сборка из букв, вписывание, пропуски, произнесение вслух.</small></button>
 <button class="pick" id="pick2"><span class="e">⚡</span><b>Лента карточек</b><small>Короткие карточки по фразовым глаголам в формате ленты. Свайп вверх пропускает карточку, есть голосовой ввод и звук при верном ответе.</small></button>
+<h2 class="lh">Настройки</h2>
+<label class="srow"><span><b>Озвучка слов</b><small>Произносить слово, когда появляется карточка</small></span><input type="checkbox" id="cv"></label>
+<label class="srow"><span><b>Звуки ответов</b><small>Мягкий сигнал за верный и неверный ответ</small></span><input type="checkbox" id="cs"></label>
+<label class="srow"><span><b>Ручной переход</b><small>После ответа свайп вверх открывает следующую карточку</small></span><input type="radio" name="nm" value="manual"></label>
+<label class="srow"><span><b>Автопереход</b><small>Через 2 секунды после ответа карточка листается сама</small></span><input type="radio" name="nm" value="auto"></label>
+<label class="srow"><span><b>Данные карточки</b><small>Служебный JSON поверх карточки, для отладки</small></span><input type="checkbox" id="cd"></label>
 </div></section>
 <div id="t1" hidden><main><button class="lnk" id="back1">← Выбор тренажёра</button><h1>Тренажёр слов</h1><div id="t1app"></div></main></div>
 <div id="t2" hidden><div id="app">
   <div class="top"><button class="backb" id="back2" aria-label="К выбору тренажёра">← Меню</button><span id="cnt"></span><div class="bar"><i id="prog"></i></div><span id="score"></span></div>
   <div class="stage" id="stage"></div><input id="kbp" aria-hidden="true" tabindex="-1" autocomplete="off" autocapitalize="off">
-  <div class="foot"><span>Свайп вверх = пропуск</span><div><button id="vox">Озвучка: вкл</button><button id="rep" aria-label="Повторить озвучку">🔊</button><button id="snd">Звук: вкл</button><button id="jsn">Данные</button><button id="skip">Пропустить</button></div></div>
+  
 </div></div>
 <script>(function(){
 
@@ -278,6 +297,9 @@ menu();
 
 /* ============ ДАННЫЕ (то, что лежало бы в БД) ============ */
 // units: учебные единицы. Повторения считаются по ним, а не по карточкам.
+var CFG=window.CFG={voice:true,sound:true,auto:false,data:false};
+try{Object.assign(CFG,JSON.parse(localStorage.getItem('enCfg')||'{}'))}catch(e){}
+window.cfgSave=function(){try{localStorage.setItem('enCfg',JSON.stringify(CFG))}catch(e){}};
 var UNITS={
  put_off:{kind:'phrasal_verb',title:'put off',data:{tr:'отложить, перенести'}},
  pick_up:{kind:'phrasal_verb',title:'pick up',data:{tr:'забрать, подобрать'}},
@@ -459,13 +481,13 @@ TASKS.build={
    pool.appendChild(b)});
   chk.onclick=function(){submit([].map.call(ans.children,function(x){return x.textContent}).join(t.payload.join!=null?t.payload.join:' '))};
   box.appendChild(ans);box.appendChild(pool);box.appendChild(chk);
-  return function(res){locked=true;chk.remove();ans.style.borderColor=res.ok?'var(--ok)':'var(--bad)';[].forEach.call(ans.children,function(x){x.disabled=true})};
+  return function(res){locked=true;chk.style.visibility='hidden';ans.style.borderColor=res.ok?'var(--ok)':'var(--bad)';[].forEach.call(ans.children,function(x){x.disabled=true})};
  },
  check:function(a,s){var ok=s.accept.some(function(x){return norm(x)===norm(a)});return {ok:ok,score:ok?1:0}},
  show:function(s){return s.accept[0]}
 };
-function hintBtns(box,hs){if(!hs||!hs.length)return;var r=el('div','hrow');
- hs.forEach(function(h){var x=el('button','hintb','💡 '+h[0]);x.type='button';x.onclick=function(){x.replaceWith(el('div','hint sh',h[0]+': '+h[1]))};r.appendChild(x)});box.appendChild(r)}
+function hintBtns(box,hs){if(!hs||!hs.length)return;var r=el('div','hcol');
+ hs.forEach(function(h){var x=el('button','hintb');x.type='button';x.appendChild(el('span','l','💡 '+h[0]));x.appendChild(el('span','r',h[0]+': '+h[1]));x.onclick=function(){x.classList.add('sh')};r.appendChild(x)});box.appendChild(r)}
 TASKS.type_word={
  render:function(t,box,submit){
   box.appendChild(el('div','q',t.payload.prompt));
@@ -484,7 +506,7 @@ TASKS.type_word={
   box.appendChild(row);box.appendChild(hint);box.appendChild(b);
   box.addEventListener('mousedown',function(e){if(e.target.closest('button')&&(document.activeElement===inp||document.activeElement.id==='kbp'))e.preventDefault()});
   inp.focus({preventScroll:true});
-  return function(res){var kp=document.getElementById('kbp');if(kp&&document.activeElement===inp)try{kp.focus({preventScroll:true})}catch(e){}inp.disabled=true;mic.disabled=true;b.remove();hint.textContent='';inp.style.borderColor=res.ok?'var(--ok)':'var(--bad)'};
+  return function(res){var kp=document.getElementById('kbp');if(kp&&document.activeElement===inp)try{kp.focus({preventScroll:true})}catch(e){}inp.disabled=true;mic.disabled=true;b.style.visibility='hidden';hint.textContent='';inp.style.borderColor=res.ok?'var(--ok)':'var(--bad)'};
  },
  check:function(a,s){var n=norm(a);
   if(s.accept.some(function(x){return norm(x)===n}))return {ok:true,score:1};
@@ -512,7 +534,7 @@ TASKS.match={
  show:function(s,t){return t.payload.pairs.map(function(p){return p.join(' = ')}).join('; ')}
 };
 TASKS.ack={
- render:function(t,box,submit){var b=el('button','main','Понятно, дальше');b.onclick=function(){submit('ok',b)};box.appendChild(b)},
+ render:function(t,box){box.appendChild(el('div','hint','Прочитайте и свайпните вверх, чтобы продолжить'))},
  check:function(){return {ok:true,score:1}},show:function(){return ''}};
 function cleanS(x){return String(x).toLowerCase().replace(/[’‘`]/g,"'").replace(/[^a-z0-9' ]+/g,' ').replace(/\s+/g,' ').trim()}
 function said(h,a){h=cleanS(h);a=cleanS(a);if((' '+h+' ').indexOf(' '+a+' ')>=0)return true;var f=function(x){return x.replace(/[' ]/g,'')};return /[' ]/.test(a)&&f(a).length>0&&f(h).indexOf(f(a))>=0}
@@ -544,31 +566,28 @@ TASKS.self_check={
  show:function(){return ''}
 };
 
-/* ===== Приятный звук при верном ответе (WebAudio, без файлов) ===== */
-var soundOn=true,actx=null;
-function chime(){
-  if(!soundOn)return;
-  try{
-    var C=actx||(actx=new (window.AudioContext||window.webkitAudioContext)());
-    if(C.state==='suspended')C.resume();
-    var t=C.currentTime;
-    [[659.25,0],[783.99,.09],[1046.5,.18]].forEach(function(n){
-      var o=C.createOscillator(),g=C.createGain(),s=t+n[1];
-      o.type='sine';o.frequency.value=n[0];o.connect(g);g.connect(C.destination);
-      g.gain.setValueAtTime(0.0001,s);g.gain.exponentialRampToValueAtTime(0.2,s+0.02);g.gain.exponentialRampToValueAtTime(0.0001,s+0.5);
-      o.start(s);o.stop(s+0.55)});
-    setTimeout(function(){try{C.close()}catch(e){}if(actx===C)actx=null},900);
-  }catch(e){}
+/* ===== Звуки ответа (один общий AudioContext, разблокируется первым касанием) ===== */
+var actx=null;
+function ac(){try{if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume()}catch(e){}return actx}
+['pointerdown','keydown','touchend'].forEach(function(n){document.addEventListener(n,ac,true)});
+function tone(list,vol,type){
+  if(!CFG.sound)return;var C=ac();if(!C)return;var t=C.currentTime;
+  list.forEach(function(n){var o=C.createOscillator(),g=C.createGain(),s=t+n[1];
+    o.type=type||'sine';o.frequency.value=n[0];o.connect(g);g.connect(C.destination);
+    g.gain.setValueAtTime(0.0001,s);g.gain.exponentialRampToValueAtTime(vol,s+0.03);g.gain.exponentialRampToValueAtTime(0.0001,s+0.35);
+    o.start(s);o.stop(s+0.4)});
 }
+function chime(){tone([[659.25,0],[783.99,.09],[1046.5,.18]],.2)}
+function buzz(){tone([[330,0],[262,.14]],.07,'triangle')}
 
 /* ============ ДВИЖОК ленты ============ */
 var stage=document.getElementById('stage');
-var queue,i,ti,st,wrong,answered,showJson=false;
-var UNITS0=UNITS,CUR={cards:CARDS},voiceOn=true;
+var queue,i,ti,st,wrong,answered,AT=0,ansAt=0;
+var UNITS0=UNITS,CUR={cards:CARDS};
 function reset(){queue=CUR.cards.map(function(c){return Object.assign({},c)});i=0;st={ok:0,bad:0,skip:0,prog:{}};for(var u in UNITS)st.prog[u]=0;draw()}
 function tts(t,l){try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.lang=l;u.rate=.95;speechSynthesis.speak(u)}catch(e){}}
 var lastSay=null;
-function sayTask(t){var c=queue[i],x=t.say||(c&&c.kind==='lesson'&&UNITS[c.units[0].id]&&{t:UNITS[c.units[0].id].title,l:'en-US'});lastSay=x||null;if(voiceOn&&x)tts(x.t,x.l)}
+function sayTask(t){var c=queue[i],x=t.say||(c&&c.kind==='lesson'&&UNITS[c.units[0].id]&&{t:UNITS[c.units[0].id].title,l:'en-US'});lastSay=x||null;var rb=document.getElementById('rep');if(rb)rb.hidden=!lastSay;if(CFG.voice&&x)tts(x.t,x.l)}
 var kbp=document.getElementById('kbp');
 function warmKb(){var c=queue[i],nx=(c&&ti<c.tasks.length-1)?c.tasks[ti+1]:(queue[i+1]&&queue[i+1].tasks[0]);if(nx&&nx.type==='type_word'){try{kbp.focus({preventScroll:true})}catch(e){}}}
 function head(){
@@ -590,7 +609,7 @@ function draw(){
   }
   ti=0;wrong=false;answered=false;
   var c=queue[i],card=el('div','card');card.id='card';
-  card.appendChild(el('span','tag'+(c.kind==='practice'?' p':''),c.kind==='lesson'?'Новое':'Тренировка'));
+  var tr=el('div','trow');tr.appendChild(el('span','tag'+(c.kind==='practice'?' p':''),c.kind==='lesson'?'Новое':'Тренировка'));var rpb=el('button','repb','🔊');rpb.id='rep';rpb.type='button';rpb.hidden=true;rpb.setAttribute('aria-label','Повторить озвучку');rpb.onclick=function(){if(lastSay)tts(lastSay.t,lastSay.l)};tr.appendChild(rpb);card.appendChild(tr);
   c.units.filter(function(x){return x.role==='teaches'}).forEach(function(x){
     card.appendChild(el('div','item',UNITS[x.id].title));card.appendChild(el('div','tr',UNITS[x.id].data.tr))});
   c.blocks.forEach(function(b){card.appendChild(BLOCKS[b.type](b.payload))});
@@ -598,10 +617,10 @@ function draw(){
   stage.appendChild(card);drawJson();showTask();
 }
 function drawJson(){var o=document.getElementById('json');if(o)o.remove();
-  if(showJson&&queue[i]){var p=el('pre','json',JSON.stringify(queue[i],null,1));p.id='json';stage.appendChild(p)}}
+  if(CFG.data&&queue[i]){var p=el('pre','json',JSON.stringify(queue[i],null,1));p.id='json';stage.appendChild(p)}}
 function showTask(){
   var c=queue[i],t=c.tasks[ti],box=document.getElementById('task');box.innerHTML='';answered=false;
-  [].forEach.call(box.parentNode.querySelectorAll('.q.prompt,.ans.top'),function(x){x.remove()});
+  [].forEach.call(box.parentNode.querySelectorAll('.q.prompt,.ans.top,.fb'),function(x){x.remove()});
   var mark=TASKS[t.type].render(t,box,function(a,extra){
     if(answered)return;answered=true;
     if(t.type==='ack'){warmKb();if(ti>=c.tasks.length-1)advance('done');else{ti++;showTask()}return}
@@ -614,23 +633,25 @@ function showTask(){
 }
 function finish(res,t){
   var c=queue[i],box=document.getElementById('task'),T=TASKS[t.type],fb=t.feedback||{};
-  if(res.ok){st.ok++;chime()}else{st.bad++;wrong=true}
+  if(res.ok){st.ok++;chime()}else{st.bad++;wrong=true;buzz()}
   c.units.forEach(function(x){var v=st.prog[x.id];st.prog[x.id]=Math.max(0,Math.min(3,v+(res.ok?1:-1)))});
   var msg=res.ok?(fb.right||'Верно'):(t.type==='self_check'?'Вернёмся к этому позже':(res.score>0?'':'')+'Правильный ответ: '+T.show(t.answer_spec||{},t));
   var f=el('div','fb '+(res.ok?'ok':'bad'),msg);
   var extra=[res.note,!res.ok&&fb.wrong].filter(Boolean).join(' ');if(extra)f.appendChild(el('span','',extra));
-  box.appendChild(f);
-  var last=ti>=c.tasks.length-1,b=el('button','main',last?'Дальше':'Следующее задание');
-  b.onclick=function(){warmKb();if(last)advance('done');else{ti++;showTask()}};box.appendChild(b);head();
+  if(!CFG.auto)f.appendChild(el('div','nx','Свайп вверх — дальше'));
+  box.parentNode.insertBefore(f,box);ansAt=Date.now();head();
+  if(CFG.auto)AT=setTimeout(skip,2000);
 }
 function advance(kind){
   var c=queue[i],card=document.getElementById('card');if(!card)return;
   if(kind==='skip')st.skip++;
   if((kind==='skip'||wrong)&&!c.rq)queue.splice(Math.min(i+4,queue.length),0,Object.assign({},c,{rq:true}));
-  stopMic();card.classList.add('out');var j=document.getElementById('json');if(j)j.remove();
+  clearTimeout(AT);stopMic();card.classList.add('out');var j=document.getElementById('json');if(j)j.remove();
   setTimeout(function(){i++;draw()},220);
 }
-function skip(){if(i<queue.length&&(warmKb(),1))advance(answered?'done':'skip')}
+function skip(){if(i>=queue.length)return;var c=queue[i],t=c.tasks[ti];clearTimeout(AT);warmKb();
+  if(answered&&ti<c.tasks.length-1){ti++;showTask();return}
+  advance(answered||t.type==='ack'?'done':'skip')}
 
 /* свайп вверх = пропуск (работает, даже если жест начат на кнопке) */
 var sy=null,s0=0,ov=0,moved=false;
@@ -651,18 +672,14 @@ function endSwipe(){
   if(ov>80)skip();else c.style.transform=''}
 window.addEventListener('pointerup',endSwipe);
 window.addEventListener('pointercancel',endSwipe);
-document.getElementById('skip').onclick=skip;
-document.getElementById('vox').onclick=function(){voiceOn=!voiceOn;this.textContent=voiceOn?'Озвучка: вкл':'Озвучка: выкл';if(!voiceOn)try{speechSynthesis.cancel()}catch(e){}};
-document.getElementById('rep').onclick=function(){if(lastSay)tts(lastSay.t,lastSay.l)};
-document.addEventListener('keydown',function(e){if(e.key==='Enter'&&answered&&!document.getElementById('t2').hidden){var m=document.querySelector('#task button.main');if(m){e.preventDefault();m.click()}}});
+window.chimePreview=function(){chime()};
+document.addEventListener('keydown',function(e){if(e.key==='Enter'&&answered&&Date.now()-ansAt>400&&!document.getElementById('t2').hidden){e.preventDefault();skip()}});
 if(window.visualViewport){var T2=document.getElementById('t2'),vv=window.visualViewport;function fit(){if(T2.hidden)return;var q=T2.style;q.position='fixed';q.left='0';q.right='0';q.top=vv.offsetTop+'px';q.height=vv.height+'px';if(window.scrollY)window.scrollTo(0,0)}vv.addEventListener('resize',fit);vv.addEventListener('scroll',fit);document.addEventListener('focusin',function(){fit();setTimeout(fit,60);setTimeout(fit,350)});window.addEventListener('scroll',fit)}
 (function(){var T=document.getElementById('t2');function tx(x){return x&&(x.id==='kbp'||(x.classList&&x.classList.contains('txt')))}
 document.addEventListener('focusin',function(e){if(tx(e.target)){T.classList.add('kb');document.documentElement.style.background=getComputedStyle(T).backgroundColor}});
 document.addEventListener('focusout',function(){setTimeout(function(){if(!tx(document.activeElement))T.classList.remove('kb')},150)})})()
-document.getElementById('snd').onclick=function(){soundOn=!soundOn;this.textContent=soundOn?'Звук: вкл':'Звук: выкл';if(soundOn)chime()};
-document.getElementById('jsn').onclick=function(){showJson=!showJson;drawJson()};
 document.addEventListener('keydown',function(e){if(e.key==='ArrowUp'&&!document.getElementById('t2').hidden&&document.activeElement.tagName!=='INPUT')skip()});
-window.t2={start:function(o){if(o){CUR=o;UNITS=o.units}else{CUR={cards:CARDS};UNITS=UNITS0}reset();var c=queue[0];if(c&&c.tasks[0].type==='type_word')try{kbp.focus({preventScroll:true})}catch(e){}},stop:function(){stopMic();try{speechSynthesis.cancel()}catch(e){}}};
+window.t2={start:function(o){if(o){CUR=o;UNITS=o.units}else{CUR={cards:CARDS};UNITS=UNITS0}reset();var c=queue[0];if(c&&c.tasks[0].type==='type_word')try{kbp.focus({preventScroll:true})}catch(e){}},stop:function(){clearTimeout(AT);stopMic();try{speechSynthesis.cancel()}catch(e){}}};
 reset();
 })();</script>
 <script>(function(){
@@ -672,6 +689,9 @@ function home(){try{t2.stop()}catch(e){}try{speechSynthesis.cancel()}catch(e){}s
 window.feedStart=function(o){back='1';show('2');t2.start(o)};
 document.getElementById('pick1').onclick=function(){show('1');t1.start()};
 document.getElementById('pick2').onclick=function(){back='l';show('2');t2.start()};
+var C=window.CFG;
+[['cv','voice'],['cs','sound'],['cd','data']].forEach(function(p){var e=document.getElementById(p[0]);e.checked=!!C[p[1]];e.onchange=function(){C[p[1]]=e.checked;cfgSave();if(p[1]==='voice'&&!e.checked)try{speechSynthesis.cancel()}catch(x){}if(p[1]==='sound'&&e.checked)chimePreview()}});
+[].forEach.call(document.querySelectorAll('input[name=nm]'),function(r){r.checked=(r.value==='auto')===!!C.auto;r.onchange=function(){C.auto=r.value==='auto';cfgSave()}});
 document.getElementById('back1').onclick=home;
 document.getElementById('back2').onclick=function(){try{t2.stop()}catch(e){}show(back)};
 })();</script>
