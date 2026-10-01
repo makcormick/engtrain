@@ -121,7 +121,16 @@ html,body{margin:0}
 #t2.kb .top,#t2.kb .foot{display:none}
 #t2.kb .card>*:not(.prompt):not(.dock):not(.fb):not(.trow){display:none}
 #t2.kb .stage{margin:8px 0}
-#t2 .heard{font-size:24px;font-weight:800;min-height:34px}
+#t2 .heard{font-size:22px;line-height:1.25;font-weight:800;height:56px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-word}
+#t2 .bt{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin-bottom:6px}
+#t2 .colbox{background:var(--acc-t);border:2px solid var(--acc);border-radius:16px;padding:12px 14px;font-size:19px}
+#t2 .colbox .bt{color:var(--acc)}
+#t2 .colbox .cl{margin:5px 0}
+#t2 .assoc{font-size:16px}
+#t2 .assoc .al{margin:4px 0}
+#t2 .assoc .al b{color:var(--mute)}
+#t2 .sent .sl{font-size:17px;margin:4px 0}
+#t2 .sent .st{font-size:15px;color:var(--mute)}
 #t2 .heard .ok{color:var(--ok)}
 #t2 .heard .bad{color:var(--bad)}
 #t2 button:focus-visible,#t2 input:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
@@ -143,7 +152,7 @@ html,body{margin:0}
 #t2 .mic.on{background:var(--bad-t);border-color:var(--bad);color:var(--bad);animation:pulse 1.1s infinite}
 #t2 .mic:disabled{opacity:.45}
 @keyframes pulse{50%{box-shadow:0 0 0 6px var(--bad-t)}}
-#t2 .hint{font-size:14px;color:var(--mute);min-height:20px}
+#t2 .hint{font-size:14px;color:var(--mute);min-height:40px}
 @media (prefers-reduced-motion:reduce){#t2 .mic.on{animation:none}}
 #t2 .fb{border-radius:14px;padding:12px 14px;font-size:16px}
 #t2 .fb.ok{background:var(--ok-t);color:var(--ok)}
@@ -174,7 +183,7 @@ html,body{margin:0}
 #t2 .hintb.sh .l{visibility:hidden}
 #t2 .hintb.sh .r{visibility:visible}
 #t2 .trow{display:flex;justify-content:space-between;align-items:center}
-#t2 button.repb{padding:6px 12px;border-radius:99px;font-size:18px;line-height:1;text-align:center}
+#t2 button.repb{align-self:flex-end;padding:8px 16px;border-radius:99px;font-size:20px;line-height:1;text-align:center}
 #t2 .fb .nx{font-size:13px;opacity:.7;margin-top:6px}
 #t2 .hint.sh{color:var(--ink);font-weight:700}
 #t2 .chip.l{min-width:42px;padding:9px 10px;font-size:20px}
@@ -266,23 +275,25 @@ function feed(rv){
  const ms=MODES.filter(m=>sel.has(m[0])),U={},ids=new Set();let cards=[],n=0;
  const trS2=w=>w.exru.replace(/\[(.+?)\]/,"$1"),exs=w=>w.ex.replace(/\[(.+?)\]/,"$1");
  const EN=l=>({l:"en-US",t:l}),RU=t=>({l:"ru-RU",t});
- const lesson=w=>{U[w.en]={kind:kind,title:w.en,data:{tr:w.ru}};
-  const b=[{type:"text",payload:{text:w.em+" "+w.def+" — "+w.defru}},{type:"dialog",payload:{lines:[["•",exs(w)],["•",trS2(w)]]}}];
-  if(w.sit)b.push({type:"text",payload:{text:"Когда говорят: "+w.sit}});
-  b.push({type:"example_list",payload:{items:w.col.map(c=>c[0]+" — "+c[1])}});
-  b.push({type:"tip",payload:{text:w.as.map(a=>a[0]+": "+a[1]).join(" · ")}});
+ const lesson=w=>{U[w.en]={kind:kind,title:w.en,data:{tr:w.ru,em:w.em}};
+  const b=[{type:"text",payload:{text:w.def+" — "+w.defru}},
+   {type:"collocs",payload:{items:w.col}},
+   {type:"assoc",payload:{items:w.as}},
+   {type:"sentences",payload:{items:[[exs(w),trS2(w)]].concat(w.sit?[["Когда говорят — "+w.sit]]:[])}}];
   return {id:++n,kind:"lesson",units:[{id:w.en,role:"teaches"}],blocks:b,tasks:[{type:"ack",payload:{},say:EN(w.en)}]}};
  const ch=(w,prompt,pick,say,cls)=>({type:"choice",payload:{prompt,options:sh([w,...sh(W.filter(x=>x!==w)).slice(0,3)]).map(pick)},answer_spec:{correct:pick(w)},say});
- const hint=w=>["Подсказка","начинается на «"+w.en[0]+"», букв: "+w.en.length];
+ const pl=(k,a,b,c)=>k%10===1&&k%100!==11?a:(k%10>=2&&k%10<=4&&(k%100<10||k%100>=20)?b:c);
+ const hint=t=>{const p=t.split(" "),L=(t.match(/[a-z]/gi)||[]).length;return ["Сколько букв",(p.length>1?p.length+" "+pl(p.length,"слово","слова","слов")+", ":"")+L+" "+pl(L,"буква","буквы","букв")+", начинается на «"+t[0]+"»"]};
+ const ass=w=>{const o=w.as.find(a=>a[0]==="Образ")||w.as.find(a=>/Созвуч|Синоним/.test(a[0]))||w.as[0];return ["Ассоциация",o[0]+": "+o[1]]};
  const MK={
   en2ru:w=>ch(w,w.en,x=>x.ru,EN(w.en)),
   ru2en:w=>ch(w,w.ru,x=>x.en,RU(w.ru)),
   situ:w=>ch(w,w.sit,x=>x.en,RU(w.sit)),
   letters:w=>({type:"build",payload:{prompt:w.ru,words:w.en.split(""),join:"",cls:"l"},answer_spec:{accept:[w.en]},say:RU(w.ru)}),
   words:w=>({type:"build",payload:{prompt:w.ru,words:w.en.split(" ")},answer_spec:{accept:[w.en]},say:RU(w.ru)}),
-  type:w=>({type:"type_word",payload:{prompt:w.ru,placeholder:"по-английски",hints:[hint(w)]},answer_spec:{accept:[w.en]},say:RU(w.ru)}),
-  cloze:w=>({type:"type_word",payload:{prompt:w.ex.replace(/\[.+?\]/,"_____"),placeholder:"пропущенное слово",hints:[["Перевод",trS2(w)],hint({en:form(w)})]},answer_spec:{accept:[form(w)]},say:RU(trS2(w))}),
-  speak:w=>({type:"speak",payload:{prompt:"Скажите по-английски: «"+w.ru+"»"+(w.sit?" ("+w.sit+")":""),hints:[["Подсказка","начинается на «"+w.en[0]+"», слов: "+w.en.split(" ").length],["Показать фразу",w.en]]},answer_spec:{accept:[w.en]},say:RU(w.ru)})};
+  type:w=>({type:"type_word",payload:{prompt:w.ru,placeholder:"по-английски",hints:[hint(w.en),ass(w)]},answer_spec:{accept:[w.en]},say:RU(w.ru)}),
+  cloze:w=>({type:"type_word",payload:{prompt:w.ex.replace(/\[.+?\]/,"_____"),placeholder:"пропущенное слово",hints:[hint(form(w)),ass(w)]},answer_spec:{accept:[form(w)]},say:EN(w.ex.replace(/\[.+?\]/,", "))}),
+  speak:w=>({type:"speak",payload:{prompt:"Скажите по-английски: «"+w.ru+"»"+(w.sit?" ("+w.sit+")":""),hints:[hint(w.en),ass(w)]},answer_spec:{accept:[w.en]},say:RU(w.ru)})};
  const prac=(w,m)=>{const t=MK[m](w);t.feedback={right:"Верно! "+exs(w),wrong:exs(w)+" — "+trS2(w)};U[w.en]=U[w.en]||{kind:kind,title:w.en,data:{tr:w.ru}};
   return {id:++n,kind:"practice",units:[{id:w.en,role:"tests"}],blocks:[],tasks:[t]}};
  if(rv){cards=sh(W.flatMap(w=>ms.map(m=>prac(w,m[0]))));
@@ -348,6 +359,9 @@ var BLOCKS={
  text:function(p){return el('div','',p.text)},
  tip:function(p){return el('div','tip',p.text)},
  dialog:function(p){var d=el('div','scene');p.lines.forEach(function(l){var r=el('div');r.appendChild(el('b','',l[0]+':'));r.appendChild(document.createTextNode(l[1]));d.appendChild(r)});return d},
+ collocs:function(p){var d=el('div','colbox');d.appendChild(el('div','bt','Словосочетания'));p.items.forEach(function(c){var r=el('div','cl');r.appendChild(el('b','',c[0]));r.appendChild(document.createTextNode(' — '+c[1]));d.appendChild(r)});return d},
+ assoc:function(p){var d=el('div','assoc');d.appendChild(el('div','bt','Ассоциации'));p.items.forEach(function(a){var r=el('div','al');r.appendChild(el('b','',a[0]+' '));r.appendChild(document.createTextNode(a[1]));d.appendChild(r)});return d},
+ sentences:function(p){var d=el('div','sent');d.appendChild(el('div','bt','Примеры'));p.items.forEach(function(x){var r=el('div','sl',x[0]);if(x[1])r.appendChild(el('div','st',x[1]));d.appendChild(r)});return d},
  example_list:function(p){var u=el('ul','ex');p.items.forEach(function(t){u.appendChild(el('li','',t))});return u}
 };
 
@@ -487,7 +501,7 @@ TASKS.build={
  show:function(s){return s.accept[0]}
 };
 function hintBtns(box,hs){if(!hs||!hs.length)return;var r=el('div','hcol');
- hs.forEach(function(h){var x=el('button','hintb');x.type='button';x.appendChild(el('span','l','💡 '+h[0]));x.appendChild(el('span','r',h[0]+': '+h[1]));x.onclick=function(){x.classList.add('sh')};r.appendChild(x)});box.appendChild(r)}
+ hs.forEach(function(h){var x=el('button','hintb');x.type='button';x.appendChild(el('span','l','💡 '+h[0]));x.appendChild(el('span','r',h[1]));x.onclick=function(){x.classList.add('sh')};r.appendChild(x)});box.appendChild(r)}
 TASKS.type_word={
  render:function(t,box,submit){
   box.appendChild(el('div','q',t.payload.prompt));
@@ -582,7 +596,7 @@ function buzz(){tone([[330,0],[262,.14]],.07,'triangle')}
 
 /* ============ ДВИЖОК ленты ============ */
 var stage=document.getElementById('stage');
-var queue,i,ti,st,wrong,answered,AT=0,ansAt=0;
+var queue,i,ti,st,wrong,answered,AT=0,ansAt=0,repBtn=null;
 var UNITS0=UNITS,CUR={cards:CARDS};
 function reset(){queue=CUR.cards.map(function(c){return Object.assign({},c)});i=0;st={ok:0,bad:0,skip:0,prog:{}};for(var u in UNITS)st.prog[u]=0;draw()}
 function tts(t,l){try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.lang=l;u.rate=.95;speechSynthesis.speak(u)}catch(e){}}
@@ -609,9 +623,9 @@ function draw(){
   }
   ti=0;wrong=false;answered=false;
   var c=queue[i],card=el('div','card');card.id='card';
-  var tr=el('div','trow');tr.appendChild(el('span','tag'+(c.kind==='practice'?' p':''),c.kind==='lesson'?'Новое':'Тренировка'));var rpb=el('button','repb','🔊');rpb.id='rep';rpb.type='button';rpb.hidden=true;rpb.setAttribute('aria-label','Повторить озвучку');rpb.onclick=function(){if(lastSay)tts(lastSay.t,lastSay.l)};tr.appendChild(rpb);card.appendChild(tr);
+  card.appendChild(el('span','tag'+(c.kind==='practice'?' p':''),c.kind==='lesson'?'Новое':'Тренировка'));var rpb=el('button','repb','🔊');rpb.id='rep';rpb.type='button';rpb.hidden=true;rpb.setAttribute('aria-label','Повторить озвучку');rpb.onclick=function(){if(lastSay)tts(lastSay.t,lastSay.l)};repBtn=rpb;
   c.units.filter(function(x){return x.role==='teaches'}).forEach(function(x){
-    card.appendChild(el('div','item',UNITS[x.id].title));card.appendChild(el('div','tr',UNITS[x.id].data.tr))});
+    card.appendChild(el('div','item',UNITS[x.id].title+(UNITS[x.id].data.em?' '+UNITS[x.id].data.em:'')));card.appendChild(el('div','tr',UNITS[x.id].data.tr))});
   c.blocks.forEach(function(b){card.appendChild(BLOCKS[b.type](b.payload))});
   var box=el('div');box.id='task';box.className='dock';card.appendChild(box);
   stage.appendChild(card);drawJson();showTask();
@@ -627,6 +641,7 @@ function showTask(){
     var res=TASKS[t.type].check(a,t.answer_spec||{},t);
     if(mark)mark(res,t,extra);finish(res,t);
   });
+  if(repBtn)box.appendChild(repBtn);
   ['.q','.ans'].forEach(function(sl){var x=box.querySelector(sl);if(x){x.classList.add(sl==='.q'?'prompt':'top');box.parentNode.insertBefore(x,box)}});
   if(t.type!=='type_word'){document.getElementById('t2').classList.remove('kb');if(document.activeElement===kbp)kbp.blur()}
   sayTask(t);
@@ -638,9 +653,9 @@ function finish(res,t){
   var msg=res.ok?(fb.right||'Верно'):(t.type==='self_check'?'Вернёмся к этому позже':(res.score>0?'':'')+'Правильный ответ: '+T.show(t.answer_spec||{},t));
   var f=el('div','fb '+(res.ok?'ok':'bad'),msg);
   var extra=[res.note,!res.ok&&fb.wrong].filter(Boolean).join(' ');if(extra)f.appendChild(el('span','',extra));
-  if(!CFG.auto)f.appendChild(el('div','nx','Свайп вверх — дальше'));
+  if(!CFG.auto||!res.ok)f.appendChild(el('div','nx','Свайп вверх — дальше'));
   box.parentNode.insertBefore(f,box);ansAt=Date.now();head();
-  if(CFG.auto)AT=setTimeout(skip,2000);
+  if(CFG.auto&&res.ok)AT=setTimeout(skip,2000);
 }
 function advance(kind){
   var c=queue[i],card=document.getElementById('card');if(!card)return;
