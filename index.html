@@ -19,19 +19,17 @@ html,body{margin:0}
 #launcher .pick .e{font-size:32px;line-height:1}
 #launcher .pick b{display:block;font-size:21px;margin:8px 0 4px}
 #launcher .pick small{display:block;color:var(--mut);font-size:15px;line-height:1.45}
-#t1{--bg:#f3f6f4;--card:#fff;--ink:#1c2b26;--mut:#5d6f68;--line:#d5dfda;--acc:#1f7a5c;--accbg:#dff1ea;--ok:#1f7a5c;--okbg:#dff1ea;--bad:#b3341f;--badbg:#f8e1dc;
-box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){#t1{--bg:#14201c;--card:#1d2c26;--ink:#e6f0eb;--mut:#9db2a9;--line:#2f443b;--acc:#5fcfa5;--accbg:#22392f;--ok:#5fcfa5;--okbg:#22392f;--bad:#ff8f7a;--badbg:#3d2622}}
-#t1[data-theme="dark"]{--bg:#14201c;--card:#1d2c26;--ink:#e6f0eb;--mut:#9db2a9;--line:#2f443b;--acc:#5fcfa5;--accbg:#22392f;--ok:#5fcfa5;--okbg:#22392f;--bad:#ff8f7a;--badbg:#3d2622}
+#t1{--bg:#eef2f9;--card:#fff;--ink:#14213d;--mut:#5d6a85;--line:#d5dcea;--acc:#2f5bea;--accbg:#e3eaff;--ok:#16825a;--okbg:#d9f3e8;--bad:#c93a54;--badbg:#fbe1e6;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){#t1{--bg:#0e1526;--card:#172038;--ink:#e8edf9;--mut:#93a0bf;--line:#2a3554;--acc:#7c9bff;--accbg:#22305a;--ok:#4fd39a;--okbg:#143a2e;--bad:#ff7b93;--badbg:#45202b}}
 #t1{scroll-padding-top:env(safe-area-inset-top,0px)}
 #t1 *{box-sizing:border-box}
-#t1{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 Georgia,serif}
+#t1{margin:0;background:var(--bg);color:var(--ink);font:500 17px/1.5 "Manrope",system-ui,sans-serif}
 #t1 main{max-width:720px;margin:0 auto;padding:20px 16px 48px}
 #t1 h1{font-size:26px;margin:4px 0}
 #t1 .sub{color:var(--mut);margin:0 0 14px;font-size:15px}
 #t1 button,#t1 input{font-family:system-ui,sans-serif}
 #t1 button:focus-visible,#t1 input:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
-#t1 .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:12px}
+#t1 .card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px;margin-bottom:12px}
 #t1 .top{display:flex;gap:14px;align-items:center}
 #t1 .pic{font-size:52px;line-height:1;background:var(--accbg);border-radius:12px;padding:10px 12px}
 #t1 .w{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
@@ -52,8 +50,8 @@ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:en
 #t1 .qs{font-size:20px;margin:6px 0 4px}
 #t1 .hint{color:var(--mut);font:14px system-ui,sans-serif;margin:4px 0 12px}
 #t1 .opts{display:grid;gap:8px}
-#t1 .opt,#t1 .btn{font:600 16px system-ui,sans-serif;padding:12px 14px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;text-align:left}
-#t1 .btn{background:var(--acc);color:var(--bg);border-color:var(--acc);text-align:center}
+#t1 .opt,#t1 .btn{font:700 16px "Manrope",system-ui,sans-serif;padding:13px 14px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;text-align:left}
+#t1 .btn{background:var(--acc);color:#fff;border-color:var(--acc);text-align:center}
 #t1 .btn.sec{background:var(--card);color:var(--ink);border-color:var(--line)}
 #t1 .btn:disabled{opacity:.4;cursor:not-allowed}
 #t1 .opt:hover:not(:disabled){border-color:var(--acc)}
@@ -78,7 +76,7 @@ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:en
 #t1 .hid.sh{background:var(--accbg);color:var(--acc);font-weight:700}
 #t1 .seg{display:flex;gap:6px;margin-bottom:12px}
 #t1 .seg button{flex:1;font:600 15px system-ui,sans-serif;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
-#t1 .seg .on{background:var(--acc);color:var(--bg);border-color:var(--acc)}
+#t1 .seg .on{background:var(--acc);color:#fff;border-color:var(--acc)}
 #t1 .slot.wd{width:auto;min-width:36px;padding:0 8px;font-size:20px}
 #t1 .letters.wd button{width:auto;padding:0 12px;font-size:17px}
 #t1 .big{font-size:44px;font-weight:700;margin:4px 0}
@@ -148,6 +146,13 @@ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:en
 @media (prefers-reduced-motion:reduce){#t2 .card,#t2 .bar i{transition:none}}
 #t2 .backb{flex:none;border:0!important;background:none!important;color:var(--acc)!important;padding:4px 6px!important;font-size:14px;border-radius:8px}
 #t2{height:100dvh}
+#t2 .dock{margin:auto -20px -22px;padding:12px 20px 22px;position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;flex-direction:column;gap:12px;z-index:1}
+#t2 .q.prompt{margin-top:2px}
+#t2 .hrow{display:flex;gap:8px;flex-wrap:wrap}
+#t2 button.hintb{padding:7px 12px;font-size:14px;border-radius:99px;color:var(--mute)}
+#t2 .hint.sh{color:var(--ink);font-weight:700}
+#t2 .chip.l{min-width:42px;padding:9px 10px;font-size:20px}
+#t2 #kbp{position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;border:0;padding:0;pointer-events:none}
 </style>
 </head>
 <body>
@@ -160,8 +165,8 @@ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:en
 <div id="t1" hidden><main><button class="lnk" id="back1">← Выбор тренажёра</button><h1>Тренажёр слов</h1><div id="t1app"></div></main></div>
 <div id="t2" hidden><div id="app">
   <div class="top"><button class="backb" id="back2" aria-label="К выбору тренажёра">← Меню</button><span id="cnt"></span><div class="bar"><i id="prog"></i></div><span id="score"></span></div>
-  <div class="stage" id="stage"></div>
-  <div class="foot"><span>Свайп вверх = пропуск</span><div><button id="snd">Звук: вкл</button><button id="jsn">Данные</button><button id="skip">Пропустить</button></div></div>
+  <div class="stage" id="stage"></div><input id="kbp" aria-hidden="true" tabindex="-1" autocomplete="off" autocapitalize="off">
+  <div class="foot"><span>Свайп вверх = пропуск</span><div><button id="vox">Озвучка: вкл</button><button id="rep" aria-label="Повторить озвучку">🔊</button><button id="snd">Звук: вкл</button><button id="jsn">Данные</button><button id="skip">Пропустить</button></div></div>
 </div></div>
 <script>(function(){
 
@@ -195,7 +200,7 @@ const COL=[
 {type:"phrase",em:"👀",en:"pay attention",ru:"обращать внимание",def:"to listen or look carefully",defru:"внимательно слушать или смотреть",ex:"Please [pay] attention to the instructions.",exru:"Пожалуйста, [обращайте] внимание на инструкции.",sit:"Учитель просит класс внимательно послушать объяснение.",col:[["pay attention to details","обращать внимание на детали"],["pay no attention","не обращать внимания"]],as:[["Буквально","«платить вниманием»: внимание как деньги"],["Русский аналог","«уделять внимание»"],["Образ","монетки, которые вы кладёте на важный предмет"]]},
 {type:"phrase",em:"🤧",en:"catch a cold",ru:"простудиться",def:"to get a common illness with a runny nose",defru:"заболеть лёгкой простудой с насморком",ex:"I [caught] a cold after the rain.",exru:"Я [простудился] после дождя.",sit:"Вы промокли под дождём, а на следующий день у вас насморк.",col:[["have a cold","быть простуженным"],["catch the flu","заболеть гриппом"]],as:[["Буквально","«поймать простуду», как мяч"],["Русский аналог","«подхватить простуду»"],["Образ","человек в шарфе ловит летящий вирус-мячик"]]},
 {type:"phrase",em:"🍽️",en:"do the dishes",ru:"мыть посуду",def:"to wash plates, cups and forks after a meal",defru:"мыть тарелки, чашки и вилки после еды",ex:"I always [do] the dishes after dinner.",exru:"Я всегда [мою] посуду после ужина.",sit:"Вы поужинали, и на столе остались грязные тарелки.",col:[["do the laundry","стирать бельё"],["do the shopping","ходить за покупками"]],as:[["Буквально","«делать посуду»: с домашними делами говорят do"],["Русский аналог","«помыть посуду»"],["Образ","стопка тарелок и губка"]]},
-{type:"phrase",em:"❌",en:"make a mistake",ru:"совершить ошибку",def:"to do something wrong by accident",defru:"случайно сделать что-то неправильно",ex:"Everyone [makes] mistakes.",exru:"Все [совершают] ошибки.",sit:"Друг расстроился из-за ошибки, и вы его успокаиваете.",col:[["make a big mistake","совершить большую ошибку"],["by mistake","по ошибке"]],as:[["Буквально","«сделать ошибку»"],["Русский аналог","«допустить ошибку»"],["Образ","красный крестик в тетради"]]},
+{type:"phrase",em:"🙈",en:"make a mistake",ru:"совершить ошибку",def:"to do something wrong by accident",defru:"случайно сделать что-то неправильно",ex:"Everyone [makes] mistakes.",exru:"Все [совершают] ошибки.",sit:"Друг расстроился из-за ошибки, и вы его успокаиваете.",col:[["make a big mistake","совершить большую ошибку"],["by mistake","по ошибке"]],as:[["Буквально","«сделать ошибку»"],["Русский аналог","«допустить ошибку»"],["Образ","красный крестик в тетради"]]},
 {type:"phrase",em:"📱",en:"keep in touch",ru:"поддерживать связь",def:"to stay in contact with someone",defru:"оставаться на связи с кем-то",ex:"Let's [keep] in touch after the course.",exru:"Давайте [будем] на связи после курса.",sit:"Вы прощаетесь с новым знакомым после отпуска.",col:[["get in touch","связаться"],["lose touch","потерять связь"]],as:[["Буквально","«держать в касании»"],["Русский аналог","«не пропадай»"],["Образ","две руки тянутся друг к другу через экран телефона"]]},
 {type:"phrase",em:"🔍",en:"have a look",ru:"взглянуть",def:"to look at something for a short time",defru:"ненадолго посмотреть на что-то",ex:"Can I [have] a look at your phone?",exru:"Можно [взглянуть] на твой телефон?",sit:"Друг показывает новую игру, и вам интересно посмотреть.",col:[["take a look","взглянуть"],["have a look around","осмотреться"]],as:[["Буквально","«иметь взгляд»"],["Русский аналог","«бросить взгляд»"],["Образ","лупа над предметом"]]},
 {type:"phrase",em:"⏱️",en:"save time",ru:"экономить время",def:"to use less time to do something",defru:"потратить меньше времени на что-то",ex:"Cooking on Sunday [saves] time during the week.",exru:"Готовка в воскресенье [экономит] время в течение недели.",sit:"Вы советуете другу готовить еду заранее.",col:[["save money","экономить деньги"],["waste time","тратить время впустую"]],as:[["Буквально","«спасать время»"],["Русский аналог","«сэкономить время»"],["Образ","часы в спасательном круге"]]},
@@ -209,14 +214,8 @@ const norm=s=>s.toLowerCase().replace(/[’]/g,"'").replace(/[?.!,]/g,"").replac
 const R=document.getElementById("t1"),$=s=>R.querySelector(s),sh=a=>[...a].sort(()=>Math.random()-.5);
 const form=w=>(w.ex.match(/\[(.+?)\]/)||[])[1]||w.en;
 const sent=w=>w.ex.replace(/\[(.+?)\]/,"<b>$1</b>");
-const say=t=>{try{const u=new SpeechSynthesisUtterance(t);u.lang="en-US";speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}};
-let flow="learn",showCards=true,kind="word",MODES=MS.word,W=WORDS,sel=SELS.word,steps=[],si=0,score=0,total=0,wrong=[],busy=false;
+let flow="learn",showCards=true,kind="word",MODES=MS.word,W=WORDS,sel=SELS.word;
 const trS=w=>w.exru.replace(/\[(.+?)\]/,"$1");
-const hid=t=>`<span class="hid" tabindex="0" role="button" onclick="this.classList.add('sh')" onkeydown="if(event.key==='Enter')this.classList.add('sh')">${t}</span>`;
-const trH=w=>w.exru.replace(/\[(.+?)\]/,(_,t)=>hid(t));
-const spk=w=>`<button class="spk" data-say="${w.en}" onclick="t1.say(this.dataset.say)" aria-label="Произнести">🔊</button>`;
-const card=w=>`<div class="card"><div class="top"><div class="pic">${w.em}</div><div><div class="w"><span class="en">${w.en}</span>${spk(w)}</div><div class="ru">${w.ru}</div></div></div><p class="def">${w.def}<br><span class="tr">${w.defru}</span></p><p class="ex">${sent(w)}<br><span class="tr">${trS(w)}</span></p>${w.sit?`<p class="def"><b>Когда говорят:</b> ${w.sit}</p>`:""}<ul class="col">${w.col.map(c=>`<li><b>${c[0]}</b> — ${c[1]}</li>`).join("")}</ul><div class="as">${w.as.map(a=>`<div><span class="tag">${a[0]}</span>${a[1]}</div>`).join("")}</div></div>`;
-
 function menu(){
 const rv=flow==="review";
 $("#t1app").innerHTML=`<div class="seg"><button data-k="word" class="${kind==="word"?"on":""}">Слова</button><button data-k="phrase" class="${kind==="phrase"?"on":""}">Выражения</button><button data-k="colloc" class="${kind==="colloc"?"on":""}">Сочетания</button></div><div class="seg"><button data-f="learn" class="${rv?"":"on"}">Обучение</button><button data-f="review" class="${rv?"on":""}">Повторение</button></div><p class="sub">${rv?"Все "+W.length+({word:" слов",phrase:" выражений",colloc:" сочетаний"})[kind]+" сразу, в случайном порядке: задания вперемешку с обучающими карточками. Карточка показывает только русский перевод, английское слово нужно вспомнить. После карточки всегда идёт задание.":"Карточки идут парами: сначала знакомство с двумя словами, затем задания на них в случайном порядке, потом следующая пара."}</p><div class="card">${rv?`<label class="mrow"><input type="checkbox" id="sc"><span><b>Показывать обучающие карточки</b><br><small>Если выключить, будут только задания</small></span></label>`:""}<div class="row" style="margin:10px 0 0"><button class="btn sec" id="all">Включить все</button><button class="btn sec" id="no">Отключить все</button></div><div class="ml">${MODES.map(m=>`<label class="mrow"><input type="checkbox" value="${m[0]}"><span><b>${m[1]}</b><br><small>${m[2]}</small></span></label>`).join("")}</div><button class="btn" id="go" style="width:100%">Начать</button><p class="hint" id="wn"></p></div>`;
@@ -227,69 +226,39 @@ cb.forEach(c=>c.onchange=()=>{c.checked?sel.add(c.value):sel.delete(c.value);syn
 if(rv){$("#sc").checked=showCards;$("#sc").onchange=e=>showCards=e.target.checked}
 $("#all").onclick=()=>{MODES.forEach(m=>sel.add(m[0]));sync()};
 $("#no").onclick=()=>{sel.clear();sync()};
-$("#go").onclick=()=>{steps=rv?buildReview():build();si=0;score=0;total=0;wrong=[];run()};sync()}
+$("#go").onclick=()=>feed(rv);sync()}
 
-function build(){const st=[],ws=sh(W),n=ws.length/2,ms=MODES.filter(m=>sel.has(m[0]));
-for(let k=0;k<ws.length;k+=2){const p=ws.slice(k,k+2),g=`Обучение, пара ${k/2+1} из ${n}`;
-st.push({t:"s",p,g:g+": знакомство"});
-sh(ms.flatMap(m=>p.map(w=>({t:"q",m:m[0],w,g:g+": "+m[1]})))).forEach(x=>st.push(x))}
-return st}
 
-function buildReview(){const ms=MODES.filter(m=>sel.has(m[0]));
-const T=sh(W.flatMap(w=>ms.map(m=>({t:"q",m:m[0],w,g:"Повторение: "+m[1]}))));
-if(showCards){const pos=sh(T.map((_,i)=>i)).slice(0,W.length).sort((x,y)=>y-x);
-sh(W).forEach((w,k)=>T.splice(pos[k],0,{t:"r",w,g:"Повторение: карточка"}))}
-return T}
-
-function run(){busy=false;if(si>=steps.length)return result();const s=steps[si];
-const pr=`<div class="bar"><span>${s.g}</span><button class="lnk" onclick="t1.start()">В меню</button></div><div class="prog"><i style="width:${si/steps.length*100}%"></i></div>`;
-window.scrollTo(0,0);
-if(s.t==="s"){$("#t1app").innerHTML=pr+s.p.map(card).join("")+`<button class="btn" id="nx" style="width:100%">Перейти к заданиям</button>`;$("#nx").onclick=()=>{si++;run()};return}
-if(s.t==="r"){const w=s.w;$("#t1app").innerHTML=`<div id="rc">${pr}<div class="card"><p class="hint">Вспомните английский вариант</p><div class="q">${w.ru}</div></div><button class="btn" id="nx" style="width:100%">Дальше</button></div>`;
-$("#nx").onclick=()=>{$("#rc").innerHTML=pr+card(w)+`<button class="btn" id="n2" style="width:100%">Дальше</button>`;$("#n2").onclick=()=>{si++;run()};window.scrollTo(0,0)};return}
-$("#t1app").innerHTML=`<div class="card">${pr}<div id="q"></div></div>`;
-({en2ru:w=>choice(w,w.en,x=>x.ru,true),ru2en:w=>choice(w,w.ru,x=>x.en,false),letters,type:typing,cloze,speak,words:w=>letters(w,true),situ:w=>choice(w,w.sit,x=>x.en,false,"qs")})[s.m](s.w)}
-
-function choice(w,prompt,pick,sp,cls="q"){
-const o=sh([w,...sh(W.filter(x=>x!==w)).slice(0,3)]);
-$("#q").innerHTML=`<div class="${cls}">${prompt} ${sp?spk(w):""}</div><p class="hint">Выберите правильный вариант</p><div class="opts">${o.map((x,k)=>`<button class="opt" data-k="${k}">${pick(x)}</button>`).join("")}</div>`;
-R.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{if(busy)return;const ok=o[b.dataset.k]===w;
-R.querySelectorAll(".opt").forEach(c=>{if(o[c.dataset.k]===w)c.classList.add("ok");c.disabled=true});
-if(!ok)b.classList.add("bad");done(ok,w)})}
-
-function letters(w,wd){const U=wd?w.en.split(" "):w.en.split(""),L=sh(U),built=[],j=wd?" ":"";
-$("#q").innerHTML=`<div class="q">${w.ru}</div>${w.sit?`<p class="hint">${w.sit}</p>`:""}<p class="hint">${wd?"Соберите фразу из слов":"Соберите слово из букв"}</p><div class="slots" id="sl"></div><div class="letters${wd?" wd":""}" id="lt"></div><div class="row"><button class="btn sec" id="er">Стереть</button></div>`;
-const draw=()=>{$("#sl").innerHTML=U.map((_,k)=>`<div class="slot${wd?" wd":""}">${built[k]!==undefined?L[built[k]]:""}</div>`).join("");
-$("#lt").innerHTML=L.map((c,k)=>`<button ${built.includes(k)?"disabled":""} data-k="${k}">${c}</button>`).join("");
-R.querySelectorAll("#lt button").forEach(b=>b.onclick=()=>{if(busy)return;built.push(+b.dataset.k);draw();
-if(built.length===U.length)done(norm(built.map(k=>L[k]).join(j))===norm(w.en),w)})};
-$("#er").onclick=()=>{if(!busy){built.pop();draw()}};draw()}
-
-function typing(w){
-$("#q").innerHTML=`<div class="q">${w.ru}</div><p class="hint" id="h">Напишите по-английски без подсказок</p><input type="text" id="in" autocomplete="off" autocapitalize="off" spellcheck="false"><div class="row"><button class="btn" id="ck">Проверить</button><button class="btn sec" id="hn">Первая буква</button></div>`;
-const inp=$("#in");inp.focus();
-$("#hn").onclick=()=>{$("#h").textContent="Начинается на «"+w.en[0]+"», букв: "+w.en.length};
-const chk=()=>{if(!busy&&inp.value.trim())done(norm(inp.value)===norm(w.en),w)};
-$("#ck").onclick=chk;inp.onkeydown=e=>{if(e.key==="Enter")chk()}}
-
-function cloze(w){const f=form(w);
-$("#q").innerHTML=`<div class="qs">${w.ex.replace(/\[.+?\]/,"_____")}</div><p class="hint">${trH(w)}<br>Вставьте пропущенное слово в нужной форме. Нажмите на закрытое слово в переводе, если нужна подсказка. Букв: ${f.length}, начало: ${f[0]}…</p><input type="text" id="in" autocomplete="off" autocapitalize="off" spellcheck="false"><div class="row"><button class="btn" id="ck">Проверить</button></div>`;
-const inp=$("#in");inp.focus();
-const chk=()=>{if(!busy&&inp.value.trim())done(inp.value.trim().toLowerCase()===f,w)};
-$("#ck").onclick=chk;inp.onkeydown=e=>{if(e.key==="Enter")chk()}}
-
-function speak(w){const it=w.sit?[["Фраза",w.en],...w.col]:w.col;
-$("#q").innerHTML=`<div class="top"><div class="pic">${w.em}</div><div class="q">${w.ru}</div></div>${w.sit?`<p class="hint">${w.sit}</p>`:""}<p class="def">Скажите вслух по-английски ${w.sit?"фразу и её варианты":"каждое словосочетание"}. Потом нажмите на закрытую фразу, чтобы проверить себя.</p><ul class="col">${it.map(c=>w.sit&&c[0]==="Фраза"?`<li><b>Фраза</b> — ${hid(c[1])}</li>`:`<li>${c[1]} — ${hid(c[0])}</li>`).join("")}</ul><p class="hint" style="margin-top:12px">Получилось сказать всё?</p><div class="row"><button class="btn" id="y">Да</button><button class="btn sec" id="n">Ещё потренируюсь</button></div>`;
-$("#y").onclick=()=>{total++;score++;si++;run()};$("#n").onclick=()=>{total++;wrong.push({m:"speak",w});si++;run()}}
-
-function done(ok,w){busy=true;total++;if(ok)score++;else wrong.push({m:steps[si].m,w});
-$("#q").insertAdjacentHTML("beforeend",`<div class="fb ${ok?"ok":"bad"}">${w.em} ${ok?"Верно!":"Правильно: <b>"+(steps[si].m==="cloze"?form(w):w.en)+"</b>"}<br><em>${sent(w)}</em><br>${trS(w)}</div><div class="row"><button class="btn" id="nx">Дальше</button></div>`);
-$("#nx").focus();$("#nx").onclick=()=>{si++;run()}}
-
-function result(){const p=total?Math.round(score/total*100):0,ws=[...new Set(wrong.map(x=>x.w.en))];
-$("#t1app").innerHTML=`<div class="card"><p class="hint">Результат</p><div class="big">${score} из ${total}</div><p>${p>=90?"Отлично, слова сидят крепко.":p>=60?"Хорошо. Ошибки лучше повторить сразу.":"Пока сложно, и это нормально. Повторите знакомство со словами."}</p>${ws.length?`<p class="hint">Ошибки: ${ws.join(", ")}</p>`:""}<div class="row">${wrong.length?`<button class="btn" id="rw">Повторить ошибки</button>`:""}<button class="btn sec" onclick="t1.start()">В меню</button></div></div>`;
-if(wrong.length)$("#rw").onclick=()=>{steps=sh(wrong).map(x=>({t:"q",m:x.m,w:x.w,g:"Повторение ошибок"}));si=0;score=0;total=0;wrong=[];run()}}
-window.t1={start:menu,say:say};
+/* ===== Генератор карточек ленты из слов/выражений ===== */
+function feed(rv){
+ const ms=MODES.filter(m=>sel.has(m[0])),U={},ids=new Set();let cards=[],n=0;
+ const trS2=w=>w.exru.replace(/\[(.+?)\]/,"$1"),exs=w=>w.ex.replace(/\[(.+?)\]/,"$1");
+ const EN=l=>({l:"en-US",t:l}),RU=t=>({l:"ru-RU",t});
+ const lesson=w=>{U[w.en]={kind:kind,title:w.en,data:{tr:w.ru}};
+  const b=[{type:"text",payload:{text:w.em+" "+w.def+" — "+w.defru}},{type:"dialog",payload:{lines:[["•",exs(w)],["•",trS2(w)]]}}];
+  if(w.sit)b.push({type:"text",payload:{text:"Когда говорят: "+w.sit}});
+  b.push({type:"example_list",payload:{items:w.col.map(c=>c[0]+" — "+c[1])}});
+  b.push({type:"tip",payload:{text:w.as.map(a=>a[0]+": "+a[1]).join(" · ")}});
+  return {id:++n,kind:"lesson",units:[{id:w.en,role:"teaches"}],blocks:b,tasks:[{type:"ack",payload:{},say:EN(w.en)}]}};
+ const ch=(w,prompt,pick,say,cls)=>({type:"choice",payload:{prompt,options:sh([w,...sh(W.filter(x=>x!==w)).slice(0,3)]).map(pick)},answer_spec:{correct:pick(w)},say});
+ const hint=w=>["Подсказка","начинается на «"+w.en[0]+"», букв: "+w.en.length];
+ const MK={
+  en2ru:w=>ch(w,w.en,x=>x.ru,EN(w.en)),
+  ru2en:w=>ch(w,w.ru,x=>x.en,RU(w.ru)),
+  situ:w=>ch(w,w.sit,x=>x.en,RU(w.sit)),
+  letters:w=>({type:"build",payload:{prompt:w.ru,words:w.en.split(""),join:"",cls:"l"},answer_spec:{accept:[w.en]},say:RU(w.ru)}),
+  words:w=>({type:"build",payload:{prompt:w.ru,words:w.en.split(" ")},answer_spec:{accept:[w.en]},say:RU(w.ru)}),
+  type:w=>({type:"type_word",payload:{prompt:w.ru,placeholder:"по-английски",hints:[hint(w)]},answer_spec:{accept:[w.en]},say:RU(w.ru)}),
+  cloze:w=>({type:"type_word",payload:{prompt:w.ex.replace(/\[.+?\]/,"_____"),placeholder:"пропущенное слово",hints:[["Перевод",trS2(w)],hint({en:form(w)})]},answer_spec:{accept:[form(w)]},say:RU(trS2(w))}),
+  speak:w=>({type:"self_check",payload:{prompt:"Скажите по-английски: «"+w.ru+"»"+(w.sit?" ("+w.sit+")":""),reveal:w.en},say:RU(w.ru)})};
+ const prac=(w,m)=>{const t=MK[m](w);t.feedback={right:"Верно! "+exs(w),wrong:exs(w)+" — "+trS2(w)};U[w.en]=U[w.en]||{kind:kind,title:w.en,data:{tr:w.ru}};
+  return {id:++n,kind:"practice",units:[{id:w.en,role:"tests"}],blocks:[],tasks:[t]}};
+ if(rv){cards=sh(W.flatMap(w=>ms.map(m=>prac(w,m[0]))));
+  if(showCards)sh(W).forEach(w=>cards.splice(Math.floor(Math.random()*(cards.length+1)),0,lesson(w)))}
+ else{const ws=sh(W);for(let k=0;k<ws.length;k+=2){const p=ws.slice(k,k+2);p.forEach(w=>cards.push(lesson(w)));sh(ms.flatMap(m=>p.map(w=>prac(w,m[0])))).forEach(c=>cards.push(c))}}
+ window.feedStart({cards,units:U});
+}
+window.t1={start:menu};
 menu();
 })();</script>
 <script>(function(){
@@ -365,10 +334,8 @@ function rcKill(){
     setTimeout(fin,700);
   });
 }
-var stopMic=function(){rcKill()};
-function micButton(inp,hint,lang){
-  var b=el('button','mic');b.type='button';b.setAttribute('aria-label','Говорить');
-  b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg>';
+var stopMic=function(){rcKill();if(MIC&&MIC.cleanup)MIC.cleanup()};
+function micWeb(inp,hint,lang,b){
   if(!SR){b.disabled=true;b.title='Голосовой ввод не поддерживается в этом браузере';hint.textContent='Голосовой ввод здесь недоступен, печатайте ответ.';return b}
   var KB=' Можно продиктовать через значок микрофона на клавиатуре телефона.';
   var on=false,busy=false,after=null,userStop=false,retried=false;
@@ -405,6 +372,45 @@ function micButton(inp,hint,lang){
   return b;
 }
 
+
+/* ===== Vosk (WebAssembly, работает в браузере) ===== */
+// Для полностью офлайн-работы положите модель рядом с index.html и укажите её путь: VOSK_MODEL='vosk-model-small-en-us-0.15.tar.gz'
+var VOSK_MODEL='https://ccoreilly.github.io/vosk-browser/models/vosk-model-small-en-us-0.15.tar.gz',VK=null,MIC=null;
+function vkLoad(){
+  if(VK)return VK;
+  VK=new Promise(function(res,rej){var sc=document.createElement('script');sc.src='https://cdn.jsdelivr.net/npm/vosk-browser@0.0.5/dist/vosk.js';
+    sc.onload=function(){window.Vosk.createModel(VOSK_MODEL).then(res,rej)};sc.onerror=function(){rej(new Error('cdn'))};document.head.appendChild(sc)});
+  VK.catch(function(){VK=null});return VK}
+function micButton(inp,hint,lang){
+  var b=el('button','mic');b.type='button';b.setAttribute('aria-label','Говорить');MIC=b;
+  b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg>';
+  var ctx,stream,node,rec,on=false,busy=false;
+  function ui(v){on=v;b.classList.toggle('on',v)}
+  function cleanup(){try{node&&node.disconnect()}catch(e){}try{stream&&stream.getTracks().forEach(function(t){t.stop()})}catch(e){}try{ctx&&ctx.close()}catch(e){}try{rec&&rec.remove()}catch(e){}ctx=stream=node=rec=null;busy=false;ui(false)}
+  b.cleanup=cleanup;
+  b.stop=function(cb){if(!rec){cleanup();if(cb)cb();return}
+    try{rec.retrieveFinalResult()}catch(e){}
+    setTimeout(function(){cleanup();hint.textContent='';if(cb)cb()},350)};
+  b.onclick=function(){
+    if(on){b.stop();return}
+    if(busy)return;busy=true;try{speechSynthesis.cancel()}catch(e){}
+    hint.textContent=VK?'Запускаю микрофон...':'Загружаю распознавание речи (один раз, около 40 МБ)...';
+    vkLoad().then(function(model){
+      return navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true}}).then(function(s){
+        stream=s;ctx=new (window.AudioContext||window.webkitAudioContext)();
+        rec=new model.KaldiRecognizer(ctx.sampleRate);var fin='';
+        rec.on('result',function(m){var t=m.result&&m.result.text;if(t){fin=(fin+' '+t).trim();inp.value=fin}});
+        rec.on('partialresult',function(m){var p=m.result&&m.result.partial;if(p)inp.value=(fin+' '+p).trim()});
+        node=ctx.createScriptProcessor(4096,1,1);
+        node.onaudioprocess=function(e){try{rec.acceptWaveform(e.inputBuffer)}catch(x){}};
+        ctx.createMediaStreamSource(stream).connect(node);node.connect(ctx.destination);
+        busy=false;ui(true);hint.textContent='Слушаю... нажмите ещё раз, чтобы закончить'});
+    }).catch(function(err){cleanup();
+      if(err&&err.name==='NotAllowedError'){hint.textContent='Нет доступа к микрофону. Разрешите его в браузере.';return}
+      if(SR){hint.textContent='Офлайн-распознавание недоступно, включаю распознавание браузера.';micWeb(inp,hint,lang,b);b.onclick()}
+      else{b.disabled=true;hint.textContent='Голосовой ввод недоступен, печатайте ответ.'}});
+  };
+  return b}
 var TASKS={};
 TASKS.choice={
  render:function(t,box,submit){
@@ -421,14 +427,16 @@ TASKS.build={
  render:function(t,box,submit){
   box.appendChild(el('div','q',t.payload.prompt));
   var ans=el('div','ans'),pool=el('div','pool'),locked=false,chk=el('button','main','Проверить');
-  shuffle(t.payload.words).forEach(function(w){var b=el('button','chip',w);b.onclick=function(){if(!locked)(b.parentNode===pool?ans:pool).appendChild(b)};pool.appendChild(b)});
-  chk.onclick=function(){submit([].map.call(ans.children,function(x){return x.textContent}).join(' '))};
+  shuffle(t.payload.words).forEach(function(w){var b=el('button','chip'+(t.payload.cls?' '+t.payload.cls:''),w);b.onclick=function(){if(!locked)(b.parentNode===pool?ans:pool).appendChild(b)};pool.appendChild(b)});
+  chk.onclick=function(){submit([].map.call(ans.children,function(x){return x.textContent}).join(t.payload.join!=null?t.payload.join:' '))};
   box.appendChild(ans);box.appendChild(pool);box.appendChild(chk);
   return function(res){locked=true;chk.remove();ans.style.borderColor=res.ok?'var(--ok)':'var(--bad)';[].forEach.call(box.querySelectorAll('.chip'),function(x){x.disabled=true})};
  },
  check:function(a,s){var ok=s.accept.some(function(x){return norm(x)===norm(a)});return {ok:ok,score:ok?1:0}},
  show:function(s){return s.accept[0]}
 };
+function hintBtns(box,hs){if(!hs||!hs.length)return;var r=el('div','hrow');
+ hs.forEach(function(h){var x=el('button','hintb','💡 '+h[0]);x.type='button';x.onclick=function(){x.replaceWith(el('div','hint sh',h[0]+': '+h[1]))};r.appendChild(x)});box.appendChild(r)}
 TASKS.type_word={
  render:function(t,box,submit){
   box.appendChild(el('div','q',t.payload.prompt));
@@ -438,7 +446,10 @@ TASKS.type_word={
   b.onclick=function(){if(mic.stop)mic.stop(go);else go()};
   inp.onkeydown=function(e){if(e.key==='Enter')b.onclick()};
   row.appendChild(inp);row.appendChild(mic);
+  hintBtns(box,t.payload.hints);
   box.appendChild(row);box.appendChild(hint);box.appendChild(b);
+  box.addEventListener('mousedown',function(e){if(e.target.closest('button')&&document.activeElement===inp)e.preventDefault()});
+  inp.focus({preventScroll:true});
   return function(res){inp.disabled=true;mic.disabled=true;b.remove();hint.textContent='';inp.style.borderColor=res.ok?'var(--ok)':'var(--bad)'};
  },
  check:function(a,s){var n=norm(a);
@@ -466,10 +477,13 @@ TASKS.match={
   return {ok:sc===1,score:sc,note:sc<1?'Верно '+c+' из '+t.payload.pairs.length:''}},
  show:function(s,t){return t.payload.pairs.map(function(p){return p.join(' = ')}).join('; ')}
 };
+TASKS.ack={
+ render:function(t,box,submit){var b=el('button','main','Понятно, дальше');b.onclick=function(){submit('ok',b)};box.appendChild(b)},
+ check:function(){return {ok:true,score:1}},show:function(){return ''}};
 TASKS.self_check={
  render:function(t,box,submit){
   box.appendChild(el('div','q',t.payload.prompt));var o=el('div','opts');
-  var y=el('button','','Сказал(а), получилось'),n=el('button','','Не получилось, повторю позже');
+  hintBtns(box,t.payload.reveal?[['Показать ответ',t.payload.reveal]]:null);var y=el('button','','Сказал(а), получилось'),n=el('button','','Не получилось, повторю позже');
   y.onclick=function(){submit('yes',y)};n.onclick=function(){submit('no',n)};o.appendChild(y);o.appendChild(n);box.appendChild(o);
   return function(res,t,chosen){y.disabled=n.disabled=true;chosen.className=res.ok?'ok':'bad'};
  },
@@ -497,7 +511,13 @@ function chime(){
 /* ============ ДВИЖОК ленты ============ */
 var stage=document.getElementById('stage');
 var queue,i,ti,st,wrong,answered,showJson=false;
-function reset(){queue=CARDS.map(function(c){return Object.assign({},c)});i=0;st={ok:0,bad:0,skip:0,prog:{}};for(var u in UNITS)st.prog[u]=0;draw()}
+var UNITS0=UNITS,CUR={cards:CARDS},voiceOn=true;
+function reset(){queue=CUR.cards.map(function(c){return Object.assign({},c)});i=0;st={ok:0,bad:0,skip:0,prog:{}};for(var u in UNITS)st.prog[u]=0;draw()}
+function tts(t,l){try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.lang=l;u.rate=.95;speechSynthesis.speak(u)}catch(e){}}
+var lastSay=null;
+function sayTask(t){var c=queue[i],x=t.say||(c&&c.kind==='lesson'&&UNITS[c.units[0].id]&&{t:UNITS[c.units[0].id].title,l:'en-US'});lastSay=x||null;if(voiceOn&&x)tts(x.t,x.l)}
+var kbp=document.getElementById('kbp');
+function warmKb(){var c=queue[i],nx=(c&&ti<c.tasks.length-1)?c.tasks[ti+1]:(queue[i+1]&&queue[i+1].tasks[0]);if(nx&&nx.type==='type_word'){try{kbp.focus({preventScroll:true})}catch(e){}}}
 function head(){
   document.getElementById('cnt').textContent=Math.min(i+1,queue.length)+' / '+queue.length;
   document.getElementById('prog').style.width=(i/queue.length*100)+'%';
@@ -521,18 +541,22 @@ function draw(){
   c.units.filter(function(x){return x.role==='teaches'}).forEach(function(x){
     card.appendChild(el('div','item',UNITS[x.id].title));card.appendChild(el('div','tr',UNITS[x.id].data.tr))});
   c.blocks.forEach(function(b){card.appendChild(BLOCKS[b.type](b.payload))});
-  var box=el('div');box.id='task';box.style.cssText='display:flex;flex-direction:column;gap:12px';card.appendChild(box);
+  var box=el('div');box.id='task';box.className='dock';card.appendChild(box);
   stage.appendChild(card);drawJson();showTask();
 }
 function drawJson(){var o=document.getElementById('json');if(o)o.remove();
   if(showJson&&queue[i]){var p=el('pre','json',JSON.stringify(queue[i],null,1));p.id='json';stage.appendChild(p)}}
 function showTask(){
   var c=queue[i],t=c.tasks[ti],box=document.getElementById('task');box.innerHTML='';answered=false;
+  [].forEach.call(box.parentNode.querySelectorAll('.q.prompt'),function(x){x.remove()});
   var mark=TASKS[t.type].render(t,box,function(a,extra){
     if(answered)return;answered=true;
+    if(t.type==='ack'){warmKb();if(ti>=c.tasks.length-1)advance('done');else{ti++;showTask()}return}
     var res=TASKS[t.type].check(a,t.answer_spec||{},t);
     if(mark)mark(res,t,extra);finish(res,t);
   });
+  var q=box.querySelector('.q');if(q){q.classList.add('prompt');box.parentNode.insertBefore(q,box)}
+  sayTask(t);
 }
 function finish(res,t){
   var c=queue[i],box=document.getElementById('task'),T=TASKS[t.type],fb=t.feedback||{};
@@ -543,7 +567,7 @@ function finish(res,t){
   var extra=[res.note,!res.ok&&fb.wrong].filter(Boolean).join(' ');if(extra)f.appendChild(el('span','',extra));
   box.appendChild(f);
   var last=ti>=c.tasks.length-1,b=el('button','main',last?'Дальше':'Следующее задание');
-  b.onclick=function(){if(last)advance('done');else{ti++;showTask()}};box.appendChild(b);head();b.focus();
+  b.onclick=function(){warmKb();if(last)advance('done');else{ti++;showTask()}};box.appendChild(b);head();b.focus();
 }
 function advance(kind){
   var c=queue[i],card=document.getElementById('card');if(!card)return;
@@ -552,7 +576,7 @@ function advance(kind){
   stopMic();card.classList.add('out');var j=document.getElementById('json');if(j)j.remove();
   setTimeout(function(){i++;draw()},220);
 }
-function skip(){if(i<queue.length)advance(answered?'done':'skip')}
+function skip(){if(i<queue.length&&(warmKb(),1))advance(answered?'done':'skip')}
 
 /* свайп вверх = пропуск (работает, даже если жест начат на кнопке) */
 var sy=null,s0=0,ov=0,moved=false;
@@ -574,20 +598,25 @@ function endSwipe(){
 window.addEventListener('pointerup',endSwipe);
 window.addEventListener('pointercancel',endSwipe);
 document.getElementById('skip').onclick=skip;
+document.getElementById('vox').onclick=function(){voiceOn=!voiceOn;this.textContent=voiceOn?'Озвучка: вкл':'Озвучка: выкл';if(!voiceOn)try{speechSynthesis.cancel()}catch(e){}};
+document.getElementById('rep').onclick=function(){if(lastSay)tts(lastSay.t,lastSay.l)};
+document.addEventListener('keydown',function(e){if(e.key==='Enter'&&answered&&!document.getElementById('t2').hidden){var m=document.querySelector('#task button.main');if(m){e.preventDefault();m.click()}}});
+if(window.visualViewport){var T2=document.getElementById('t2'),vv=window.visualViewport;function fit(){if(!T2.hidden)T2.style.height=vv.height+'px'}vv.addEventListener('resize',fit);vv.addEventListener('scroll',fit)}
 document.getElementById('snd').onclick=function(){soundOn=!soundOn;this.textContent=soundOn?'Звук: вкл':'Звук: выкл';if(soundOn)chime()};
 document.getElementById('jsn').onclick=function(){showJson=!showJson;drawJson()};
 document.addEventListener('keydown',function(e){if(e.key==='ArrowUp'&&!document.getElementById('t2').hidden&&document.activeElement.tagName!=='INPUT')skip()});
-window.t2={start:reset,stop:function(){stopMic()}};
+window.t2={start:function(o){if(o){CUR=o;UNITS=o.units}else{CUR={cards:CARDS};UNITS=UNITS0}reset();var c=queue[0];if(c&&c.tasks[0].type==='type_word')try{kbp.focus({preventScroll:true})}catch(e){}},stop:function(){stopMic();try{speechSynthesis.cancel()}catch(e){}}};
 reset();
 })();</script>
 <script>(function(){
-var L=document.getElementById('launcher'),A=document.getElementById('t1'),B=document.getElementById('t2');
-function show(w){L.hidden=w!=='l';A.hidden=w!=='1';B.hidden=w!=='2';window.scrollTo(0,0)}
+var L=document.getElementById('launcher'),A=document.getElementById('t1'),B=document.getElementById('t2'),back='l';
+function show(w){L.hidden=w!=='l';A.hidden=w!=='1';B.hidden=w!=='2';if(w!=='2')B.style.height='';window.scrollTo(0,0)}
 function home(){try{t2.stop()}catch(e){}try{speechSynthesis.cancel()}catch(e){}show('l')}
+window.feedStart=function(o){back='1';show('2');t2.start(o)};
 document.getElementById('pick1').onclick=function(){show('1');t1.start()};
-document.getElementById('pick2').onclick=function(){show('2');t2.start()};
+document.getElementById('pick2').onclick=function(){back='l';show('2');t2.start()};
 document.getElementById('back1').onclick=home;
-document.getElementById('back2').onclick=home;
+document.getElementById('back2').onclick=function(){try{t2.stop()}catch(e){}show(back)};
 })();</script>
 </body>
 </html>
