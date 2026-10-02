@@ -210,6 +210,13 @@ html,body{margin:0}
 #t2 .toast.info{background:var(--acc-t);color:var(--acc);border-color:var(--acc)}
 #t2 .toast button{border:0;background:none;color:inherit;padding:0 2px;font-size:16px;line-height:1;border-radius:6px}
 #launcher .lbk{background:none;border:0;color:var(--acc);font:700 15px "Manrope",system-ui,sans-serif;padding:4px 0;cursor:pointer}
+#t2 .card>*{flex-shrink:0}
+#t2 button.hintb{min-height:calc(2.9em + 20px);align-items:center}
+#t2 .hintb>span{align-self:center}
+#t2 .row button.main{flex:none;width:auto;padding:0 16px;font-size:15px;border-radius:14px}
+@keyframes spk{0%{box-shadow:0 4px 14px rgba(0,0,0,.28),0 0 0 0 var(--acc)}100%{box-shadow:0 4px 14px rgba(0,0,0,.28),0 0 0 14px transparent}}
+#t2 .fab.sp{background:var(--acc-t);border-color:var(--acc);animation:spk .9s ease-out infinite}
+@media (prefers-reduced-motion:reduce){#t2 .fab.sp{animation:none}}
 </style>
 </head>
 <body>
@@ -242,16 +249,16 @@ html,body{margin:0}
 <script>(function(){
 
 const WORDS=[
-{em:"🏆",en:"achieve",ru:"достигать",def:"to succeed in doing something good, usually after hard work",defru:"добиться чего-то хорошего, обычно после тяжёлой работы",ex:"She worked hard to [achieve] her goal.",exru:"Она много работала, чтобы [достичь] своей цели.",col:[["achieve a goal","достичь цели"],["achieve success","добиться успеха"],["achieve results","получить результаты"]],as:[["Созвучие","«ачивка» в играх — награда за достижение"],["Образ","альпинист с флагом на вершине"],["Синоним","reach, succeed"]]},
+{em:"🏆",en:"achieve",ru:"достигать",def:"to succeed in doing something good, usually after hard work",defru:"добиться чего-то хорошего, обычно после тяжёлой работы",ex:"She worked hard to [achieve] her goal.",exru:"Она много работала, чтобы [достичь] своей цели.",col:[["achieve a goal","достичь цели"],["achieve success","добиться успеха"],["achieve results","получить результаты"]],as:[["Созвучие","«ачивка» в играх — значок за победу над боссом"],["Образ","альпинист с флагом на вершине"],["Синоним","reach, succeed"]]},
 {em:"🚧",en:"avoid",ru:"избегать",def:"to stay away from something or not let it happen",defru:"держаться подальше от чего-то или не допустить этого",ex:"I try to [avoid] sugar in the evening.",exru:"Я стараюсь [избегать] сахара вечером.",col:[["avoid problems","избегать проблем"],["avoid mistakes","избегать ошибок"],["avoid traffic","объехать пробки"]],as:[["Созвучие","«эвойд» — «обойду» стороной"],["Образ","человек обходит большую лужу"],["Антоним","face — столкнуться лицом к лицу"]]},
 {em:"📈",en:"improve",ru:"улучшать",def:"to make something better",defru:"сделать что-то лучше",ex:"I want to [improve] my English this year.",exru:"Я хочу [улучшить] свой английский в этом году.",col:[["improve your skills","улучшить навыки"],["improve your health","улучшить здоровье"],["improve quickly","быстро улучшаться"]],as:[["Созвучие","«импрув» — «в прок»: всё идёт на пользу"],["Образ","график, который идёт вверх"],["Синоним / антоним","get better / get worse"]]},
 {em:"💡",en:"suggest",ru:"предлагать",def:"to give an idea for someone to think about",defru:"предложить идею, над которой другой человек может подумать",ex:"Can you [suggest] a good restaurant?",exru:"Можете [посоветовать] хороший ресторан?",col:[["suggest an idea","предложить идею"],["suggest a solution","предложить решение"],["I suggest that…","я предлагаю, чтобы…"]],as:[["Созвучие","«саджест» — подсказки в поисковой строке"],["Образ","человек с лампочкой над головой"],["Синоним","recommend, propose"]]},
-{em:"🤹",en:"manage",ru:"справляться, суметь",def:"to succeed in doing something difficult",defru:"суметь сделать что-то трудное",ex:"I [managed] to finish the project on time.",exru:"Мне [удалось] закончить проект вовремя.",col:[["manage to do","суметь сделать"],["manage a team","управлять командой"],["manage stress","справляться со стрессом"]],as:[["Созвучие","«менеджер» — тот, кто со всем справляется"],["Образ","жонглёр с десятком шаров"],["Синоним","cope, succeed in"]]},
-{em:"📋",en:"require",ru:"требовать, нуждаться",def:"to need something, or to make something necessary",defru:"нуждаться в чём-то или делать что-то необходимым",ex:"This job [requires] a lot of patience.",exru:"Эта работа [требует] много терпения.",col:[["require time","требовать времени"],["require attention","требовать внимания"],["require experience","требовать опыта"]],as:[["Созвучие","«реквизит» — без него спектакль не сыграть"],["Образ","список требований в вакансии"],["Синоним","need"]]},
+{em:"🤹",en:"manage",ru:"справляться, суметь",def:"to succeed in doing something difficult",defru:"суметь сделать что-то трудное",ex:"I [managed] to finish the project on time.",exru:"Мне [удалось] закончить проект вовремя.",col:[["manage to do","суметь сделать"],["manage a team","управлять командой"],["manage stress","справляться со стрессом"]],as:[["Созвучие","«менеджер» — тот, кто всем заправляет и всё успевает"],["Образ","жонглёр с десятком шаров"],["Синоним","cope, succeed in"]]},
+{em:"📋",en:"require",ru:"требовать, нуждаться",def:"to need something, or to make something necessary",defru:"нуждаться в чём-то или делать что-то необходимым",ex:"This job [requires] a lot of patience.",exru:"Эта работа [требует] много терпения.",col:[["require time","требовать времени"],["require attention","требовать внимания"],["require experience","требовать опыта"]],as:[["Созвучие","«реквизит» — без него спектакль не сыграть"],["Образ","длинный список пунктов в вакансии: опыт, знания, документы"],["Синоним","need"]]},
 {em:"🚪",en:"opportunity",ru:"возможность",def:"a chance to do something good",defru:"шанс сделать что-то хорошее",ex:"Living abroad is a great [opportunity] to learn.",exru:"Жизнь за границей — отличная [возможность] учиться.",col:[["a great opportunity","отличная возможность"],["miss an opportunity","упустить возможность"],["have the opportunity to","иметь возможность"]],as:[["Созвучие","«оппортунист» — тот, кто ловит случай"],["Образ","приоткрытая дверь со светом"],["Синоним","chance"]]},
-{em:"💪",en:"effort",ru:"усилие",def:"the energy you use to do something",defru:"энергия, которую вы тратите, чтобы что-то сделать",ex:"It takes a lot of [effort] to learn a language.",exru:"Чтобы выучить язык, нужно много [усилий].",col:[["make an effort","постараться"],["put effort into","вкладывать усилия в"],["a waste of effort","напрасные усилия"]],as:[["Созвучие","effort → effect: из усилия рождается эффект"],["Образ","человек толкает камень в гору"],["Синоним","hard work"]]},
-{em:"🌳",en:"environment",ru:"окружающая среда, обстановка",def:"the place and conditions around you",defru:"место и условия вокруг вас",ex:"I work better in a quiet [environment].",exru:"Я лучше работаю в тихой [обстановке].",col:[["work environment","рабочая обстановка"],["protect the environment","защищать природу"],["a friendly environment","дружелюбная атмосфера"]],as:[["Созвучие","«инвайронмент» — «вокруг», как в environs"],["Образ","лес или комната вокруг вас"],["Синоним","surroundings"]]},
-{em:"📬",en:"receive",ru:"получать",def:"to get something that someone gives or sends",defru:"получить то, что кто-то даёт или присылает",ex:"I [received] your message this morning.",exru:"Я [получил] ваше сообщение сегодня утром.",col:[["receive a letter","получить письмо"],["receive an email","получить e-mail"],["receive a gift","получить подарок"]],as:[["Созвучие","«ресивер» — приёмник, он получает сигнал"],["Образ","почтовый ящик с письмом"],["Антоним","send — отправлять"]]}
+{em:"💪",en:"effort",ru:"усилие",def:"the energy you use to do something",defru:"энергия, которую вы тратите, чтобы что-то сделать",ex:"It takes a lot of [effort] to learn a language.",exru:"Чтобы выучить язык, нужно много [усилий].",col:[["make an effort","постараться"],["put effort into","вкладывать усилия в"],["a waste of effort","напрасные усилия"]],as:[["Созвучие","созвучно «эффект»: результат рождается из стараний"],["Образ","человек толкает камень в гору"],["Синоним","hard work"]]},
+{em:"🌳",en:"environment",ru:"окружающая среда, обстановка",def:"the place and conditions around you",defru:"место и условия вокруг вас",ex:"I work better in a quiet [environment].",exru:"Я лучше работаю в тихой [обстановке].",col:[["work environment","рабочая обстановка"],["protect the environment","защищать природу"],["a friendly environment","дружелюбная атмосфера"]],as:[["Созвучие","«ин-вайро-мент» → «и вокруг мы»: всё, что вокруг нас"],["Образ","лес или комната вокруг вас"],["Синоним","surroundings"]]},
+{em:"📬",en:"receive",ru:"получать",def:"to get something that someone gives or sends",defru:"получить то, что кто-то даёт или присылает",ex:"I [received] your message this morning.",exru:"Я [получил] ваше сообщение сегодня утром.",col:[["receive a letter","получить письмо"],["receive an email","получить e-mail"],["receive a gift","получить подарок"]],as:[["Созвучие","«ресивер» — приёмник сигнала у радио"],["Образ","почтовый ящик с письмом"],["Антоним","send — отправлять"]]}
 ];
 const PHR=[
 {type:"phrase",em:"⏰",en:"I'm running late",ru:"я опаздываю",def:"I will arrive later than planned",defru:"я приду позже, чем планировалось",ex:"Sorry, I'm [running] late.",exru:"Извини, я [опаздываю].",sit:"Вы стоите в пробке и пишете другу, что задержитесь.",col:[["I'll be a bit late","я немного опоздаю"],["Sorry I'm late","простите за опоздание"]],as:[["Буквально","«бегу с опозданием»: бежите, но не успеваете"],["Русский аналог","«опаздываю»"],["Образ","человек бежит к автобусу и смотрит на часы"]]},
@@ -311,18 +318,21 @@ function feed(rv){
   if(w.sit)b.push({type:"situation",payload:{text:w.sit}});
   b.push({type:"collocs",payload:{items:w.col}},{type:"assoc",payload:{items:w.as}});
   return {id:++n,kind:"lesson",units:[{id:w.en,role:"teaches"}],blocks:b,tasks:[{type:"ack",payload:{},say:EN(w.en)}]}};
- const ass=w=>["Ассоциация","",w.as];
- const ch=(w,prompt,pick,say,orig)=>{const os=sh([w,...sh(DATA[w.k].filter(x=>x!==w)).slice(0,3)]),fl={};os.forEach(x=>fl[pick(x)]=orig(x));return {type:"choice",payload:{prompt,options:os.map(pick),flip:fl,hints:[ass(w)]},answer_spec:{correct:pick(w)},say}};
+ const STOP=new Set(["если","тебе","меня","этого","чтобы","себя","свой","своей"]);
+ const stems=t=>(t.toLowerCase().match(/[a-zа-яё']+/g)||[]).filter(x=>x.length>3&&!STOP.has(x)).map(x=>x.slice(0,5));
+ const leaks=(txt,ans)=>{const l=txt.toLowerCase();return stems(ans).some(x=>l.includes(x))};
+ const ass=(w,ans)=>w.as.filter(a=>!leaks(a[1],ans));
+ const ch=(w,prompt,pick,say,orig)=>{const os=sh([w,...sh(DATA[w.k].filter(x=>x!==w)).slice(0,3)]),fl={};os.forEach(x=>fl[pick(x)]=orig(x));return {type:"choice",payload:{prompt,options:os.map(pick),flip:fl,hints:ass(w,pick===undefined?"":pick(w)+" "+(pick(w)===w.ru?"":w.en))},answer_spec:{correct:pick(w)},say}};
  const pl=(k,a,b,c)=>k%10===1&&k%100!==11?a:(k%10>=2&&k%10<=4&&(k%100<10||k%100>=20)?b:c);
  const hint=t=>{const p=t.split(" "),L=(t.match(/[a-zа-яё]/gi)||[]).length;return ["Сколько букв",(p.length>1?p.length+" "+pl(p.length,"слово","слова","слов")+", ":"")+L+" "+pl(L,"буква","буквы","букв")+", начинается на «"+t[0]+"»"]};
  const MK={
   en2ru:w=>ch(w,w.en,x=>x.ru,EN(w.en),x=>x.en),
   ru2en:w=>ch(w,w.ru,x=>x.en,RU(w.ru),x=>x.ru),
   situ:w=>ch(w,"Ситуация: "+w.sit+"\n\nВыберите фразу, которую уместно сказать:",x=>x.en,RU(w.sit),x=>x.ru),
-  build:w=>{const one=!/\s/.test(w.en.trim());return {type:"build",payload:Object.assign({prompt:w.ru,words:one?w.en.split(""):w.en.split(" "),hints:[ass(w)]},one?{join:"",cls:"l"}:{}),answer_spec:{accept:[w.en]},say:RU(w.ru)}},
-  type:w=>({type:"type_word",payload:{prompt:w.ru,placeholder:"по-английски",hints:[hint(w.en),ass(w)]},answer_spec:{accept:[w.en]},say:RU(w.ru)}),
-  cloze:w=>({type:"type_word",payload:{prompt:w.ex.replace(/\[.+?\]/,"_____"),placeholder:"пропущенное слово",hints:[hint(form(w)),ass(w)]},answer_spec:{accept:[form(w)]},say:{l:"en-US",gap:[w.ex.slice(0,w.ex.indexOf("[")).trim(),w.ex.slice(w.ex.indexOf("]")+1).trim()]}}),
-  speak:w=>({type:"speak",payload:{prompt:"Скажите по-английски: «"+w.ru+"»"+(w.sit?" ("+w.sit+")":""),hints:[hint(w.en),ass(w)]},answer_spec:{accept:[w.en]},say:RU(w.ru)})};
+  build:w=>{const one=!/\s/.test(w.en.trim());return {type:"build",payload:Object.assign({prompt:w.ru,words:one?w.en.split(""):w.en.split(" "),hints:ass(w,w.en)},one?{join:"",cls:"l"}:{}),answer_spec:{accept:[w.en]},say:RU(w.ru)}},
+  type:w=>({type:"type_word",payload:{prompt:w.ru,placeholder:"по-английски",hints:[hint(w.en)].concat(ass(w,w.en))},answer_spec:{accept:[w.en]},say:RU(w.ru)}),
+  cloze:w=>({type:"type_word",payload:{prompt:w.ex.replace(/\[.+?\]/,"_____"),placeholder:"пропущенное слово",hints:[hint(form(w))].concat(ass(w,w.en+" "+form(w)))},answer_spec:{accept:[form(w)]},say:{l:"en-US",gap:[w.ex.slice(0,w.ex.indexOf("[")).trim(),w.ex.slice(w.ex.indexOf("]")+1).trim()]}}),
+  speak:w=>({type:"speak",payload:{prompt:"Скажите по-английски: «"+w.ru+"»"+(w.sit?" ("+w.sit+")":""),hints:[hint(w.en)].concat(ass(w,w.en))},answer_spec:{accept:[w.en]},say:RU(w.ru)})};
  const prac=(w,m)=>{const t=MK[m](w);t.feedback={right:"Верно! "+exs(w),wrong:exs(w)+" — "+trS2(w)};U[w.en]=U[w.en]||{kind:w.k,title:w.en,data:{tr:w.ru}};
   return {id:++n,kind:"practice",units:[{id:w.en,role:"tests"}],blocks:[],tasks:[t]}};
  if(rv){cards=sh(W.flatMap(w=>ms.filter(m=>ok(m,w)).map(m=>prac(w,m[0]))));
@@ -508,21 +518,21 @@ TASKS.build={
  check:function(a,s){var ok=s.accept.some(function(x){return norm(x)===norm(a)});return {ok:ok,score:ok?1:0}},
  show:function(s){return s.accept[0]}
 };
-function assocHint(items){
- var wrap=el('div','ahint'),b=el('button','hintb'),n=items.length,k=Math.floor(Math.random()*n),open=false;
- var l=el('span','l','💡 Ассоциация'),r=el('span','r');b.type='button';b.appendChild(l);b.appendChild(r);
+function flipHint(items){
+ var wrap=el('div','ahint'),b=el('button','hintb'),n=items.length,k=items[0][0]==='Сколько букв'?0:Math.floor(Math.random()*n),open=false;
+ var l=el('span','l','💡 Подсказка'),r=el('span','r');b.type='button';b.appendChild(l);b.appendChild(r);
  var nx=el('button','nxt','🔄');nx.type='button';nx.hidden=true;nx.setAttribute('aria-label','Следующая подсказка');
  function paint(){var a=items[k];r.innerHTML='';r.appendChild(el('b','',a[0]+': '));r.appendChild(document.createTextNode(a[1]));b.classList.remove('flp');void b.offsetWidth;b.classList.add('flp')}
- b.onclick=function(){if(open)return;open=true;paint();b.classList.add('sh');nx.hidden=n<2};
- nx.onclick=function(){k=(k+1)%n;paint()};
+ function next(){k=(k+1)%n;paint()}
+ b.onclick=function(){if(!open){open=true;paint();b.classList.add('sh');nx.hidden=n<2}else if(n>1)next()};
+ nx.onclick=next;
  wrap.appendChild(b);wrap.appendChild(nx);return wrap}
-function hintBtns(box,hs){if(!hs||!hs.length)return;var r=el('div','hcol');
-  hs.forEach(function(h){if(h[2]){r.appendChild(assocHint(h[2]));return}var x=el('button','hintb');x.type='button';x.appendChild(el('span','l','💡 '+h[0]));x.appendChild(el('span','r',h[1]));x.onclick=function(){x.classList.add('sh')};r.appendChild(x)});box.appendChild(r)}
+function hintBtns(box,items){if(!items||!items.length)return;box.appendChild(flipHint(items))}
 TASKS.type_word={
  render:function(t,box,submit){
   box.appendChild(el('div','q',t.payload.prompt));
   var inp=el('input','txt');inp.placeholder=t.payload.placeholder||'';inp.autocomplete='off';inp.autocapitalize='off';inp.spellcheck=false;
-  var b=el('button','main','Проверить'),hint=mkHint(),mic=micButton(inp,hint,'en-US');mic.classList.add('big');mic.setAttribute('aria-label','Удерживайте и говорите');
+  var b=el('button','main','Проверить'),hint=mkHint(),row=el('div','row'),mic=micButton(inp,hint,'en-US');mic.classList.add('big');mic.setAttribute('aria-label','Удерживайте и говорите');
   var voiced=false,auto=false,acc=t.answer_spec.accept;
   function hit(v){for(var k=0;k<acc.length;k++)if(said(v,acc[k]))return acc[k];return null}
   function go(){var v=inp.value.trim();if(v)submit(voiced&&hit(v)||v)}
@@ -532,10 +542,10 @@ TASKS.type_word={
   b.onclick=function(){if(mic.stop)mic.stop(go);else go()};
   inp.onkeydown=function(e){if(e.key==='Enter')b.onclick()};
   hintBtns(box,t.payload.hints);
-  box.appendChild(inp);box.appendChild(mic);box.appendChild(b);
+  row.appendChild(inp);row.appendChild(b);box.appendChild(row);box.appendChild(mic);
   box.addEventListener('mousedown',function(e){if(e.target.closest('button')&&(document.activeElement===inp||document.activeElement.id==='kbp'))e.preventDefault()});
   if(CFG.kb)inp.focus({preventScroll:true});
-  return function(res){var kp=document.getElementById('kbp');if(kp&&document.activeElement===inp)try{kp.focus({preventScroll:true})}catch(e){}inp.disabled=true;mic.disabled=true;b.style.visibility='hidden';hint.textContent='';inp.style.borderColor=res.ok?'var(--ok)':'var(--bad)'};
+  return function(res){try{inp.blur();var kp=document.getElementById('kbp');if(kp)kp.blur()}catch(e){}inp.disabled=true;mic.disabled=true;b.style.visibility='hidden';hint.textContent='';inp.style.borderColor=res.ok?'var(--ok)':'var(--bad)'};
  },
  check:function(a,s){var n=norm(a);
   if(s.accept.some(function(x){return norm(x)===n}))return {ok:true,score:1};
@@ -613,6 +623,7 @@ function playSay(x){if(!x)return;if(x.gap)ttsGap(x.gap[0],x.gap[1],x.l);else tts
 var lastSay=null;
 function sayTask(t){var c=queue[i],x=t.say||(c&&c.kind==='lesson'&&UNITS[c.units[0].id]&&{t:UNITS[c.units[0].id].title,l:'en-US'});lastSay=x||null;var rb=document.getElementById('rep');if(rb)rb.hidden=!lastSay;if(CFG.voice&&x)playSay(x)}
 var kbp=document.getElementById('kbp');
+setInterval(function(){var f=document.getElementById('rep');if(!f||f.hidden)return;var v=false;try{v=speechSynthesis.speaking||speechSynthesis.pending}catch(e){}f.classList.toggle('sp',!!v)},120);
 function warmKb(){var c=queue[i],nx=(c&&ti<c.tasks.length-1)?c.tasks[ti+1]:(queue[i+1]&&queue[i+1].tasks[0]);if(CFG.kb&&nx&&nx.type==='type_word'){try{kbp.focus({preventScroll:true})}catch(e){}}}
 function head(){
   document.getElementById('cnt').textContent=Math.min(i+1,queue.length)+' / '+queue.length;
@@ -643,14 +654,14 @@ function drawJson(){var o=document.getElementById('json');if(o)o.remove();
   if(CFG.data&&queue[i]){var p=el('pre','json',JSON.stringify(queue[i],null,1));p.id='json';stage.appendChild(p)}}
 function showTask(){
   var c=queue[i],t=c.tasks[ti],box=document.getElementById('task');box.innerHTML='';answered=false;toastHide();
-  [].forEach.call(box.parentNode.querySelectorAll('.q.prompt,.ans.top,.fb'),function(x){x.remove()});
+  [].forEach.call(box.parentNode.querySelectorAll('.q.prompt,.ans.top,.heard,.fb'),function(x){x.remove()});
   var mark=TASKS[t.type].render(t,box,function(a,extra){
     if(answered)return;answered=true;
     if(t.type==='ack'){warmKb();if(ti>=c.tasks.length-1)advance('done');else{ti++;showTask()}return}
     var res=TASKS[t.type].check(a,t.answer_spec||{},t);
     if(mark)mark(res,t,extra);finish(res,t);
   });
-  ['.q','.ans'].forEach(function(sl){var x=box.querySelector(sl);if(x){x.classList.add(sl==='.q'?'prompt':'top');box.parentNode.insertBefore(x,box)}});
+  ['.q','.ans','.heard'].forEach(function(sl){var x=box.querySelector(sl);if(x){if(sl!=='.heard')x.classList.add(sl==='.q'?'prompt':'top');box.parentNode.insertBefore(x,box)}});
   if(t.type!=='type_word'){document.getElementById('t2').classList.remove('kb');if(document.activeElement===kbp)kbp.blur()}
   sayTask(t);
   clearTimeout(MT);var mm=box._mic;
