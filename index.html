@@ -138,7 +138,7 @@ html,body{margin:0}
 #t2 button.bad{background:var(--bad-t);border-color:var(--bad)}
 #t2 button.sel{border-color:var(--acc);background:var(--acc-t)}
 #t2 button.main{background:var(--acc);border-color:var(--acc);color:#fff;text-align:center}
-#t2 button:disabled{cursor:default}
+#t2 button:disabled,#t2 button.dn{cursor:default}
 #t2 .ans,#t2 .pool{display:flex;flex-wrap:wrap;gap:8px}
 #t2 .ans{min-height:56px;border-bottom:2px solid var(--line);padding-bottom:10px;align-content:flex-start}
 #t2 .chip{padding:8px 12px;border-radius:12px;text-align:center}
@@ -152,7 +152,7 @@ html,body{margin:0}
 @keyframes pulse{50%{box-shadow:0 0 0 6px var(--bad-t)}}
 #t2 .hint{font-size:14px;color:var(--mute)}
 @media (prefers-reduced-motion:reduce){#t2 .mic.on{animation:none}}
-#t2 .fb{border-radius:14px;padding:12px 14px;font-size:16px}
+#t2 .fb{border-radius:14px;padding:12px 14px;font-size:16px;white-space:pre-line}
 #t2 .fb.ok{background:var(--ok-t);color:var(--ok)}
 #t2 .fb.bad{background:var(--bad-t);color:var(--bad)}
 #t2 .fb span{display:block;color:var(--ink);font-weight:500;margin-top:4px}
@@ -217,6 +217,7 @@ html,body{margin:0}
 @keyframes spk{0%{box-shadow:0 4px 14px rgba(0,0,0,.28),0 0 0 0 var(--acc)}100%{box-shadow:0 4px 14px rgba(0,0,0,.28),0 0 0 14px transparent}}
 #t2 .fab.sp{background:var(--acc-t);border-color:var(--acc);animation:spk .9s ease-out infinite}
 @media (prefers-reduced-motion:reduce){#t2 .fab.sp{animation:none}}
+#t2 .q .qs{font-size:16px;font-weight:500;color:var(--mute);margin-top:8px}
 </style>
 </head>
 <body>
@@ -331,9 +332,9 @@ function feed(rv){
   situ:w=>ch(w,"Ситуация: "+w.sit+"\n\nВыберите фразу, которую уместно сказать:",x=>x.en,RU(w.sit),x=>x.ru),
   build:w=>{const one=!/\s/.test(w.en.trim());return {type:"build",payload:Object.assign({prompt:w.ru,words:one?w.en.split(""):w.en.split(" "),hints:ass(w,w.en)},one?{join:"",cls:"l"}:{}),answer_spec:{accept:[w.en]},say:RU(w.ru)}},
   type:w=>({type:"type_word",payload:{prompt:w.ru,placeholder:"по-английски",hints:[hint(w.en)].concat(ass(w,w.en))},answer_spec:{accept:[w.en]},say:RU(w.ru)}),
-  cloze:w=>({type:"type_word",payload:{prompt:w.ex.replace(/\[.+?\]/,"_____"),placeholder:"пропущенное слово",hints:[hint(form(w))].concat(ass(w,w.en+" "+form(w)))},answer_spec:{accept:[form(w)]},say:{l:"en-US",gap:[w.ex.slice(0,w.ex.indexOf("[")).trim(),w.ex.slice(w.ex.indexOf("]")+1).trim()]}}),
+  cloze:w=>({type:"type_word",payload:{prompt:w.ex.replace(/\[.+?\]/,"_____"),sub:trS2(w),placeholder:"пропущенное слово",hints:[hint(form(w))].concat(ass(w,w.en+" "+form(w)))},answer_spec:{accept:[form(w)]},say:{l:"en-US",gap:[w.ex.slice(0,w.ex.indexOf("[")).trim(),w.ex.slice(w.ex.indexOf("]")+1).trim()]}}),
   speak:w=>({type:"speak",payload:{prompt:"Скажите по-английски: «"+w.ru+"»"+(w.sit?" ("+w.sit+")":""),hints:[hint(w.en)].concat(ass(w,w.en))},answer_spec:{accept:[w.en]},say:RU(w.ru)})};
- const prac=(w,m)=>{const t=MK[m](w);t.feedback={right:"Верно! "+exs(w),wrong:exs(w)+" — "+trS2(w)};U[w.en]=U[w.en]||{kind:w.k,title:w.en,data:{tr:w.ru}};
+ const prac=(w,m)=>{const t=MK[m](w);t.feedback={right:"Верно!\n"+exs(w),wrong:exs(w)+" — "+trS2(w)};U[w.en]=U[w.en]||{kind:w.k,title:w.en,data:{tr:w.ru}};
   return {id:++n,kind:"practice",units:[{id:w.en,role:"tests"}],blocks:[],tasks:[t]}};
  if(rv){cards=sh(W.flatMap(w=>ms.filter(m=>ok(m,w)).map(m=>prac(w,m[0]))));
   if(showCards)sh(W).forEach(w=>cards.splice(Math.floor(Math.random()*(cards.length+1)),0,lesson(w)))}
@@ -495,8 +496,12 @@ TASKS.choice={
   box.appendChild(el('div','q',t.payload.prompt));hintBtns(box,t.payload.hints);var o=el('div','opts');
   shuffle(t.payload.options).forEach(function(v){var b=el('button','',v);b.onclick=function(){submit(v,b)};o.appendChild(b)});
   box.appendChild(o);
-  return function(res,t,chosen){[].forEach.call(o.children,function(x){x.disabled=true;if(x.textContent===t.answer_spec.correct)x.className='ok'});if(!res.ok&&chosen)chosen.className='bad';
-   var fl=t.payload.flip;if(fl)[].forEach.call(o.children,function(x,k){var a=x.textContent;x.classList.add('fp');x.textContent='';var w=el('span','fl');w.style.animationDelay=(k*.3)+'s';w.appendChild(el('span','f1',a));w.appendChild(el('span','f2',fl[a]||''));x.appendChild(w)})};
+  return function(res,t,chosen){[].forEach.call(o.children,function(x){x.classList.add('dn');if(x.textContent===t.answer_spec.correct)x.className='ok dn'});if(!res.ok&&chosen)chosen.className='bad dn';
+   var fl=t.payload.flip;if(fl)[].forEach.call(o.children,function(x,k){var a=x.textContent;x.classList.add('fp');x.textContent='';var w=el('span','fl');w.appendChild(el('span','f1',a));w.appendChild(el('span','f2',fl[a]||''));x.appendChild(w);
+    x.onclick=function(){var cs=getComputedStyle(w).transform,back;
+     if(w.dataset.m!=null)back=w.dataset.m==='1';else{var m=/matrix3d\((.+)\)/.exec(cs);back=m?parseFloat(m[1].split(',')[5])<0:false}
+     w.style.animation='none';w.style.transition='none';w.style.transform=back?'rotateX(180deg)':'rotateX(0deg)';void w.offsetWidth;
+     w.style.transition='transform .45s ease';w.style.transform=back?'rotateX(0deg)':'rotateX(180deg)';w.dataset.m=back?'0':'1'}})};
  },
  check:function(a,s){return {ok:a===s.correct,score:a===s.correct?1:0}},
  show:function(s){return s.correct}
@@ -530,7 +535,7 @@ function flipHint(items){
 function hintBtns(box,items){if(!items||!items.length)return;box.appendChild(flipHint(items))}
 TASKS.type_word={
  render:function(t,box,submit){
-  box.appendChild(el('div','q',t.payload.prompt));
+  var qd=el('div','q',t.payload.prompt);if(t.payload.sub)qd.appendChild(el('div','qs',t.payload.sub));box.appendChild(qd);
   var inp=el('input','txt');inp.placeholder=t.payload.placeholder||'';inp.autocomplete='off';inp.autocapitalize='off';inp.spellcheck=false;
   var b=el('button','main','Проверить'),hint=mkHint(),row=el('div','row'),mic=micButton(inp,hint,'en-US');mic.classList.add('big');mic.setAttribute('aria-label','Удерживайте и говорите');
   var voiced=false,auto=false,acc=t.answer_spec.accept;
@@ -590,10 +595,10 @@ function tone(list,vol,type){
       g.gain.setValueAtTime(0.0001,s);g.gain.exponentialRampToValueAtTime(vol,s+0.03);g.gain.exponentialRampToValueAtTime(0.0001,s+0.35);
       o.start(s);o.stop(s+0.4)})});
 }
-function beep(){run(function(C){var t=C.currentTime+.02,o=C.createOscillator(),g=C.createGain();o.type='sine';
-  o.frequency.setValueAtTime(520,t);o.frequency.exponentialRampToValueAtTime(840,t+.14);
-  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.22,t+.03);g.gain.exponentialRampToValueAtTime(.0001,t+.3);
-  o.connect(g);g.connect(C.destination);o.start(t);o.stop(t+.32)})}
+function beep(d){d=d||1;run(function(C){var t=C.currentTime+.02,o=C.createOscillator(),g=C.createGain();o.type='sine';
+  o.frequency.setValueAtTime(520,t);o.frequency.exponentialRampToValueAtTime(840,t+.14*d);
+  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.22,t+.03*d);g.gain.exponentialRampToValueAtTime(.0001,t+.3*d);
+  o.connect(g);g.connect(C.destination);o.start(t);o.stop(t+.32*d)})}
 function chime(){tone([[659.25,0],[783.99,.09],[1046.5,.18]],.2)}
 function buzz(){tone([[330,0],[262,.14]],.07,'triangle')}
 
@@ -605,20 +610,20 @@ function reset(){queue=CUR.cards.map(function(c){return Object.assign({},c)});i=
 var VOICES=[],vcache={};
 function loadV(){try{VOICES=speechSynthesis.getVoices()||[];vcache={}}catch(e){}}
 loadV();try{speechSynthesis.onvoiceschanged=loadV}catch(e){}
+document.addEventListener('pointerdown',function w(){document.removeEventListener('pointerdown',w);try{var u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}catch(e){}},{once:true});
 function pickV(l){if(vcache[l]!==undefined)return vcache[l];var pre=l.slice(0,2),best=null,bs=-99;
   VOICES.forEach(function(v){if(String(v.lang).replace('_','-').slice(0,2).toLowerCase()!==pre)return;var n=v.name,sc=0;
     if(/premium|enhanced|neural|natural/i.test(n))sc+=6;
     if(/samantha|ava|allison|susan|evan|zoe|serena|karen|daniel|aria|jenny|guy|google|milena|yuri|katya|svetlana|dmitry|alena/i.test(n))sc+=3;
     if(l==='en-US'&&/en[-_]US/i.test(v.lang))sc+=2;
     if(/espeak|fred|albert|zarvox|bad news|bells|boing|bubbles|cellos|deranged|good news|hysterical|junior|organ|ralph|trinoids|whisper|wobble|superstar|jester|grandma|grandpa|reed|rocko|shelley|flo|sandy|eddy/i.test(n))sc-=10;
-    if(v.localService)sc+=1;
+    sc+=v.localService?8:-8;
     if(sc>bs){bs=sc;best=v}});
   if(VOICES.length)vcache[l]=best;return best}
 function mkU(t,l){var u=new SpeechSynthesisUtterance(t);u.lang=l;var v=pickV(l);if(v)u.voice=v;u.rate=.9;u.pitch=1;return u}
-function tts(t,l){try{speechSynthesis.cancel();speechSynthesis.speak(mkU(t,l))}catch(e){}}
-function ttsGap(a,b,l){try{speechSynthesis.cancel();var u1=mkU(a,l),u2=mkU(b,l),d=false;
-  function nx(){if(d)return;d=true;beep();setTimeout(function(){try{speechSynthesis.speak(u2)}catch(e){}},380)}
-  u1.onend=nx;u1.onerror=nx;speechSynthesis.speak(u1)}catch(e){}}
+function stopTts(){try{if(speechSynthesis.speaking||speechSynthesis.pending)speechSynthesis.cancel()}catch(e){}}
+function tts(t,l){try{stopTts();speechSynthesis.speak(mkU(t,l))}catch(e){}}
+function ttsGap(a,b,l){try{stopTts();var u1=mkU(a,l),u2=mkU(b,l);u1.onend=function(){beep(.4)};speechSynthesis.speak(u1);speechSynthesis.speak(u2)}catch(e){}}
 function playSay(x){if(!x)return;if(x.gap)ttsGap(x.gap[0],x.gap[1],x.l);else tts(x.t,x.l)}
 var lastSay=null;
 function sayTask(t){var c=queue[i],x=t.say||(c&&c.kind==='lesson'&&UNITS[c.units[0].id]&&{t:UNITS[c.units[0].id].title,l:'en-US'});lastSay=x||null;var rb=document.getElementById('rep');if(rb)rb.hidden=!lastSay;if(CFG.voice&&x)playSay(x)}
