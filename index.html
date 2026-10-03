@@ -413,120 +413,75 @@ function toast(m,info){var e=document.getElementById('toast');document.getElemen
 document.getElementById('toastx').onclick=toastHide;
 var TOASTRE=/^(Нет доступа|Ошибка|Не удалось|Микрофон не запустился|Запись прервана|Речь не|Загружаю|Офлайн|Голосовой ввод|Не то)/;
 function mkHint(){var v='';return {get textContent(){return v},set textContent(x){v=String(x);if(TOASTRE.test(v))toast(v,/^Загружаю/.test(v))},appendChild:function(){}}}
-/* ===== Голосовой ввод (Web Speech API) ===== */
-// Правила: одна живая сессия; пауза между сессиями (Chrome на телефоне освобождает микрофон не сразу); журнал событий для диагностики.
-var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-var RC={rec:null,tm:null,lastEnd:0,log:[]};
-function rcLog(e){RC.log.push(e);if(RC.log.length>16)RC.log.shift()}
-function rcKill(){
-  return new Promise(function(res){
-    clearTimeout(RC.tm);
-    var r=RC.rec;RC.rec=null;if(!r){res();return}
-    rcLog('kill');
-    var done=false;function fin(){if(!done){done=true;RC.lastEnd=Date.now();audioMode('play');res()}}
-    r.onstart=r.onresult=r.onerror=null;r.onend=fin;
-    try{r.abort()}catch(e){fin()}
-    setTimeout(fin,700);
-  });
-}
-var stopMic=function(){rcKill();if(MIC&&MIC.cleanup)MIC.cleanup()};
-function micWeb(inp,hint,lang,b){
-  if(!SR){b.disabled=true;b.title='Голосовой ввод не поддерживается в этом браузере';hint.textContent='Голосовой ввод здесь недоступен, печатайте ответ.';return b}
-  var KB=' Можно продиктовать через значок микрофона на клавиатуре телефона.';
-  var on=false,busy=false,after=null,userStop=false,retried=false;
-  function ui(v){on=v;b.classList.toggle('on',v)}
-  function say(t){hint.textContent=t}
-  function start(){
-    if(busy)return;busy=true;say('Запускаю микрофон...');
-    var guard=setTimeout(function(){if(busy){busy=false;say('Микрофон не запустился, нажмите ещё раз.'+KB,1);rcKill()}},5000);
-    rcKill().then(function(){var w=Math.max(150,900-(Date.now()-RC.lastEnd));return new Promise(function(r){setTimeout(r,w)})}).then(function(){
-      var rec=new SR();RC.rec=rec;var got=false,bad=false,t0=Date.now();
-      rec.lang=lang||'en-US';rec.interimResults=true;rec.continuous=false;rec.maxAlternatives=1;
-      ['audiostart','soundstart','speechstart','speechend','soundend','audioend'].forEach(function(n){rec['on'+n]=function(){rcLog(n);if(b.level){if(n==='speechstart'||n==='soundstart')b.level(.6);else if(n==='speechend'||n==='soundend'||n==='audioend')b.level(0)}}});
-      rec.onstart=function(){rcLog('start');clearTimeout(guard);busy=false;ui(true);say('Слушаю... нажмите ещё раз, чтобы закончить');
-        RC.tm=setTimeout(function(){b.stop()},10000)};
-      rec.onresult=function(e){if(b.disabled)return;rcLog('result');got=true;var t='';for(var k=0;k<e.results.length;k++)t+=e.results[k][0].transcript;inp.value=t.trim();if(b.recog)b.recog();if(b.onpartial)b.onpartial(inp.value)};
-      rec.onerror=function(e){rcLog('error:'+e.error);clearTimeout(guard);busy=false;bad=true;
-        if(e.error==='aborted'){if(!got)say('Запись прервана браузером (aborted). Нажмите на микрофон ещё раз.'+KB,1);return}
-        say((e.error==='not-allowed'||e.error==='service-not-allowed')?'Нет доступа к микрофону. Разрешите его в браузере или печатайте ответ.':e.error==='no-speech'?'Речь не услышана, попробуйте ещё раз.':'Ошибка распознавания: '+e.error+(e.message?' ('+e.message+')':'')+'.'+KB,e.error!=='no-speech'&&e.error!=='not-allowed')};
-      rec.onend=function(){audioMode('play');rcLog('end');clearTimeout(guard);clearTimeout(RC.tm);busy=false;RC.lastEnd=Date.now();if(RC.rec===rec)RC.rec=null;ui(false);
-        if(!got&&!bad&&!userStop&&!retried&&Date.now()-t0<1500){retried=true;rcLog('retry');start();return}
-        if(hint.textContent.indexOf('Слушаю')===0||hint.textContent.indexOf('Запускаю')===0)say('');
-        if(!got&&!bad&&!userStop)say('Речь не распозналась. Попробуйте ещё раз.'+KB,1);
-        if(after){var f=after;after=null;f()}else if(got&&b.onfinal)b.onfinal()};
-      audioMode('record');try{rec.start()}catch(err){clearTimeout(guard);busy=false;ui(false);say('Не удалось начать запись: '+err.name+'.'+KB,1)}
-    });
-  }
-  // stop(cb): останавливает запись, ждёт последний текст и вызывает cb (с запасным выходом, если конец не пришёл)
-  b.stop=function(cb){
-    userStop=true;
-    if(on&&RC.rec){after=cb||null;try{RC.rec.stop()}catch(e){}
-      setTimeout(function(){if(after){var f=after;after=null;rcKill().then(f)}},1500);
-    }else if(cb)cb()};
-  b.onclick=function(){if(on){b.stop();return}userStop=false;retried=false;RC.log=[];start()};
-  return b;
-}
-
-
-/* ===== Vosk (WebAssembly, работает в браузере) ===== */
-// Для полностью офлайн-работы положите модель рядом с index.html и укажите её путь: VOSK_MODEL='vosk-model-small-en-us-0.15.tar.gz'
-var VOSK_MODEL='https://ccoreilly.github.io/vosk-browser/models/vosk-model-small-en-us-0.15.tar.gz',VK=null,MIC=null;
-function vkLoad(){
-  if(VK)return VK;
-  VK=new Promise(function(res,rej){var sc=document.createElement('script');sc.src='https://cdn.jsdelivr.net/npm/vosk-browser@0.0.5/dist/vosk.js';
-    sc.onload=function(){window.Vosk.createModel(VOSK_MODEL).then(res,rej)};sc.onerror=function(){rej(new Error('cdn'))};document.head.appendChild(sc)});
-  VK.catch(function(){VK=null});return VK}
+/* ===== Голосовой ввод: только встроенное распознавание браузера (Web Speech API) ===== */
+// Без загрузок и без собственной обработки звука: микрофоном управляет браузер. Одна живая сессия, новый объект на каждый запуск.
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition,MIC=null;
+var KBHINT=' Можно продиктовать через значок микрофона на клавиатуре телефона.';
+function stopMic(){if(MIC&&MIC.halt)MIC.halt()}
+document.addEventListener('visibilitychange',function(){if(document.hidden)stopMic()});
 function micButton(inp,hint,lang){
   var b=el('button','mic');b.type='button';b.setAttribute('aria-label','Нажмите и говорите');MIC=b;
   b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg>';
-  var ctx,stream,node,rec,on=false,busy=false,held=false,webT=null,auto=false,tmA=0,rgT=0;
-  var lv=el('span','lv'),bars=[];for(var q=0;q<13;q++){var bi=el('i');lv.appendChild(bi);bars.push(bi)}b.appendChild(lv);
+  var lv=el('span','lv'),bars=[],rgT=0;for(var q=0;q<13;q++){var bi=el('i');lv.appendChild(bi);bars.push(bi)}b.appendChild(lv);
   b.level=function(v){bars.forEach(function(x,k){x.style.height=(4+(v?v*44*(1-Math.abs(k-6)/8)*(.7+Math.random()*.3):0))+'px'})};
   b.recog=function(){b.classList.add('rg');clearTimeout(rgT);rgT=setTimeout(function(){b.classList.remove('rg')},700)};
-  function ui(v){on=v;b.classList.toggle('on',v)}
-  function setv(v){if(b.disabled)return;inp.value=v;b.recog();if(b.onpartial)b.onpartial(v)}
-  function cleanup(){try{node&&node.disconnect()}catch(e){}try{stream&&stream.getTracks().forEach(function(t){t.stop()})}catch(e){}try{rec&&rec.remove()}catch(e){}ctx=stream=node=rec=null;busy=false;ui(false);b.level(0);audioMode('play')}
-  b.cleanup=cleanup;
-  b.halt=function(){held=false;auto=false;clearTimeout(tmA);if(webT){b.stop(function(){});return}cleanup();hint.textContent=''};
-  b.auto=function(){if(on||busy||b.disabled)return;held=true;auto=true;begin(true)};
-  b.stop=function(cb){if(!rec){cleanup();if(cb)cb();return}
-    try{rec.retrieveFinalResult()}catch(e){}
-    setTimeout(function(){cleanup();hint.textContent='';if(cb)cb()},350)};
-  function begin(isAuto){
-    if(b.disabled)return;
-    if(webT){webT();return}
-    if(on||busy)return;busy=true;if(!isAuto)stopTts();
-    hint.textContent=VK?'Запускаю микрофон...':'Загружаю распознавание речи (один раз, около 40 МБ)...';
-    vkLoad().then(function(model){
-      if(!held){busy=false;hint.textContent='Готово. Нажмите на микрофон и говорите.';return}
-      audioMode('record');return navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:!IOS,noiseSuppression:!IOS,autoGainControl:false}}).then(function(s){
-        if(!held){s.getTracks().forEach(function(t){t.stop()});busy=false;hint.textContent='';return}
-        stream=s;ctx=ac();
-        rec=new model.KaldiRecognizer(ctx.sampleRate);var fin='',fired=false;
-        rec.on('result',function(m){var t=m.result&&m.result.text;if(t){fin=(fin+' '+t).trim();setv(fin);if(auto&&!fired){fired=true;rel()}}});
-        rec.on('partialresult',function(m){var p=m.result&&m.result.partial;if(p)setv((fin+' '+p).trim())});
-        node=ctx.createScriptProcessor(4096,1,1);
-        // шумовой порог: тихие кадры (фон) заменяются тишиной, порог подстраивается под уровень шума
-        var floor=.005,open=0,sr=ctx.sampleRate;
-        node.onaudioprocess=function(e){var d=e.inputBuffer.getChannelData(0),sum=0,k;for(k=0;k<d.length;k++)sum+=d[k]*d[k];
-          var rms=Math.sqrt(sum/d.length),thr=Math.max(.012,floor*2.5);
-          if(rms>thr)open=8;else{floor=floor*.9+rms*.1;if(open>0)open--}
-          b.level(rms>thr?Math.min(1,(rms-thr)*9+.15):0);
-          try{rec.acceptWaveform(open>0?e.inputBuffer:ctx.createBuffer(1,d.length,sr))}catch(x){}};
-        ctx.createMediaStreamSource(stream).connect(node);node.connect(ctx.destination);
-        busy=false;ui(true);if(auto){clearTimeout(tmA);tmA=setTimeout(rel,10000)}hint.textContent='Слушаю... нажмите ещё раз, чтобы закончить'});
-    }).catch(function(err){cleanup();
-      if(err&&err.name==='NotAllowedError'){hint.textContent='Нет доступа к микрофону. Разрешите его в браузере.';return}
-      if(SR){hint.textContent='Офлайн-распознавание недоступно, включаю распознавание браузера. Нажмите ещё раз.';micWeb(inp,hint,lang,b);webT=b.onclick;b.onclick=null}
-      else{b.disabled=true;hint.textContent='Голосовой ввод недоступен, печатайте ответ.'}});
-  }
-  function rel(){if(!held)return;held=false;auto=false;clearTimeout(tmA);
-    if(webT){b.stop();return}
-    if(on||rec)b.stop(function(){hint.textContent='';if(b.onfinal)b.onfinal()})}
-  b.addEventListener('click',function(){if(b.disabled)return;if(webT){webT();return}
-    if(on||busy){held=true;rel();return}
-    held=true;auto=true;begin(false)});
   b.oncontextmenu=function(e){e.preventDefault()};
+  b.cleanup=function(){};
+  if(!SR){b.disabled=true;hint.textContent='Голосовой ввод здесь недоступен, печатайте ответ.';b.halt=b.stop=function(cb){if(typeof cb==='function')cb()};b.auto=function(){};return b}
+  var rec=null,on=false,starting=false,got=false,bad=false,userStop=false,retried=false,after=null;
+  var t0=0,lastEnd=0,sess=0,tMax=0,tFin=0,tGo=0,tGuard=0;
+  function ui(v){on=v;b.classList.toggle('on',v)}
+  function say(t){hint.textContent=t}
+  function sayClear(){if(/^(Слушаю|Запускаю)/.test(hint.textContent))say('')}
+  function detach(r){r.onstart=r.onresult=r.onerror=r.onend=r.onspeechstart=r.onspeechend=r.onaudioend=null}
+  function finish(r){
+    if(rec!==r)return;
+    detach(r);rec=null;clearTimeout(tMax);clearTimeout(tFin);clearTimeout(tGuard);
+    starting=false;lastEnd=Date.now();ui(false);b.level(0);audioMode('play');
+    var f=after;after=null;
+    if(!got&&!bad&&!userStop&&!f&&!retried&&Date.now()-t0<1500){retried=true;begin(0);return}
+    sayClear();
+    if(!got&&!bad&&!userStop)say('Речь не распозналась. Попробуйте ещё раз.'+KBHINT);
+    if(f)f();else if(got&&b.onfinal)b.onfinal()}
+  function begin(extra){
+    starting=true;got=false;bad=false;var my=++sess;say('Запускаю микрофон...');
+    tGo=setTimeout(function(){
+      if(my!==sess)return;
+      var r=new SR();rec=r;t0=Date.now();
+      r.lang=lang||'en-US';r.interimResults=true;r.continuous=false;r.maxAlternatives=1;
+      r.onstart=function(){clearTimeout(tGuard);starting=false;ui(true);say('Слушаю... нажмите ещё раз, чтобы закончить');
+        clearTimeout(tMax);tMax=setTimeout(function(){b.stop()},10000)};
+      r.onspeechstart=function(){b.level(.6)};
+      r.onspeechend=r.onaudioend=function(){b.level(0)};
+      r.onresult=function(e){if(b.disabled)return;got=true;var t='';for(var k=0;k<e.results.length;k++)t+=e.results[k][0].transcript;
+        inp.value=t.trim();b.recog();if(b.onpartial)b.onpartial(inp.value)};
+      r.onerror=function(e){var c=e&&e.error;bad=true;setTimeout(function(){finish(r)},800);
+        if(c==='aborted'){if(!got&&!userStop)say('Запись прервана. Нажмите на микрофон ещё раз.'+KBHINT);return}
+        say(c==='not-allowed'?'Нет доступа к микрофону. Разрешите его в браузере или печатайте ответ.'
+          :c==='service-not-allowed'?'Нет доступа к распознаванию речи. Разрешите микрофон для сайта; на iPhone включите «Диктовка» в Настройки → Основные → Клавиатура.'
+          :c==='no-speech'?'Речь не услышана, попробуйте ещё раз.'
+          :c==='audio-capture'?'Ошибка: микрофон не найден или занят другим приложением.'
+          :c==='network'?'Ошибка: нет связи с сервисом распознавания речи. Нужен интернет.'
+          :'Ошибка распознавания: '+c+'.'+KBHINT)};
+      r.onend=function(){finish(r)};
+      tGuard=setTimeout(function(){if(rec!==r||on)return;try{r.abort()}catch(x){}bad=true;say('Микрофон не запустился, нажмите ещё раз.'+KBHINT);finish(r)},12000);
+      try{r.start()}catch(err){clearTimeout(tGuard);detach(r);rec=null;starting=false;ui(false);say('Не удалось начать запись: '+(err&&err.name)+'.'+KBHINT)}
+    },Math.max(extra||0,300-(Date.now()-lastEnd)))}
+  // stop(cb): мягкая остановка, ждём последний текст и вызываем cb (запасной выход через 1.5 с, если конец не пришёл)
+  b.stop=function(cb){
+    userStop=true;clearTimeout(tGo);var r=rec;
+    if(r){if(cb)after=cb;try{r.stop()}catch(e){}
+      clearTimeout(tFin);tFin=setTimeout(function(){if(rec===r){try{r.abort()}catch(e){}finish(r)}},1500)}
+    else{sess++;starting=false;sayClear();if(cb)cb()}};
+  // halt(): жёсткая остановка без обратных вызовов (ответ принят, выключили авто, ушли с карточки)
+  b.halt=function(){sess++;clearTimeout(tGo);clearTimeout(tMax);clearTimeout(tFin);clearTimeout(tGuard);after=null;
+    var r=rec;rec=null;if(r){detach(r);try{r.abort()}catch(e){}lastEnd=Date.now()}
+    starting=false;ui(false);b.level(0);audioMode('play');say('')};
+  b.auto=function(){if(on||starting||b.disabled)return;userStop=false;retried=false;begin(0)};
+  b.addEventListener('click',function(){
+    if(b.disabled)return;
+    if(on||starting){b.stop();return}
+    var was=TTSON||ttsLive();stopTts();userStop=false;retried=false;begin(was?150:0)});
   return b}
 function subLine(x){var d=el('div','qs'),m=/\[(.+?)\]/.exec(x);if(!m){d.textContent=x;return d}
   d.appendChild(document.createTextNode(x.slice(0,m.index)));d.appendChild(el('span','rw',m[1]));d.appendChild(document.createTextNode(x.slice(m.index+m[0].length)));return d}
@@ -690,14 +645,14 @@ function reset(){queue=CUR.cards.map(function(c){return Object.assign({},c)});i=
 var VOICES=[],vcache={};
 function loadV(){try{VOICES=speechSynthesis.getVoices()||[];vcache={}}catch(e){}}
 loadV();try{speechSynthesis.onvoiceschanged=loadV}catch(e){}
-document.addEventListener('pointerdown',function w(){document.removeEventListener('pointerdown',w);try{var u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}catch(e){}},{once:true});
+if(IOS)document.addEventListener('pointerdown',function w(){document.removeEventListener('pointerdown',w);try{var u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}catch(e){}},{once:true});
 function pickV(l){if(vcache[l]!==undefined)return vcache[l];var pre=l.slice(0,2),best=null,bs=-99;
   VOICES.forEach(function(v){if(String(v.lang).replace('_','-').slice(0,2).toLowerCase()!==pre)return;var n=v.name,sc=0;
-    if(/premium|enhanced|neural|natural/i.test(n))sc+=6;
+    if(/premium|enhanced|neural|natural/i.test(n))sc+=1;
     if(/samantha|ava|allison|susan|evan|zoe|serena|karen|daniel|aria|jenny|guy|google|milena|yuri|katya|svetlana|dmitry|alena/i.test(n))sc+=3;
     if(l==='en-US'&&/en[-_]US/i.test(v.lang))sc+=2;
     if(/espeak|fred|albert|zarvox|bad news|bells|boing|bubbles|cellos|deranged|good news|hysterical|junior|organ|ralph|trinoids|whisper|wobble|superstar|jester|grandma|grandpa|reed|rocko|shelley|flo|sandy|eddy/i.test(n))sc-=10;
-    sc+=v.localService?8:-8;
+    sc+=v.localService?20:-20;
     if(sc>bs){bs=sc;best=v}});
   if(VOICES.length)vcache[l]=best;return best}
 function mkU(t,l){var u=new SpeechSynthesisUtterance(t);u.lang=l;var v=pickV(l);if(v)u.voice=v;u.rate=.9;u.pitch=1;return u}
@@ -723,7 +678,7 @@ function speakSeq(parts,l){
       u.onend=fire;
       u.onerror=function(e){if(e&&(e.error==='canceled'||e.error==='interrupted'))return;fire()};
       wd=setTimeout(function(){if(fin||g!==TG||started)return;fin=true;clearTimeout(cap);try{speechSynthesis.cancel()}catch(x){}
-        if(tries++<1)TTT=setTimeout(function(){if(g===TG)say()},150);else if(g===TG)TTSON=false},2500);
+        if(tries++<1)TTT=setTimeout(function(){if(g===TG)say()},150);else if(g===TG)TTSON=false},tries?2500:1000);
       cap=setTimeout(function(){if(g===TG)fire()},p.length*160+5000);
       try{if(speechSynthesis.paused)speechSynthesis.resume()}catch(x){}
       try{speechSynthesis.speak(u)}catch(x){fire()}
