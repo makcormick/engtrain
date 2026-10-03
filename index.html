@@ -127,7 +127,8 @@ html,body{margin:0}
 #t2 .mic svg{pointer-events:none}
 #t2 .ans.top{margin-top:2px}
 #t2.kb .top,#t2.kb .foot{display:none}
-#t2.kb .card>*:not(.prompt):not(.dock):not(.fb):not(.trow){display:none}
+#t2.kb .card>*:not(.cbody):not(.dock):not(.fb):not(.trow){display:none}
+#t2.kb .cbody>*:not(.prompt):not(.fb):not(.trow){display:none}
 #t2.kb .stage{margin:8px 0}
 #t2 .heard{font-size:22px;line-height:1.25;font-weight:800;height:56px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-word}
 #t2 .bt{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin-bottom:6px}
@@ -238,6 +239,14 @@ html,body{margin:0}
 #t2 .asw.on .trk i{transform:translateX(18px)}
 #t2 .q .qs .rw{display:inline-block;font-weight:800;color:var(--acc);background:var(--acc-t);border-radius:6px;padding:0 6px;box-shadow:0 0 0 2px var(--acc) inset}
 @media (prefers-reduced-motion:reduce){#t2 .asw .trk,#t2 .asw .trk i{transition:none}}
+
+/* ===== часть 5 ===== */
+#t2 button.asw{border:0;background:none}
+#t2 .asw.on{border-color:transparent}
+#t2 .card.split{padding:0;gap:0;overflow:hidden}
+#t2 .cbody{flex:1 1 auto;min-height:0;overflow:auto;padding:22px 20px 14px;display:flex;flex-direction:column;gap:14px;touch-action:none;overscroll-behavior:contain}
+#t2 .cbody>*{flex-shrink:0}
+#t2 .card.split>.dock{flex:none;margin:0;position:static;padding:12px 20px 22px}
 </style>
 </head>
 <body>
@@ -271,8 +280,8 @@ html,body{margin:0}
 const WORDS=[
 {em:"🏆",en:"achieve",ru:"достигать",def:"to succeed in doing something good, usually after hard work",defru:"добиться чего-то хорошего, обычно после тяжёлой работы",ex:"She worked hard to [achieve] her goal.",exru:"Она много работала, чтобы [достичь] своей цели.",col:[["achieve a goal","достичь цели"],["achieve success","добиться успеха"],["achieve results","получить результаты"]],as:[["Созвучие","«ачивка» в играх — значок за победу над боссом"],["Образ","альпинист с флагом на вершине"],["Синоним","reach, succeed"]]},
 {em:"🚧",en:"avoid",ru:"избегать",def:"to stay away from something or not let it happen",defru:"держаться подальше от чего-то или не допустить этого",ex:"I try to [avoid] sugar in the evening.",exru:"Я стараюсь [избегать] сахара вечером.",col:[["avoid problems","избегать проблем"],["avoid mistakes","избегать ошибок"],["avoid traffic","объехать пробки"]],as:[["Созвучие","«эвойд» — «обойду» стороной"],["Образ","человек обходит большую лужу"],["Антоним","face — столкнуться лицом к лицу"]]},
-{em:"📈",en:"improve",ru:"улучшать",def:"to make something better",defru:"сделать что-то лучше",ex:"I want to [improve] my English this year.",exru:"Я хочу [улучшить] свой английский в этом году.",col:[["improve your skills","улучшить навыки"],["improve your health","улучшить здоровье"],["improve quickly","быстро улучшаться"]],as:[["Созвучие","«импрув» — «в прок»: всё идёт на пользу"],["Образ","график, который идёт вверх"],["Синоним / антоним","get better / get worse"]]},
-{em:"💡",en:"suggest",ru:"предлагать",def:"to give an idea for someone to think about",defru:"предложить идею, над которой другой человек может подумать",ex:"Can you [suggest] a good restaurant?",exru:"Можете [посоветовать] хороший ресторан?",col:[["suggest an idea","предложить идею"],["suggest a solution","предложить решение"],["I suggest that…","я предлагаю, чтобы…"]],as:[["Созвучие","«саджест» — подсказки в поисковой строке"],["Образ","человек с лампочкой над головой"],["Синоним","recommend, propose"]]},
+{em:"📈",en:"improve",ru:"улучшать",dist:[["approve","одобрять"],["prove","доказывать"],["impress","впечатлять"],["increase","увеличивать"]],def:"to make something better",defru:"сделать что-то лучше",ex:"I want to [improve] my English this year.",exru:"Я хочу [улучшить] свой английский в этом году.",col:[["improve your skills","улучшить навыки"],["improve your health","улучшить здоровье"],["improve quickly","быстро улучшаться"]],as:[["Созвучие","«импрув» — «в прок»: всё идёт на пользу"],["Образ","график, который идёт вверх"],["Синоним / антоним","get better / get worse"]]},
+{em:"💡",en:"suggest",ru:"предлагать",dist:[["insist","настаивать"],["suppose","предполагать"],["support","поддерживать"],["suspect","подозревать"]],def:"to give an idea for someone to think about",defru:"предложить идею, над которой другой человек может подумать",ex:"Can you [suggest] a good restaurant?",exru:"Можете [посоветовать] хороший ресторан?",col:[["suggest an idea","предложить идею"],["suggest a solution","предложить решение"],["I suggest that…","я предлагаю, чтобы…"]],as:[["Созвучие","«саджест» — подсказки в поисковой строке"],["Образ","человек с лампочкой над головой"],["Синоним","recommend, propose"]]},
 {em:"🤹",en:"manage",ru:"справляться, суметь",def:"to succeed in doing something difficult",defru:"суметь сделать что-то трудное",ex:"I [managed] to finish the project on time.",exru:"Мне [удалось] закончить проект вовремя.",col:[["manage to do","суметь сделать"],["manage a team","управлять командой"],["manage stress","справляться со стрессом"]],as:[["Созвучие","«менеджер» — тот, кто всем заправляет и всё успевает"],["Образ","жонглёр с десятком шаров"],["Синоним","cope, succeed in"]]},
 {em:"📋",en:"require",ru:"требовать, нуждаться",def:"to need something, or to make something necessary",defru:"нуждаться в чём-то или делать что-то необходимым",ex:"This job [requires] a lot of patience.",exru:"Эта работа [требует] много терпения.",col:[["require time","требовать времени"],["require attention","требовать внимания"],["require experience","требовать опыта"]],as:[["Созвучие","«реквизит» — без него спектакль не сыграть"],["Образ","длинный список пунктов в вакансии: опыт, знания, документы"],["Синоним","need"]]},
 {em:"🚪",en:"opportunity",ru:"возможность",def:"a chance to do something good",defru:"шанс сделать что-то хорошее",ex:"Living abroad is a great [opportunity] to learn.",exru:"Жизнь за границей — отличная [возможность] учиться.",col:[["a great opportunity","отличная возможность"],["miss an opportunity","упустить возможность"],["have the opportunity to","иметь возможность"]],as:[["Созвучие","«оппортунист» — тот, кто ловит случай"],["Образ","приоткрытая дверь со светом"],["Синоним","chance"]]},
@@ -341,18 +350,19 @@ function feed(rv){
  const STOP=new Set(["если","тебе","меня","этого","чтобы","себя","свой","своей"]);
  const stems=t=>(t.toLowerCase().match(/[a-zа-яё']+/g)||[]).filter(x=>x.length>3&&!STOP.has(x)).map(x=>x.slice(0,5));
  const leaks=(txt,ans)=>{const l=txt.toLowerCase();return stems(ans).some(x=>l.includes(x))};
- const ass=(w,ans)=>w.as.filter(a=>!leaks(a[1],ans));
- const ch=(w,prompt,pick,say,orig)=>{const os=sh([w,...sh(DATA[w.k].filter(x=>x!==w)).slice(0,3)]),fl={};os.forEach(x=>fl[pick(x)]=orig(x));return {type:"choice",payload:{prompt,options:os.map(pick),flip:fl,hints:ass(w,pick===undefined?"":pick(w)+" "+(pick(w)===w.ru?"":w.en))},answer_spec:{correct:pick(w)},say}};
+ const ass=(w,ans,eng)=>w.as.filter(a=>!leaks(a[1],ans)&&!(eng&&a[0]==="Созвучие"));
+ const opts=w=>{let r=sh((w.dist||[]).map(x=>({en:x[0],ru:x[1]})).filter(x=>x.en!==w.en)).slice(0,3);if(r.length<3){const have=new Set(r.map(x=>x.en));r=r.concat(sh(DATA[w.k].filter(x=>x!==w&&!have.has(x.en))).slice(0,3-r.length))}return r};
+ const ch=(w,prompt,pick,say,orig)=>{const os=sh([w,...opts(w)]),fl={};os.forEach(x=>fl[pick(x)]=orig(x));return {type:"choice",payload:{prompt,options:os.map(pick),flip:fl,hints:ass(w,pick(w)+" "+(pick(w)===w.ru?"":w.en),pick(w)!==w.ru)},answer_spec:{correct:pick(w)},say}};
  const pl=(k,a,b,c)=>k%10===1&&k%100!==11?a:(k%10>=2&&k%10<=4&&(k%100<10||k%100>=20)?b:c);
  const hint=t=>{const p=t.split(" "),L=(t.match(/[a-zа-яё]/gi)||[]).length;return ["Сколько букв",(p.length>1?p.length+" "+pl(p.length,"слово","слова","слов")+", ":"")+L+" "+pl(L,"буква","буквы","букв")+", начинается на «"+t[0]+"»"]};
  const MK={
   en2ru:w=>ch(w,w.en,x=>x.ru,EN(w.en),x=>x.en),
   ru2en:w=>ch(w,w.ru,x=>x.en,RU(w.ru),x=>x.ru),
   situ:w=>ch(w,"Ситуация: "+w.sit+"\n\nВыберите фразу, которую уместно сказать:",x=>x.en,RU(w.sit),x=>x.ru),
-  build:w=>{const one=!/\s/.test(w.en.trim());return {type:"build",payload:Object.assign({prompt:w.ru,words:one?w.en.split(""):w.en.split(" "),hints:ass(w,w.en)},one?{join:"",cls:"l"}:{}),answer_spec:{accept:[w.en]},say:RU(w.ru)}},
-  type:w=>({type:"type_word",payload:{prompt:w.ru,placeholder:"по-английски",hints:[hint(w.en)].concat(ass(w,w.en))},answer_spec:{accept:[w.en]},say:RU(w.ru)}),
-  cloze:w=>({type:"type_word",payload:{prompt:w.ex.replace(/\[.+?\]/,"_____"),sub:w.exru,placeholder:"пропущенное слово",hints:[hint(form(w))].concat(ass(w,w.en+" "+form(w)))},answer_spec:{accept:[form(w)]},say:{l:"en-US",gap:[w.ex.slice(0,w.ex.indexOf("[")).trim(),w.ex.slice(w.ex.indexOf("]")+1).trim()]}}),
-  speak:w=>({type:"speak",payload:{prompt:"Скажите по-английски: «"+w.ru+"»"+(w.sit?" ("+w.sit+")":""),hints:[hint(w.en)].concat(ass(w,w.en))},answer_spec:{accept:[w.en]},say:RU(w.ru)})};
+  build:w=>{const one=!/\s/.test(w.en.trim());return {type:"build",payload:Object.assign({prompt:w.ru,words:one?w.en.split(""):w.en.split(" "),hints:ass(w,w.en,1)},one?{join:"",cls:"l"}:{}),answer_spec:{accept:[w.en]},say:RU(w.ru)}},
+  type:w=>({type:"type_word",payload:{prompt:w.ru,placeholder:"по-английски",hints:[hint(w.en)].concat(ass(w,w.en,1))},answer_spec:{accept:[w.en]},say:RU(w.ru)}),
+  cloze:w=>({type:"type_word",payload:{prompt:w.ex.replace(/\[.+?\]/,"_____"),sub:w.exru,placeholder:"пропущенное слово",hints:[hint(form(w))].concat(ass(w,w.en+" "+form(w),1))},answer_spec:{accept:[form(w)]},say:{l:"en-US",gap:[w.ex.slice(0,w.ex.indexOf("[")).trim(),w.ex.slice(w.ex.indexOf("]")+1).trim()]}}),
+  speak:w=>({type:"speak",payload:{prompt:"Скажите по-английски:\n«"+w.ru+"»"+(w.sit?" ("+w.sit+")":""),hints:[hint(w.en)].concat(ass(w,w.en,1))},answer_spec:{accept:[w.en]},say:RU(w.ru)})};
  const prac=(w,m)=>{const t=MK[m](w);t.feedback={right:"Верно!\n"+exs(w),wrong:exs(w)+" — "+trS2(w)};U[w.en]=U[w.en]||{kind:w.k,title:w.en,data:{tr:w.ru}};
   return {id:++n,kind:"practice",units:[{id:w.en,role:"tests"}],blocks:[],tasks:[t]}};
  if(rv){cards=sh(W.flatMap(w=>ms.filter(m=>ok(m,w)).map(m=>prac(w,m[0]))));
@@ -392,6 +402,11 @@ var BLOCKS={
 /* ============ РЕЕСТР ЗАДАНИЙ: type -> render + check + show ============ */
 // render(task, box, submit) -> mark(result, task, extra) | check(answer, answer_spec) -> {ok, score, note} | show(spec) -> эталон текстом
 /* ===== Всплывающие сообщения (только ошибки и первая загрузка распознавания) ===== */
+var IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+var FLIP=225;
+function audioMode(m){try{if(navigator.audioSession)navigator.audioSession.type=(m==='record'?'play-and-record':'playback')}catch(e){}}
+audioMode('play');
+window.addEventListener('pagehide',function(){audioMode('play')});
 var TT=0;
 function toastHide(){var e=document.getElementById('toast');if(e)e.hidden=true;clearTimeout(TT)}
 function toast(m,info){var e=document.getElementById('toast');document.getElementById('toastm').textContent=m;e.classList.toggle('info',!!info);e.hidden=false;clearTimeout(TT);TT=setTimeout(toastHide,4000)}
@@ -408,7 +423,7 @@ function rcKill(){
     clearTimeout(RC.tm);
     var r=RC.rec;RC.rec=null;if(!r){res();return}
     rcLog('kill');
-    var done=false;function fin(){if(!done){done=true;RC.lastEnd=Date.now();res()}}
+    var done=false;function fin(){if(!done){done=true;RC.lastEnd=Date.now();audioMode('play');res()}}
     r.onstart=r.onresult=r.onerror=null;r.onend=fin;
     try{r.abort()}catch(e){fin()}
     setTimeout(fin,700);
@@ -434,12 +449,12 @@ function micWeb(inp,hint,lang,b){
       rec.onerror=function(e){rcLog('error:'+e.error);clearTimeout(guard);busy=false;bad=true;
         if(e.error==='aborted'){if(!got)say('Запись прервана браузером (aborted). Нажмите на микрофон ещё раз.'+KB,1);return}
         say((e.error==='not-allowed'||e.error==='service-not-allowed')?'Нет доступа к микрофону. Разрешите его в браузере или печатайте ответ.':e.error==='no-speech'?'Речь не услышана, попробуйте ещё раз.':'Ошибка распознавания: '+e.error+(e.message?' ('+e.message+')':'')+'.'+KB,e.error!=='no-speech'&&e.error!=='not-allowed')};
-      rec.onend=function(){rcLog('end');clearTimeout(guard);clearTimeout(RC.tm);busy=false;RC.lastEnd=Date.now();if(RC.rec===rec)RC.rec=null;ui(false);
+      rec.onend=function(){audioMode('play');rcLog('end');clearTimeout(guard);clearTimeout(RC.tm);busy=false;RC.lastEnd=Date.now();if(RC.rec===rec)RC.rec=null;ui(false);
         if(!got&&!bad&&!userStop&&!retried&&Date.now()-t0<1500){retried=true;rcLog('retry');start();return}
         if(hint.textContent.indexOf('Слушаю')===0||hint.textContent.indexOf('Запускаю')===0)say('');
         if(!got&&!bad&&!userStop)say('Речь не распозналась. Попробуйте ещё раз.'+KB,1);
         if(after){var f=after;after=null;f()}else if(got&&b.onfinal)b.onfinal()};
-      try{rec.start()}catch(err){clearTimeout(guard);busy=false;ui(false);say('Не удалось начать запись: '+err.name+'.'+KB,1)}
+      audioMode('record');try{rec.start()}catch(err){clearTimeout(guard);busy=false;ui(false);say('Не удалось начать запись: '+err.name+'.'+KB,1)}
     });
   }
   // stop(cb): останавливает запись, ждёт последний текст и вызывает cb (с запасным выходом, если конец не пришёл)
@@ -462,7 +477,7 @@ function vkLoad(){
     sc.onload=function(){window.Vosk.createModel(VOSK_MODEL).then(res,rej)};sc.onerror=function(){rej(new Error('cdn'))};document.head.appendChild(sc)});
   VK.catch(function(){VK=null});return VK}
 function micButton(inp,hint,lang){
-  var b=el('button','mic');b.type='button';b.setAttribute('aria-label','Удерживайте и говорите');MIC=b;
+  var b=el('button','mic');b.type='button';b.setAttribute('aria-label','Нажмите и говорите');MIC=b;
   b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg>';
   var ctx,stream,node,rec,on=false,busy=false,held=false,webT=null,auto=false,tmA=0,rgT=0;
   var lv=el('span','lv'),bars=[];for(var q=0;q<13;q++){var bi=el('i');lv.appendChild(bi);bars.push(bi)}b.appendChild(lv);
@@ -470,7 +485,7 @@ function micButton(inp,hint,lang){
   b.recog=function(){b.classList.add('rg');clearTimeout(rgT);rgT=setTimeout(function(){b.classList.remove('rg')},700)};
   function ui(v){on=v;b.classList.toggle('on',v)}
   function setv(v){if(b.disabled)return;inp.value=v;b.recog();if(b.onpartial)b.onpartial(v)}
-  function cleanup(){try{node&&node.disconnect()}catch(e){}try{stream&&stream.getTracks().forEach(function(t){t.stop()})}catch(e){}try{rec&&rec.remove()}catch(e){}ctx=stream=node=rec=null;busy=false;ui(false);b.level(0)}
+  function cleanup(){try{node&&node.disconnect()}catch(e){}try{stream&&stream.getTracks().forEach(function(t){t.stop()})}catch(e){}try{rec&&rec.remove()}catch(e){}var cx=ctx;ctx=stream=node=rec=null;try{cx&&cx.close()}catch(e){}busy=false;ui(false);b.level(0);audioMode('play')}
   b.cleanup=cleanup;
   b.halt=function(){held=false;auto=false;clearTimeout(tmA);if(webT){b.stop(function(){});return}cleanup();hint.textContent=''};
   b.auto=function(){if(on||busy||b.disabled)return;held=true;auto=true;begin(true)};
@@ -480,13 +495,13 @@ function micButton(inp,hint,lang){
   function begin(isAuto){
     if(b.disabled)return;
     if(webT){webT();return}
-    if(on||busy)return;busy=true;if(!isAuto)try{speechSynthesis.cancel()}catch(e){}
+    if(on||busy)return;busy=true;if(!isAuto)stopTts();
     hint.textContent=VK?'Запускаю микрофон...':'Загружаю распознавание речи (один раз, около 40 МБ)...';
     vkLoad().then(function(model){
-      if(!held){busy=false;hint.textContent='Готово. Удерживайте кнопку и говорите.';return}
-      return navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true,autoGainControl:false}}).then(function(s){
+      if(!held){busy=false;hint.textContent='Готово. Нажмите на микрофон и говорите.';return}
+      audioMode('record');return navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:!IOS,noiseSuppression:!IOS,autoGainControl:false}}).then(function(s){
         if(!held){s.getTracks().forEach(function(t){t.stop()});busy=false;hint.textContent='';return}
-        stream=s;ctx=ac();
+        stream=s;ctx=new (window.AudioContext||window.webkitAudioContext)();try{ctx.resume()}catch(e){}
         rec=new model.KaldiRecognizer(ctx.sampleRate);var fin='',fired=false;
         rec.on('result',function(m){var t=m.result&&m.result.text;if(t){fin=(fin+' '+t).trim();setv(fin);if(auto&&!fired){fired=true;rel()}}});
         rec.on('partialresult',function(m){var p=m.result&&m.result.partial;if(p)setv((fin+' '+p).trim())});
@@ -499,7 +514,7 @@ function micButton(inp,hint,lang){
           b.level(rms>thr?Math.min(1,(rms-thr)*9+.15):0);
           try{rec.acceptWaveform(open>0?e.inputBuffer:ctx.createBuffer(1,d.length,sr))}catch(x){}};
         ctx.createMediaStreamSource(stream).connect(node);node.connect(ctx.destination);
-        busy=false;ui(true);if(auto){clearTimeout(tmA);tmA=setTimeout(rel,10000)}hint.textContent=auto?'Слушаю... говорите':'Слушаю... отпустите кнопку, чтобы закончить'});
+        busy=false;ui(true);if(auto){clearTimeout(tmA);tmA=setTimeout(rel,10000)}hint.textContent='Слушаю... нажмите ещё раз, чтобы закончить'});
     }).catch(function(err){cleanup();
       if(err&&err.name==='NotAllowedError'){hint.textContent='Нет доступа к микрофону. Разрешите его в браузере.';return}
       if(SR){hint.textContent='Офлайн-распознавание недоступно, включаю распознавание браузера. Нажмите ещё раз.';micWeb(inp,hint,lang,b);webT=b.onclick;b.onclick=null}
@@ -508,12 +523,14 @@ function micButton(inp,hint,lang){
   function rel(){if(!held)return;held=false;auto=false;clearTimeout(tmA);
     if(webT){b.stop();return}
     if(on||rec)b.stop(function(){hint.textContent='';if(b.onfinal)b.onfinal()})}
-  b.onpointerdown=function(e){e.preventDefault();if(b.disabled)return;held=true;try{b.setPointerCapture(e.pointerId)}catch(x){}begin()};
-  b.onpointerup=rel;b.onpointercancel=rel;b.oncontextmenu=function(e){e.preventDefault()};
+  b.addEventListener('click',function(){if(b.disabled)return;if(webT){webT();return}
+    if(on||busy){held=true;rel();return}
+    held=true;auto=true;begin(false)});
+  b.oncontextmenu=function(e){e.preventDefault()};
   return b}
 function subLine(x){var d=el('div','qs'),m=/\[(.+?)\]/.exec(x);if(!m){d.textContent=x;return d}
   d.appendChild(document.createTextNode(x.slice(0,m.index)));d.appendChild(el('span','rw',m[1]));d.appendChild(document.createTextNode(x.slice(m.index+m[0].length)));return d}
-function armMic(mm,okf,delay){clearTimeout(MT);MT=setTimeout(function fire(){if(!CFG.automic||!okf())return;if(window.speechSynthesis&&speechSynthesis.speaking){MT=setTimeout(fire,200);return}mm.auto()},delay)}
+function armMic(mm,okf,delay){clearTimeout(MT);MT=setTimeout(function fire(){if(!CFG.automic||!okf())return;if(TTSON){MT=setTimeout(fire,200);return}mm.auto()},delay)}
 function micRow(mic){
   var row=el('div','microw'),sw=el('button','asw');sw.type='button';sw.setAttribute('role','switch');sw.setAttribute('aria-label','Автоматическая запись');
   sw.innerHTML='<span class="trk"><i></i></span><span class="cap">Авто</span>';
@@ -534,7 +551,7 @@ TASKS.choice={
     x.onclick=function(){var cs=getComputedStyle(w).transform,back;
      if(w.dataset.m!=null)back=w.dataset.m==='1';else{var m=/matrix3d\((.+)\)/.exec(cs);back=m?parseFloat(m[1].split(',')[5])<0:false}
      w.style.animation='none';w.style.transition='none';w.style.transform=back?'rotateX(180deg)':'rotateX(0deg)';void w.offsetWidth;
-     w.style.transition='transform .45s ease';w.style.transform=back?'rotateX(0deg)':'rotateX(180deg)';w.dataset.m=back?'0':'1'}})};
+     w.style.transition='transform '+FLIP*2+'ms ease-in-out';w.style.transform=back?'rotateX(0deg)':'rotateX(180deg)';w.dataset.m=back?'0':'1'}})};
  },
  check:function(a,s){return {ok:a===s.correct,score:a===s.correct?1:0}},
  show:function(s){return s.correct}
@@ -556,26 +573,32 @@ TASKS.build={
  check:function(a,s){var ok=s.accept.some(function(x){return norm(x)===norm(a)});return {ok:ok,score:ok?1:0}},
  show:function(s){return s.accept[0]}
 };
+function flipSwap(b,swap,done){
+ if(!b.animate||(window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches)){swap();done();return}
+ var a1=b.animate([{transform:'perspective(600px) rotateX(0deg)'},{transform:'perspective(600px) rotateX(90deg)'}],{duration:FLIP,easing:'ease-in',fill:'forwards'});
+ a1.onfinish=function(){swap();a1.cancel();var a2=b.animate([{transform:'perspective(600px) rotateX(-90deg)'},{transform:'perspective(600px) rotateX(0deg)'}],{duration:FLIP,easing:'ease-out'});a2.onfinish=done;a2.oncancel=done}}
 function flipHint(items){
- var wrap=el('div','ahint'),b=el('button','hintb'),n=items.length,k=items[0][0]==='Сколько букв'?0:Math.floor(Math.random()*n),open=false;
+ var wrap=el('div','ahint'),b=el('button','hintb'),n=items.length,k=items[0][0]==='Сколько букв'?0:Math.floor(Math.random()*n),open=false,bz=false;
  var hb=el('span','hb'),l=el('span','l','💡 Подсказка'),r=el('span','r'),ico=el('span','ico','🔄');b.type='button';ico.setAttribute('aria-hidden','true');
  hb.appendChild(l);hb.appendChild(r);b.appendChild(hb);b.appendChild(ico);if(n>1)b.classList.add('mu');
- function paint(){var a=items[k];r.innerHTML='';r.appendChild(el('b','',a[0]+': '));r.appendChild(document.createTextNode(a[1]));b.classList.remove('flp');void b.offsetWidth;b.classList.add('flp')}
- function next(){k=(k+1)%n;paint()}
- b.onclick=function(){if(!open){open=true;paint();b.classList.add('sh')}else if(n>1)next()};
+ function paint(){var a=items[k];r.innerHTML='';r.appendChild(el('b','',a[0]+': '));r.appendChild(document.createTextNode(a[1]))}
+ function free(){bz=false}
+ b.onclick=function(){if(bz)return;bz=true;
+  if(!open){open=true;flipSwap(b,function(){paint();b.classList.add('sh')},free)}
+  else if(n>1)flipSwap(b,function(){k=(k+1)%n;paint()},free);else bz=false};
  wrap.appendChild(b);return wrap}
 function hintBtns(box,items){if(!items||!items.length)return;box.appendChild(flipHint(items))}
 TASKS.type_word={
  render:function(t,box,submit){
   var qd=el('div','q',t.payload.prompt);if(t.payload.sub)qd.appendChild(subLine(t.payload.sub));box.appendChild(qd);
   var inp=el('input','txt');inp.placeholder=t.payload.placeholder||'';inp.autocomplete='off';inp.autocapitalize='off';inp.spellcheck=false;
-  var b=el('button','main','Проверить'),hint=mkHint(),row=el('div','row'),mic=micButton(inp,hint,'en-US');mic.classList.add('big');mic.setAttribute('aria-label','Удерживайте и говорите');
+  var b=el('button','main','Проверить'),hint=mkHint(),row=el('div','row'),mic=micButton(inp,hint,'en-US');mic.classList.add('big');mic.setAttribute('aria-label','Нажмите и говорите');
   var voiced=false,auto=false,acc=t.answer_spec.accept;
   function hit(v){for(var k=0;k<acc.length;k++)if(said(v,acc[k]))return acc[k];return null}
   function go(){var v=inp.value.trim();if(v)submit(voiced&&hit(v)||v)}
   box._mic=mic;function endScroll(){inp.scrollLeft=inp.scrollWidth;requestAnimationFrame(function(){inp.scrollLeft=inp.scrollWidth})}
   mic.onpartial=function(v){voiced=true;endScroll();if(!auto&&hit(v)){auto=true;mic.stop(go)}};
-  mic.onfinal=function(){if(!auto&&inp.value&&!hit(inp.value))hint.textContent='Не то. Удерживайте микрофон и попробуйте ещё раз.'};
+  mic.onfinal=function(){if(!auto&&inp.value&&!hit(inp.value))hint.textContent='Не то. Нажмите на микрофон и попробуйте ещё раз.'};
   inp.addEventListener('input',function(){voiced=false;var n=norm(inp.value);if(n&&acc.some(function(x){return norm(x)===n}))go()});
   b.onclick=function(){if(mic.stop)mic.stop(go);else go()};
   inp.onkeydown=function(e){if(e.key==='Enter')b.onclick()};
@@ -606,9 +629,9 @@ TASKS.speak={
   var fin=false;box._mic=mic;mic.onpartial=function(v){if(!fin&&said(v,ans)){fin=true;mic.stop(function(){submit(val)})}};
   mic.onfinal=function(){if(fin||!val)return;tries++;
    if(said(val,ans)||tries>=2){submit(val);return}
-   paint(heard,val,aw);hint.textContent='Не то слово. Удерживайте микрофон и попробуйте ещё раз (попытка 2 из 2).'};
+   paint(heard,val,aw);hint.textContent='Не то слово. Нажмите на микрофон и попробуйте ещё раз (попытка 2 из 2).'};
   hintBtns(box,t.payload.hints);box.appendChild(heard);box.appendChild(micRow(mic));
-  hint.textContent='Удерживайте микрофон и говорите.';
+  hint.textContent='Нажмите на микрофон и говорите.';
   return function(res){if(mic.halt)mic.halt();mic.disabled=true;hint.textContent='';paint(heard,val,aw,res.ok)};
  },
  check:function(a,s){var ok=said(a,s.accept[0]);return {ok:ok,score:ok?1:0}},
@@ -616,33 +639,53 @@ TASKS.speak={
 /* ===== Звуки ответа: один общий AudioContext, перед каждым звуком проверяем, что он запущен ===== */
 var actx=null;
 function ac(){try{if(actx&&actx.state==='closed')actx=null;if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();if(actx.state!=='running'&&actx.resume)actx.resume()}catch(e){}return actx}
-['pointerdown','touchend','click','keydown'].forEach(function(n){document.addEventListener(n,ac,true)});
-document.addEventListener('visibilitychange',function(){if(!document.hidden)ac()});
+function acReset(){try{actx&&actx.close()}catch(e){}actx=null}
 function run(go){var C=ac();if(!C)return;if(C.state==='running'){go(C);return}
   var d=false,f=function(){if(!d){d=true;go(C)}};try{C.resume().then(f).catch(function(){})}catch(e){}setTimeout(function(){if(C.state==='running')f()},350)}
 function tone(list,vol,type){
-  if(!CFG.sound)return;
   run(function(C){var t=C.currentTime+.03;
     list.forEach(function(n){var o=C.createOscillator(),g=C.createGain(),s=t+n[1];
       o.type=type||'sine';o.frequency.value=n[0];o.connect(g);g.connect(C.destination);
       g.gain.setValueAtTime(0.0001,s);g.gain.exponentialRampToValueAtTime(vol,s+0.03);g.gain.exponentialRampToValueAtTime(0.0001,s+0.35);
       o.start(s);o.stop(s+0.4)})});
 }
-function beep(d){d=d||1;run(function(C){var t=C.currentTime+.02,o=C.createOscillator(),g=C.createGain();o.type='sine';
-  o.frequency.setValueAtTime(520,t);o.frequency.exponentialRampToValueAtTime(840,t+.14*d);
-  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.22,t+.03*d);g.gain.exponentialRampToValueAtTime(.0001,t+.3*d);
-  o.connect(g);g.connect(C.destination);o.start(t);o.stop(t+.32*d)})}
+/* Сигналы ответа. Основной путь: готовые WAV через <audio> (переживает сворачивание и режим микрофона на iPhone),
+   запасной: WebAudio. Все карточки зовут chime()/buzz() из finish(), больше нигде звук ответа не играется. */
 var VOL_OK=.2,VOL_BAD=.32;
-function chime(){tone([[659.25,0],[783.99,.09],[1046.5,.18]],VOL_OK)}
-function buzz(){tone([[330,0],[262,.14]],VOL_BAD,'triangle')}
+var SNDDEF={ok:[[[659.25,0],[783.99,.09],[1046.5,.18]],VOL_OK],bad:[[[330,0],[262,.14]],VOL_BAD,'triangle']};
+function wavUri(list,vol,type){
+  var sr=22050,dur=0,k;list.forEach(function(n){dur=Math.max(dur,n[1]+.4)});
+  var N=Math.floor(sr*dur),buf=new Float32Array(N);
+  list.forEach(function(n){var s0=Math.floor(n[1]*sr),len=Math.floor(.4*sr);
+    for(var j=0;j<len&&s0+j<N;j++){var t=j/sr,env=t<.03?t/.03:Math.exp(-(t-.03)*24),ph=2*Math.PI*n[0]*t,v=type==='triangle'?(2/Math.PI)*Math.asin(Math.sin(ph)):Math.sin(ph);buf[s0+j]+=v*env*vol}});
+  var u=new Uint8Array(44+N*2),dv=new DataView(u.buffer);
+  function w(o,x){for(var q=0;q<x.length;q++)dv.setUint8(o+q,x.charCodeAt(q))}
+  w(0,'RIFF');dv.setUint32(4,36+N*2,true);w(8,'WAVE');w(12,'fmt ');dv.setUint32(16,16,true);dv.setUint16(20,1,true);dv.setUint16(22,1,true);dv.setUint32(24,sr,true);dv.setUint32(28,sr*2,true);dv.setUint16(32,2,true);dv.setUint16(34,16,true);w(36,'data');dv.setUint32(40,N*2,true);
+  for(k=0;k<N;k++)dv.setInt16(44+k*2,Math.max(-1,Math.min(1,buf[k]))*32767,true);
+  var str='';for(k=0;k<u.length;k+=8192)str+=String.fromCharCode.apply(null,u.subarray(k,k+8192));
+  return 'data:audio/wav;base64,'+btoa(str)}
+var SND={},SNDU=false;
+function sndGet(key){if(!SND[key]){var d=SNDDEF[key],a=new Audio(wavUri(d[0],d[1],d[2]));a.preload='auto';SND[key]=a}return SND[key]}
+function sndUnlock(){if(SNDU)return;SNDU=true;
+  Object.keys(SNDDEF).forEach(function(k){try{var a=sndGet(k);a.muted=true;var p=a.play(),back=function(){try{a.pause();a.currentTime=0;a.muted=false}catch(e){}};
+    if(p&&p.then)p.then(back,function(){a.muted=false;SNDU=false});else back()}catch(e){SNDU=false}})}
+function playSnd(key){if(!CFG.sound)return;var d=SNDDEF[key],a=sndGet(key),p;
+  try{a.pause();a.currentTime=0;a.muted=false;p=a.play()}catch(e){}
+  var fb=function(){tone(d[0],d[1],d[2])};if(p&&p.catch)p.catch(fb);else if(!p)fb()}
+['pointerdown','touchend','click','keydown'].forEach(function(n){document.addEventListener(n,function(){ac();sndUnlock()},true)});
+document.addEventListener('visibilitychange',function(){if(!document.hidden){acReset();audioMode('play');ac()}});
+window.addEventListener('pageshow',function(){acReset();ac()});
+function chime(){playSnd('ok')}
+function buzz(){playSnd('bad')}
 
 /* ============ ДВИЖОК ленты ============ */
 var stage=document.getElementById('stage');
 var queue=[],i=0,ti=0,st,wrong,answered,AT=0,ansAt=0,MT=0;
 var CUR={cards:[]};
 var AT_MS=2000;
-function atbClear(){var x=document.getElementById('atb');if(x)x.remove()}
-function atbStart(ms){atbClear();var d=el('div','atb'),f=el('i');d.id='atb';f.style.animationDuration=ms+'ms';d.appendChild(f);stage.appendChild(d)}
+var AUTOP=false;
+function atbClear(){AUTOP=false;var x=document.getElementById('atb');if(x)x.remove()}
+function atbStart(ms){atbClear();AUTOP=true;var d=el('div','atb'),f=el('i');d.id='atb';f.style.animationDuration=ms+'ms';d.appendChild(f);stage.appendChild(d)}
 function reset(){queue=CUR.cards.map(function(c){return Object.assign({},c)});i=0;st={ok:0,bad:0,skip:0,prog:{}};for(var u in UNITS)st.prog[u]=0;draw()}
 var VOICES=[],vcache={};
 function loadV(){try{VOICES=speechSynthesis.getVoices()||[];vcache={}}catch(e){}}
@@ -658,14 +701,38 @@ function pickV(l){if(vcache[l]!==undefined)return vcache[l];var pre=l.slice(0,2)
     if(sc>bs){bs=sc;best=v}});
   if(VOICES.length)vcache[l]=best;return best}
 function mkU(t,l){var u=new SpeechSynthesisUtterance(t);u.lang=l;var v=pickV(l);if(v)u.voice=v;u.rate=.9;u.pitch=1;return u}
-function stopTts(){try{if(speechSynthesis.speaking||speechSynthesis.pending)speechSynthesis.cancel()}catch(e){}}
-function tts(t,l){try{stopTts();speechSynthesis.speak(mkU(t,l))}catch(e){}}
-function ttsGap(a,b,l){try{stopTts();var u1=mkU(a,l),u2=mkU(b,l);u1.onend=function(){beep(.4)};speechSynthesis.speak(u1);speechSynthesis.speak(u2)}catch(e){}}
-function playSay(x){if(!x)return;if(x.gap)ttsGap(x.gap[0],x.gap[1],x.l);else tts(x.t,x.l)}
+/* Причины зависаний: cancel() и сразу speak() в одном кадре глотает фразу; объект фразы убирает сборщик мусора, и onend не приходит;
+   движок остаётся на паузе. Поэтому: небольшая задержка после cancel, resume() перед speak, ссылки на фразы, сторожевые таймеры и один повтор. */
+var TG=0,TTSON=false,KEEP=[],TTT=0;
+function stopTts(){TG++;clearTimeout(TTT);TTSON=false;KEEP=[];try{speechSynthesis.cancel()}catch(e){}}
+window.stopTts=stopTts;
+function speakSeq(parts,l){
+  stopTts();var g=TG;TTSON=true;
+  function step(k){
+    if(g!==TG)return;
+    while(k<parts.length&&parts[k]==='')k++;
+    if(k>=parts.length){TTSON=false;return}
+    var p=parts[k];
+    if(typeof p==='number'){TTT=setTimeout(function(){step(k+1)},p);return}
+    var tries=0;
+    (function say(){
+      var u=mkU(p,l),started=false,fin=false,wd,cap;KEEP.push(u);
+      function fire(){if(fin)return;fin=true;clearTimeout(wd);clearTimeout(cap);KEEP=KEEP.filter(function(x){return x!==u});if(g===TG)step(k+1)}
+      u.onstart=function(){started=true;clearTimeout(wd)};
+      u.onend=fire;
+      u.onerror=function(e){if(e&&(e.error==='canceled'||e.error==='interrupted'))return;fire()};
+      wd=setTimeout(function(){if(fin||g!==TG||started)return;fin=true;clearTimeout(cap);try{speechSynthesis.cancel()}catch(x){}
+        if(tries++<1)TTT=setTimeout(function(){if(g===TG)say()},150);else if(g===TG)TTSON=false},2500);
+      cap=setTimeout(function(){if(g===TG)fire()},p.length*160+5000);
+      try{speechSynthesis.resume()}catch(x){}
+      try{speechSynthesis.speak(u)}catch(x){fire()}
+    })()}
+  TTT=setTimeout(function(){step(0)},70)}
+function playSay(x){if(!x)return;if(x.gap)speakSeq([x.gap[0],500,x.gap[1]],x.l);else speakSeq([x.t],x.l)}
 var lastSay=null;
 function sayTask(t){var c=queue[i],x=t.say||(c&&c.kind==='lesson'&&UNITS[c.units[0].id]&&{t:UNITS[c.units[0].id].title,l:'en-US'});lastSay=x||null;var rb=document.getElementById('rep');if(rb)rb.hidden=!lastSay;if(CFG.voice&&x)playSay(x)}
 var kbp=document.getElementById('kbp');
-setInterval(function(){var f=document.getElementById('rep');if(!f||f.hidden)return;var v=false;try{v=speechSynthesis.speaking||speechSynthesis.pending}catch(e){}f.classList.toggle('sp',!!v)},120);
+setInterval(function(){var f=document.getElementById('rep');if(!f||f.hidden)return;f.classList.toggle('sp',!!TTSON)},120);
 function warmKb(){var c=queue[i],nx=(c&&ti<c.tasks.length-1)?c.tasks[ti+1]:(queue[i+1]&&queue[i+1].tasks[0]);if(CFG.kb&&nx&&nx.type==='type_word'){try{kbp.focus({preventScroll:true})}catch(e){}}}
 function head(){
   document.getElementById('cnt').textContent=Math.min(i+1,queue.length)+' / '+queue.length;
@@ -685,10 +752,10 @@ function draw(){
     var b=el('button','main','Пройти заново');b.onclick=reset;e.appendChild(b);stage.appendChild(e);return;
   }
   ti=0;wrong=false;answered=false;
-  var c=queue[i],card=el('div','card');card.id='card';
+  var c=queue[i],card=el('div','card split');card.id='card';var cb=el('div','cbody');cb.id='cbody';card.appendChild(cb);
   c.units.filter(function(x){return x.role==='teaches'}).forEach(function(x){
-    card.appendChild(el('div','item',UNITS[x.id].title+(UNITS[x.id].data.em?' '+UNITS[x.id].data.em:'')));card.appendChild(el('div','tr',UNITS[x.id].data.tr))});
-  c.blocks.forEach(function(b){card.appendChild(BLOCKS[b.type](b.payload))});
+    cb.appendChild(el('div','item',UNITS[x.id].title+(UNITS[x.id].data.em?' '+UNITS[x.id].data.em:'')));cb.appendChild(el('div','tr',UNITS[x.id].data.tr))});
+  c.blocks.forEach(function(b){cb.appendChild(BLOCKS[b.type](b.payload))});
   var box=el('div');box.id='task';box.className='dock';card.appendChild(box);
   stage.appendChild(card);drawJson();showTask();
 }
@@ -703,7 +770,7 @@ function showTask(){
     var res=TASKS[t.type].check(a,t.answer_spec||{},t);
     if(mark)mark(res,t,extra);finish(res,t);
   });
-  ['.q','.ans','.heard'].forEach(function(sl){var x=box.querySelector(sl);if(x){if(sl!=='.heard')x.classList.add(sl==='.q'?'prompt':'top');box.parentNode.insertBefore(x,box)}});
+  ['.q','.ans','.heard'].forEach(function(sl){var x=box.querySelector(sl);if(x){if(sl!=='.heard')x.classList.add(sl==='.q'?'prompt':'top');document.getElementById('cbody').appendChild(x)}});
   if(t.type!=='type_word'){document.getElementById('t2').classList.remove('kb');if(document.activeElement===kbp)kbp.blur()}
   sayTask(t);
   clearTimeout(MT);var mm=box._mic;
@@ -719,7 +786,7 @@ function finish(res,t){
   else{var ct=String(T.show(t.answer_spec||{},t));f.appendChild(document.createTextNode('Правильный ответ'));f.appendChild(el('span','cw'+(ct.length>30?' sm':''),ct))}
   var extra=[res.note,!res.ok&&fb.wrong].filter(Boolean).join(' ');if(extra)f.appendChild(el('span','',extra));
   if(!CFG.auto||!res.ok)f.appendChild(el('div','nx','Свайп вверх — дальше'));
-  box.parentNode.insertBefore(f,box);ansAt=Date.now();head();
+  document.getElementById('cbody').appendChild(f);try{f.scrollIntoView({block:'nearest'})}catch(e){}ansAt=Date.now();head();
   if(CFG.auto&&res.ok){AT=setTimeout(skip,AT_MS);atbStart(AT_MS)}
 }
 function advance(kind){
@@ -733,17 +800,24 @@ function skip(){if(i>=queue.length)return;var c=queue[i],t=c.tasks[ti];clearTime
   if(answered&&ti<c.tasks.length-1){ti++;showTask();return}
   advance(answered||t.type==='ack'?'done':'skip')}
 
+/* любое действие пользователя: останавливает автопереход и озвучку кнопкой динамика */
+(function(){var T=document.getElementById('t2');
+  function cancelAuto(){if(!AUTOP)return;clearTimeout(AT);atbClear();var f=document.querySelector('#t2 .fb');if(f&&!f.querySelector('.nx'))f.appendChild(el('div','nx','Свайп вверх — дальше'))}
+  T.addEventListener('pointerdown',function(e){cancelAuto();if(TTSON&&!(e.target.closest&&e.target.closest('#rep')))stopTts()},true);
+  T.addEventListener('wheel',cancelAuto,{passive:true,capture:true});
+  document.addEventListener('keydown',function(){if(T.hidden)return;cancelAuto();if(TTSON)stopTts()},true)})();
 /* свайп вверх = пропуск (работает, даже если жест начат на кнопке) */
 var sy=null,s0=0,ov=0,moved=false;
 function curCard(){return document.getElementById('card')}
+function scr(){return document.getElementById('cbody')||curCard()}
 stage.addEventListener('pointerdown',function(e){
   if(e.target.closest('input,pre,.mic,.asw')||(e.pointerType==='mouse'&&e.button!==0))return;
-  var c=curCard();if(!c)return;sy=e.clientY;s0=c.scrollTop;ov=0;moved=false});
+  var c=curCard();if(!c)return;sy=e.clientY;s0=scr().scrollTop;ov=0;moved=false});
 window.addEventListener('pointermove',function(e){
   if(sy===null)return;var c=curCard();if(!c)return;var d=e.clientY-sy;
   if(Math.abs(d)>10)moved=true;if(!moved)return;
-  var max=c.scrollHeight-c.clientHeight,want=Math.max(0,s0-d);
-  ov=want>max?want-max:0;c.scrollTop=Math.min(want,max);
+  var q=scr(),max=q.scrollHeight-q.clientHeight,want=Math.max(0,s0-d);
+  ov=want>max?want-max:0;q.scrollTop=Math.min(want,max);
   c.style.transition='none';c.style.transform='translateY('+(-ov)+'px)'});
 function endSwipe(){
   if(sy===null)return;var c=curCard();sy=null;
@@ -765,9 +839,9 @@ document.addEventListener('keydown',function(e){if(e.key==='ArrowUp'&&!document.
   function init(){var p=P||{x:innerWidth-76,y:110};place(p.x,p.y)}init();window.addEventListener('resize',init);
   f.onpointerdown=function(e){dn=true;mv=false;sx=e.clientX;sy=e.clientY;var r=f.getBoundingClientRect();ox=r.left;oy=r.top;try{f.setPointerCapture(e.pointerId)}catch(x){}};
   f.onpointermove=function(e){if(!dn)return;var dx=e.clientX-sx,dy=e.clientY-sy;if(!mv&&Math.abs(dx)+Math.abs(dy)>8)mv=true;if(mv)place(ox+dx,oy+dy)};
-  f.onpointerup=function(){if(!dn)return;dn=false;if(mv){var r=f.getBoundingClientRect();P={x:r.left,y:r.top};try{localStorage.setItem('enFab',JSON.stringify(P))}catch(x){}}else playSay(lastSay)};
+  f.onpointerup=function(){if(!dn)return;dn=false;if(mv){var r=f.getBoundingClientRect();P={x:r.left,y:r.top};try{localStorage.setItem('enFab',JSON.stringify(P))}catch(x){}}else if(TTSON)stopTts();else playSay(lastSay)};
   f.onpointercancel=function(){dn=false};f.oncontextmenu=function(e){e.preventDefault()}})();
-window.t2={start:function(o){CUR=o;UNITS=o.units;reset();var c=queue[0];if(CFG.kb&&c&&c.tasks[0].type==='type_word')try{kbp.focus({preventScroll:true})}catch(e){}},stop:function(){toastHide();clearTimeout(AT);clearTimeout(MT);stopMic();try{speechSynthesis.cancel()}catch(e){}}};
+window.t2={start:function(o){CUR=o;UNITS=o.units;reset();var c=queue[0];if(CFG.kb&&c&&c.tasks[0].type==='type_word')try{kbp.focus({preventScroll:true})}catch(e){}},stop:function(){toastHide();clearTimeout(AT);clearTimeout(MT);stopMic();atbClear();stopTts()}};
 })();</script>
 <script>(function(){
 var L=document.getElementById('launcher'),LM=document.getElementById('lmain'),LS=document.getElementById('lset'),A=document.getElementById('t1'),B=document.getElementById('t2');
@@ -780,7 +854,7 @@ document.getElementById('presetS').onclick=function(){show('1');t1.start({modes:
 document.getElementById('openSet').onclick=function(){show('s')};
 document.getElementById('backs').onclick=function(){show('l')};
 var C=window.CFG;
-[['cv','voice'],['cs','sound'],['cd','data'],['ck','kb']].forEach(function(p){var e=document.getElementById(p[0]);e.checked=!!C[p[1]];e.onchange=function(){C[p[1]]=e.checked;cfgSave();if(p[1]==='voice'&&!e.checked)try{speechSynthesis.cancel()}catch(x){}if(p[1]==='sound'&&e.checked)chimePreview()}});
+[['cv','voice'],['cs','sound'],['cd','data'],['ck','kb']].forEach(function(p){var e=document.getElementById(p[0]);e.checked=!!C[p[1]];e.onchange=function(){C[p[1]]=e.checked;cfgSave();if(p[1]==='voice'&&!e.checked)try{window.stopTts()}catch(x){}if(p[1]==='sound'&&e.checked)chimePreview()}});
 [].forEach.call(document.querySelectorAll('input[name=nm]'),function(r){r.checked=(r.value==='auto')===!!C.auto;r.onchange=function(){C.auto=r.value==='auto';cfgSave()}});
 (function(){var x0=null,y0=0;
  function view(){return !LS.hidden?'s':!A.hidden?'1':!B.hidden?'2':null}
