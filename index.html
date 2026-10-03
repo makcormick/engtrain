@@ -485,7 +485,7 @@ function micButton(inp,hint,lang){
   b.recog=function(){b.classList.add('rg');clearTimeout(rgT);rgT=setTimeout(function(){b.classList.remove('rg')},700)};
   function ui(v){on=v;b.classList.toggle('on',v)}
   function setv(v){if(b.disabled)return;inp.value=v;b.recog();if(b.onpartial)b.onpartial(v)}
-  function cleanup(){try{node&&node.disconnect()}catch(e){}try{stream&&stream.getTracks().forEach(function(t){t.stop()})}catch(e){}try{rec&&rec.remove()}catch(e){}var cx=ctx;ctx=stream=node=rec=null;try{cx&&cx.close()}catch(e){}busy=false;ui(false);b.level(0);audioMode('play')}
+  function cleanup(){try{node&&node.disconnect()}catch(e){}try{stream&&stream.getTracks().forEach(function(t){t.stop()})}catch(e){}try{rec&&rec.remove()}catch(e){}ctx=stream=node=rec=null;busy=false;ui(false);b.level(0);audioMode('play')}
   b.cleanup=cleanup;
   b.halt=function(){held=false;auto=false;clearTimeout(tmA);if(webT){b.stop(function(){});return}cleanup();hint.textContent=''};
   b.auto=function(){if(on||busy||b.disabled)return;held=true;auto=true;begin(true)};
@@ -501,7 +501,7 @@ function micButton(inp,hint,lang){
       if(!held){busy=false;hint.textContent='Готово. Нажмите на микрофон и говорите.';return}
       audioMode('record');return navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:!IOS,noiseSuppression:!IOS,autoGainControl:false}}).then(function(s){
         if(!held){s.getTracks().forEach(function(t){t.stop()});busy=false;hint.textContent='';return}
-        stream=s;ctx=new (window.AudioContext||window.webkitAudioContext)();try{ctx.resume()}catch(e){}
+        stream=s;ctx=ac();
         rec=new model.KaldiRecognizer(ctx.sampleRate);var fin='',fired=false;
         rec.on('result',function(m){var t=m.result&&m.result.text;if(t){fin=(fin+' '+t).trim();setv(fin);if(auto&&!fired){fired=true;rel()}}});
         rec.on('partialresult',function(m){var p=m.result&&m.result.partial;if(p)setv((fin+' '+p).trim())});
@@ -704,10 +704,11 @@ function mkU(t,l){var u=new SpeechSynthesisUtterance(t);u.lang=l;var v=pickV(l);
 /* Причины зависаний: cancel() и сразу speak() в одном кадре глотает фразу; объект фразы убирает сборщик мусора, и onend не приходит;
    движок остаётся на паузе. Поэтому: небольшая задержка после cancel, resume() перед speak, ссылки на фразы, сторожевые таймеры и один повтор. */
 var TG=0,TTSON=false,KEEP=[],TTT=0;
-function stopTts(){TG++;clearTimeout(TTT);TTSON=false;KEEP=[];try{speechSynthesis.cancel()}catch(e){}}
+function ttsLive(){try{return speechSynthesis.speaking||speechSynthesis.pending}catch(e){return false}}
+function stopTts(){var was=TTSON||ttsLive();TG++;clearTimeout(TTT);TTSON=false;KEEP=[];if(was)try{speechSynthesis.cancel()}catch(e){}}
 window.stopTts=stopTts;
 function speakSeq(parts,l){
-  stopTts();var g=TG;TTSON=true;
+  var busy=TTSON||ttsLive();stopTts();var g=TG;TTSON=true;
   function step(k){
     if(g!==TG)return;
     while(k<parts.length&&parts[k]==='')k++;
@@ -724,10 +725,10 @@ function speakSeq(parts,l){
       wd=setTimeout(function(){if(fin||g!==TG||started)return;fin=true;clearTimeout(cap);try{speechSynthesis.cancel()}catch(x){}
         if(tries++<1)TTT=setTimeout(function(){if(g===TG)say()},150);else if(g===TG)TTSON=false},2500);
       cap=setTimeout(function(){if(g===TG)fire()},p.length*160+5000);
-      try{speechSynthesis.resume()}catch(x){}
+      try{if(speechSynthesis.paused)speechSynthesis.resume()}catch(x){}
       try{speechSynthesis.speak(u)}catch(x){fire()}
     })()}
-  TTT=setTimeout(function(){step(0)},70)}
+  if(busy)TTT=setTimeout(function(){step(0)},60);else step(0)}
 function playSay(x){if(!x)return;if(x.gap)speakSeq([x.gap[0],500,x.gap[1]],x.l);else speakSeq([x.t],x.l)}
 var lastSay=null;
 function sayTask(t){var c=queue[i],x=t.say||(c&&c.kind==='lesson'&&UNITS[c.units[0].id]&&{t:UNITS[c.units[0].id].title,l:'en-US'});lastSay=x||null;var rb=document.getElementById('rep');if(rb)rb.hidden=!lastSay;if(CFG.voice&&x)playSay(x)}
@@ -793,7 +794,7 @@ function advance(kind){
   var c=queue[i],card=document.getElementById('card');if(!card)return;
   if(kind==='skip')st.skip++;
   if((kind==='skip'||wrong)&&!c.rq)queue.splice(Math.min(i+4,queue.length),0,Object.assign({},c,{rq:true}));
-  clearTimeout(AT);clearTimeout(MT);atbClear();stopMic();card.classList.add('out');var j=document.getElementById('json');if(j)j.remove();
+  clearTimeout(AT);clearTimeout(MT);atbClear();stopTts();stopMic();card.classList.add('out');var j=document.getElementById('json');if(j)j.remove();
   setTimeout(function(){i++;draw()},220);
 }
 function skip(){if(i>=queue.length)return;var c=queue[i],t=c.tasks[ti];clearTimeout(AT);atbClear();warmKb();
@@ -803,9 +804,9 @@ function skip(){if(i>=queue.length)return;var c=queue[i],t=c.tasks[ti];clearTime
 /* любое действие пользователя: останавливает автопереход и озвучку кнопкой динамика */
 (function(){var T=document.getElementById('t2');
   function cancelAuto(){if(!AUTOP)return;clearTimeout(AT);atbClear();var f=document.querySelector('#t2 .fb');if(f&&!f.querySelector('.nx'))f.appendChild(el('div','nx','Свайп вверх — дальше'))}
-  T.addEventListener('pointerdown',function(e){cancelAuto();if(TTSON&&!(e.target.closest&&e.target.closest('#rep')))stopTts()},true);
+  T.addEventListener('pointerdown',cancelAuto,true);
   T.addEventListener('wheel',cancelAuto,{passive:true,capture:true});
-  document.addEventListener('keydown',function(){if(T.hidden)return;cancelAuto();if(TTSON)stopTts()},true)})();
+  document.addEventListener('keydown',function(){if(!T.hidden)cancelAuto()},true)})();
 /* свайп вверх = пропуск (работает, даже если жест начат на кнопке) */
 var sy=null,s0=0,ov=0,moved=false;
 function curCard(){return document.getElementById('card')}
@@ -839,7 +840,7 @@ document.addEventListener('keydown',function(e){if(e.key==='ArrowUp'&&!document.
   function init(){var p=P||{x:innerWidth-76,y:110};place(p.x,p.y)}init();window.addEventListener('resize',init);
   f.onpointerdown=function(e){dn=true;mv=false;sx=e.clientX;sy=e.clientY;var r=f.getBoundingClientRect();ox=r.left;oy=r.top;try{f.setPointerCapture(e.pointerId)}catch(x){}};
   f.onpointermove=function(e){if(!dn)return;var dx=e.clientX-sx,dy=e.clientY-sy;if(!mv&&Math.abs(dx)+Math.abs(dy)>8)mv=true;if(mv)place(ox+dx,oy+dy)};
-  f.onpointerup=function(){if(!dn)return;dn=false;if(mv){var r=f.getBoundingClientRect();P={x:r.left,y:r.top};try{localStorage.setItem('enFab',JSON.stringify(P))}catch(x){}}else if(TTSON)stopTts();else playSay(lastSay)};
+  f.onpointerup=function(){if(!dn)return;dn=false;if(mv){var r=f.getBoundingClientRect();P={x:r.left,y:r.top};try{localStorage.setItem('enFab',JSON.stringify(P))}catch(x){}}else playSay(lastSay)};
   f.onpointercancel=function(){dn=false};f.oncontextmenu=function(e){e.preventDefault()}})();
 window.t2={start:function(o){CUR=o;UNITS=o.units;reset();var c=queue[0];if(CFG.kb&&c&&c.tasks[0].type==='type_word')try{kbp.focus({preventScroll:true})}catch(e){}},stop:function(){toastHide();clearTimeout(AT);clearTimeout(MT);stopMic();atbClear();stopTts()}};
 })();</script>
