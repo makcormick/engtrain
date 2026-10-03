@@ -688,7 +688,7 @@ function pickV(l){if(vcache[l]!==undefined)return vcache[l];var pre=l.slice(0,2)
     sc+=v.localService?20:-20;
     if(sc>bs){bs=sc;best=v}});
   if(VOICES.length)vcache[l]=best;return best}
-function mkU(t,l){var u=new SpeechSynthesisUtterance(t);u.lang=l;var v=pickV(l);if(v)u.voice=v;u.rate=.9;u.pitch=1;return u}
+function mkU(t,l){var u=new SpeechSynthesisUtterance(t);u.lang=l;u.rate=.9;u.pitch=1;return u}
 /* Озвучка без искусственных задержек: speak() вызывается в том же обработчике нажатия, без пауз, очередей и ожиданий.
    Сторож нужен только на редкий случай, когда браузер проглотил фразу после cancel(): тогда фраза повторяется почти сразу. */
 var TG=0,TTSON=false,KEEP=[],TTT=0;
@@ -696,7 +696,7 @@ function ttsLive(){try{return speechSynthesis.speaking||speechSynthesis.pending}
 function stopTts(){var was=TTSON||ttsLive();TG++;clearTimeout(TTT);TTSON=false;KEEP=[];if(was)try{speechSynthesis.cancel()}catch(e){}}
 window.stopTts=stopTts;
 function speakSeq(parts,l){
-  stopTts();var g=TG;TTSON=true;if(!VOICES.length)loadV();
+  stopTts();var g=TG;TTSON=true;
   function step(k){
     if(g!==TG)return;
     while(k<parts.length&&parts[k]==='')k++;
