@@ -689,10 +689,14 @@ function pickV(l){if(VC[l]!==undefined)return VC[l];var pre=l.slice(0,2),best=nu
     if(/espeak|fred|albert|zarvox|bad news|bells|boing|bubbles|cellos|deranged|good news|hysterical|junior|organ|ralph|trinoids|whisper|wobble|superstar|jester|grandma|grandpa|reed|rocko|shelley|flo|sandy|eddy/i.test(n))sc-=10;
     if(sc>bs){bs=sc;best=v}});
   if(VOICES.length)VC[l]=best;return best}
+/* Прогрев движка речи при первом касании: первая озвучка не ждёт инициализации голоса */
+var WU=false;
+function warmTts(){try{var u=new SpeechSynthesisUtterance(' ');u.volume=0;u.lang='en-US';var v=pickV('en-US');if(v)u.voice=v;WU=true;KEEPU=u;u.onend=u.onerror=function(){WU=false};speechSynthesis.speak(u)}catch(e){WU=false}}
+document.addEventListener('pointerdown',warmTts,{once:true,capture:true});
 var TG=0,SEQ=false,KEEPU=null;
 function fabSp(on){var f=document.getElementById('rep');if(f)f.classList.toggle('sp',!!on)}
 function speakParts(parts,l){
-  try{if(speechSynthesis.speaking||speechSynthesis.pending)speechSynthesis.cancel()}catch(e){}
+  try{if(!WU&&(speechSynthesis.speaking||speechSynthesis.pending))speechSynthesis.cancel();if(speechSynthesis.paused)speechSynthesis.resume();audioMode('play')}catch(e){}
   var g=++TG;SEQ=true;fabSp(true);
   function end(){if(g===TG){SEQ=false;fabSp(false)}}
   (function step(k){
