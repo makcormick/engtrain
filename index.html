@@ -263,6 +263,10 @@ html,body{margin:0}
 @keyframes wvi{0%,100%{transform:scaleY(.12)}50%{transform:scaleY(.3)}}
 @keyframes wvt{0%,100%{transform:scaleY(.2)}50%{transform:scaleY(1)}}
 @media (prefers-reduced-motion:reduce){#t2 .mic .wv i{animation:none;transform:scaleY(.4)}}
+#t2 .mic .wv{transform:scaleY(calc(.5 + var(--lv,.3)*.5));transition:transform .08s linear}
+#t2 .mic.proc{color:var(--acc);border-color:var(--acc);animation:pulse 1.1s infinite}
+@media (prefers-reduced-motion:reduce){#t2 .mic.proc{animation:none}}
+
 
 /* ===== часть 5 ===== */
 #t2 .card.split{padding:0;gap:0;overflow:hidden}
@@ -289,6 +293,8 @@ html,body{margin:0}
 <label class="srow"><span><b>Ручной переход</b><small>После ответа свайп вверх открывает следующую карточку</small></span><input type="radio" name="nm" value="manual"></label>
 <label class="srow"><span><b>Автопереход</b><small>Через 2 секунды после ответа карточка листается сама</small></span><input type="radio" name="nm" value="auto"></label>
 <label class="srow"><span><b>Автоматическая клавиатура</b><small>Открывать клавиатуру в заданиях с вводом слова</small></span><input type="checkbox" id="ck"></label>
+<label class="srow"><span><b>Распознавание офлайн</b><small>Модель Moonshine в браузере: загружается один раз, дальше работает без интернета и без системного сигнала</small></span><input type="radio" name="eng" value="offline"></label>
+<label class="srow"><span><b>Системное распознавание</b><small>Встроенное в браузер: запускается мгновенно, но нужен интернет и слышен системный сигнал</small></span><input type="radio" name="eng" value="system"></label>
 <label class="srow"><span><b>Данные карточки</b><small>Служебный JSON поверх карточки, для отладки</small></span><input type="checkbox" id="cd"></label>
 </div></section>
 <div id="t1" hidden><main><button class="lnk" id="back1">← Меню</button><h1>Тренажёр слов</h1><div id="t1app"></div></main></div>
@@ -400,7 +406,7 @@ menu();
 
 /* ============ ДАННЫЕ (то, что лежало бы в БД) ============ */
 // units: учебные единицы. Повторения считаются по ним, а не по карточкам.
-var CFG=window.CFG={voice:false,sound:true,auto:false,data:false,kb:false,autoMic:false};
+var CFG=window.CFG={voice:false,sound:true,auto:false,data:false,kb:false,autoMic:false,engine:'offline'};
 try{Object.assign(CFG,JSON.parse(localStorage.getItem('enCfg')||'{}'))}catch(e){}
 window.cfgSave=function(){try{localStorage.setItem('enCfg',JSON.stringify(CFG))}catch(e){}};
 var UNITS={};
@@ -431,36 +437,144 @@ function toast(m,info){var e=document.getElementById('toast');document.getElemen
 document.getElementById('toastx').onclick=toastHide;
 var TOASTRE=/^(Нет доступа|Ошибка|Не удалось|Микрофон не запустился|Запись прервана|Речь не|Офлайн|Голосовой ввод|Не то)/;
 function mkHint(){var v='';return {get textContent(){return v},set textContent(x){v=String(x);if(TOASTRE.test(v))toast(v)},appendChild:function(){}}}
-/* ===== Запись голоса: встроенное распознавание браузера. Нажали - слушает, нажали ещё раз - остановили ===== */
+/* ===== Запись голоса: офлайн Moonshine (Transformers.js, Web Worker) или системное распознавание браузера. Нажали - слушает, нажали ещё раз - остановили ===== */
 var MIC=null;
 /* iOS: во время распознавания Safari переключает аудиосессию на «звонок» (тихий разговорный динамик).
    Явно возвращаем режим воспроизведения, когда запись закончилась, чтобы сигналы и озвучка звучали громко. */
 function audioMode(t){try{if(navigator.audioSession)navigator.audioSession.type=t}catch(e){}}
 function stopMic(){if(MIC&&MIC.halt)MIC.halt()}
 document.addEventListener('visibilitychange',function(){if(document.hidden)stopMic()});
+/* --- Офлайн-движок: модель в фоновом потоке, интерфейс не замирает --- */
+var ASR=(function(){
+  var W=null,ready=false,dead=false,pct=0,shown=false,jobs={},seq=0;
+  var SRC="import{pipeline}from'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3';"
+   +"var P=null,F={};"
+   +"function load(){if(!P)P=pipeline('automatic-speech-recognition','onnx-community/moonshine-tiny-ONNX',{device:'wasm',progress_callback:function(e){if(e.status==='progress'&&e.total){F[e.file]=[e.loaded,e.total];var l=0,t=0,k;for(k in F){l+=F[k][0];t+=F[k][1]}postMessage({t:'prog',p:Math.round(l/t*100)})}}});return P}"
+   +"onmessage=async function(m){var d=m.data;try{if(d.t==='load'){await load();postMessage({t:'ready'})}else if(d.t==='run'){var a=await load(),o=await a(d.audio);postMessage({t:'res',id:d.id,text:String(o&&o.text||'').trim()})}}catch(x){P=null;postMessage({t:'err',id:d.id,msg:String(x&&x.message||x)})}};";
+  function fail(){
+    if(dead)return;dead=true;var w=W;W=null;try{if(w)w.terminate()}catch(e){}
+    var j=jobs;jobs={};Object.keys(j).forEach(function(k){j[k]('fail')});
+    toast('Офлайн-модель недоступна, включено системное распознавание.')}
+  function ensure(){
+    if(W||dead)return;
+    try{
+      if(!window.Worker)throw 0;
+      W=new Worker(URL.createObjectURL(new Blob([SRC],{type:'text/javascript'})),{type:'module'});
+      W.onmessage=function(e){var d=e.data;
+        if(d.t==='prog'){if(!ready){pct=Math.max(pct,d.p);shown=true;toast('Загрузка модели, '+pct+'%',true)}}
+        else if(d.t==='ready'){ready=true;if(shown){shown=false;toastHide()}}
+        else if(d.t==='res'){var f=jobs[d.id];delete jobs[d.id];if(f)f(null,d.text)}
+        else if(d.t==='err'){if(d.id!=null&&ready){var g=jobs[d.id];delete jobs[d.id];if(g)g('err')}else fail()}};
+      W.onerror=function(){fail()};
+      W.postMessage({t:'load'})
+    }catch(x){W=null;dead=true}}
+  function run(pcm,cb){ensure();if(dead||!W){cb('fail');return}var id=++seq;jobs[id]=cb;W.postMessage({t:'run',id:id,audio:pcm},[pcm.buffer])}
+  window.asrEnsure=function(){dead=false;ensure()};
+  return {ensure:ensure,run:run,dead:function(){return dead}}
+})();
+function to16k(a,rate){
+  var r=rate/16000,n=Math.floor(a.length/r),o=new Float32Array(n),i,j,s,e,t,pk=0;
+  for(i=0;i<n;i++){s=Math.floor(i*r);e=Math.max(s+1,Math.min(a.length,Math.floor((i+1)*r)));t=0;for(j=s;j<e;j++)t+=a[j];o[i]=t/(e-s);if(Math.abs(o[i])>pk)pk=Math.abs(o[i])}
+  if(pk>0&&pk<.6){var g=Math.min(8,.6/pk);for(i=0;i<n;i++)o[i]*=g}
+  return o}
 function micButton(inp,hint,lang){
   var b=el('button','mic');b.type='button';b.setAttribute('aria-label','Нажмите и говорите');MIC=b;
   b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg><span class="wv" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>';
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition,rec=null,cbs=[];
-  function start(){
-    b.classList.remove('nudge');
+  var st='idle',sid=0,cur=null,tkTalk=0; // st: idle | rec | proc
+  var offOK=lang==='en-US'&&navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&(window.AudioContext||window.webkitAudioContext);
+  if(offOK&&CFG.engine!=='system')ASR.ensure();
+  function lvl(v){b.style.setProperty('--lv',v)}
+  function talk(on){clearTimeout(tkTalk);b.classList.toggle('talk',on);if(!cur)lvl(on?1:.2)}
+  function reset(){st='idle';b.classList.remove('on','proc','talk');b.style.removeProperty('--lv')}
+  // общий финал: записать текст, вызвать ожидающих, иначе onpartial/onfinal
+  function end(text){
+    reset();var l=cbs;cbs=[];
+    if(text)inp.value=text.trim();
+    if(l.length){l.forEach(function(f){f()});return}
+    if(text&&b.onpartial)b.onpartial(inp.value);
+    if(!text&&!b.silent)hint.textContent='Речь не распознана. Нажмите на микрофон и попробуйте ещё раз.';
+    b.silent=false;
+    if(b.onfinal)b.onfinal()}
+  /* ---- офлайн: микрофон -> буфер -> Moonshine ---- */
+  function teardown(s){
+    try{s.node.onaudioprocess=null;s.node.disconnect();s.src.disconnect()}catch(e){}
+    try{s.stream.getTracks().forEach(function(t){t.stop()})}catch(e){}
+    try{s.ctx.close()}catch(e){}
+    if(cur===s)cur=null;audioMode('playback')}
+  function onChunk(s,d){
+    if(cur!==s||st!=='rec')return;
+    var sum=0,k;for(k=0;k<d.length;k++)sum+=d[k]*d[k];
+    var rms=Math.sqrt(sum/d.length),now=Date.now();
+    s.chunks.push(d);s.n++;
+    if(s.n<=3){s.noise=Math.min(s.noise,rms);if(s.n===3)s.thr=Math.min(.05,Math.max(.018,s.noise*3))}
+    var v=rms>(s.first<0?s.thr:s.thr*.7);
+    lvl(Math.min(1,rms*10).toFixed(2));
+    if(v){if(s.first<0)s.first=s.chunks.length-1;s.lastV=now;b.classList.add('talk');clearTimeout(tkTalk);tkTalk=setTimeout(function(){b.classList.remove('talk')},350)}
+    var t=now-s.t0;
+    if((s.first>=0&&!v&&now-s.lastV>1000)||(s.first<0&&t>8000)||t>30000)finishRec()}
+  function finishRec(){
+    var s=cur;if(!s||st!=='rec')return;
+    var rate=s.rate,first=s.first,chunks=s.chunks;
+    teardown(s);b.classList.remove('talk');b.style.removeProperty('--lv');
+    if(first<0){end('');return}
+    var parts=chunks.slice(Math.max(0,first-3)),len=0,k,o=0;
+    parts.forEach(function(c){len+=c.length});
+    var raw=new Float32Array(len);parts.forEach(function(c){raw.set(c,o);o+=c.length});
+    var pcm=to16k(raw,rate);
+    if(pcm.length<4000){end('');return}
+    st='proc';b.classList.remove('on');b.classList.add('proc');
+    var my=sid;
+    ASR.run(pcm,function(err,text){
+      if(my!==sid||st!=='proc')return;
+      if(err){if(err==='err')toast('Ошибка распознавания. Попробуйте ещё раз.');end('');return}
+      end(text)})}
+  function startOff(){
+    var my=++sid;st='rec';b.classList.add('on');lvl(.2);audioMode('play-and-record');
+    navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,channelCount:1}}).then(function(stream){
+      if(my!==sid){stream.getTracks().forEach(function(t){t.stop()});return}
+      var AC=window.AudioContext||window.webkitAudioContext,ctx=new AC(),src=ctx.createMediaStreamSource(stream),node=ctx.createScriptProcessor(4096,1,1),mute=ctx.createGain();
+      mute.gain.value=0;
+      var s=cur={stream:stream,ctx:ctx,src:src,node:node,chunks:[],rate:ctx.sampleRate,n:0,noise:Infinity,thr:.02,first:-1,lastV:0,t0:Date.now()};
+      node.onaudioprocess=function(e){onChunk(s,new Float32Array(e.inputBuffer.getChannelData(0)))};
+      src.connect(node);node.connect(mute);mute.connect(ctx.destination);
+      if(ctx.state==='suspended')ctx.resume()
+    }).catch(function(err){
+      if(my!==sid)return;
+      reset();audioMode('playback');
+      var n=err&&err.name,denied=n==='NotAllowedError'||n==='SecurityError'||n==='PermissionDeniedError';
+      if(b.silent&&denied){b.classList.add('nudge');b.silent=false;return}
+      b.silent=false;
+      hint.textContent=denied?'Нет доступа к микрофону. Разрешите его в браузере.':'Микрофон не запустился. Проверьте, что он подключён.'})}
+  /* ---- запасной вариант: системное распознавание браузера ---- */
+  function startSys(){
     if(!SR){if(!b.silent)hint.textContent='Голосовой ввод недоступен в этом браузере. Печатайте ответ.';return}
     audioMode('play-and-record');var r=rec=new SR();r.lang=lang;r.interimResults=true;
-    var tk=0;function talk(on){clearTimeout(tk);b.classList.toggle('talk',on)}
     r.onspeechstart=r.onsoundstart=function(){talk(true)};r.onspeechend=r.onsoundend=function(){talk(false)};
-    r.onresult=function(e){var t='',k;for(k=0;k<e.results.length;k++)t+=e.results[k][0].transcript;inp.value=t.trim();b.classList.add('talk');clearTimeout(tk);tk=setTimeout(function(){b.classList.remove('talk')},700);if(b.onpartial)b.onpartial(inp.value)};
+    r.onresult=function(e){var t='',k;for(k=0;k<e.results.length;k++)t+=e.results[k][0].transcript;inp.value=t.trim();b.classList.add('talk');clearTimeout(tkTalk);tkTalk=setTimeout(function(){b.classList.remove('talk')},700);if(b.onpartial)b.onpartial(inp.value)};
     r.onerror=function(e){var c=e.error;
       if(b.silent&&(c==='not-allowed'||c==='service-not-allowed')){b.classList.add('nudge');return}
       if(c==='not-allowed'||c==='service-not-allowed')hint.textContent='Нет доступа к микрофону. Разрешите его в браузере.';
       else if(c!=='no-speech'&&c!=='aborted')hint.textContent='Ошибка распознавания: '+c+'.'};
-    r.onend=function(){if(r!==rec)return;rec=null;b.silent=false;clearTimeout(tk);b.classList.remove('on','talk');audioMode('playback');var l=cbs;cbs=[];if(l.length)l.forEach(function(f){f()});else if(b.onfinal)b.onfinal()};
-    try{r.start();b.classList.add('on')}catch(x){rec=null;audioMode('playback');if(b.silent)b.classList.add('nudge')}}
+    r.onend=function(){if(r!==rec)return;rec=null;b.silent=false;clearTimeout(tkTalk);reset();audioMode('playback');var l=cbs;cbs=[];if(l.length)l.forEach(function(f){f()});else if(b.onfinal)b.onfinal()};
+    try{r.start();st='rec';b.classList.add('on')}catch(x){rec=null;reset();audioMode('playback');if(b.silent)b.classList.add('nudge')}}
+  function start(){
+    b.classList.remove('nudge');
+    if(offOK&&CFG.engine!=='system'){ASR.ensure();if(!ASR.dead()){startOff();return}}
+    startSys()}
   // остановить и дождаться последнего результата, потом вызвать cb
-  b.stop=function(cb){if(!rec){if(cb)cb();return}if(cb)cbs.push(cb);rec.stop()};
+  b.stop=function(cb){
+    if(st==='idle'){if(cb)cb();return}
+    if(cb)cbs.push(cb);
+    if(st==='rec'){if(rec)rec.stop();else if(cur)finishRec();else{sid++;reset();var l=cbs;cbs=[];l.forEach(function(f){f()})}}}
   // оборвать молча, без колбэков
-  b.halt=function(){var r=rec;rec=null;cbs=[];b.classList.remove('on','talk');if(r){audioMode('playback');r.onresult=r.onerror=r.onend=r.onspeechstart=r.onsoundstart=r.onspeechend=r.onsoundend=null;try{r.abort()}catch(x){}}};
-  b.onclick=function(){if(b.disabled)return;if(rec)rec.stop();else{b.silent=false;start()}};
-  b.auto=function(){if(b.disabled||rec)return;b.silent=true;start()};
+  b.halt=function(){
+    sid++;cbs=[];clearTimeout(tkTalk);
+    if(cur)teardown(cur);
+    var r=rec;rec=null;reset();
+    if(r){audioMode('playback');r.onresult=r.onerror=r.onend=r.onspeechstart=r.onsoundstart=r.onspeechend=r.onsoundend=null;try{r.abort()}catch(x){}}};
+  b.onclick=function(){if(b.disabled)return;if(st==='rec'){b.stop();return}if(st==='proc')return;b.silent=false;start()};
+  b.auto=function(){if(b.disabled||st!=='idle')return;b.silent=true;start()};
   return b}
 function micRow(mic){
   var w=el('div','microw'),l=el('label','ams'),c=el('input'),sw=el('span','sw'),tx=el('span','','Авто');
@@ -748,6 +862,7 @@ document.getElementById('openSet').onclick=function(){show('s')};
 document.getElementById('backs').onclick=function(){show('l')};
 var C=window.CFG;
 [['cv','voice'],['cs','sound'],['cd','data'],['ck','kb']].forEach(function(p){var e=document.getElementById(p[0]);e.checked=!!C[p[1]];e.onchange=function(){C[p[1]]=e.checked;cfgSave();if(p[1]==='voice'&&!e.checked)try{window.stopTts()}catch(x){}if(p[1]==='sound'&&e.checked)chimePreview()}});
+[].forEach.call(document.querySelectorAll('input[name=eng]'),function(r){r.checked=(r.value==='system')===(C.engine==='system');r.onchange=function(){C.engine=r.value;cfgSave();if(r.value==='offline'&&window.asrEnsure)window.asrEnsure()}});
 [].forEach.call(document.querySelectorAll('input[name=nm]'),function(r){r.checked=(r.value==='auto')===!!C.auto;r.onchange=function(){C.auto=r.value==='auto';cfgSave()}});
 (function(){var x0=null,y0=0;
  function view(){return !LS.hidden?'s':!A.hidden?'1':!B.hidden?'2':null}
