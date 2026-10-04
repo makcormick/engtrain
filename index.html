@@ -676,10 +676,23 @@ function atbClear(){AUTOP=false;var x=document.getElementById('atb');if(x)x.remo
 function atbStart(ms){atbClear();AUTOP=true;var d=el('div','atb'),f=el('i');d.id='atb';f.style.animationDuration=ms+'ms';d.appendChild(f);stage.appendChild(d)}
 function reset(){queue=CUR.cards.map(function(c){return Object.assign({},c)});i=0;st={ok:0,bad:0,skip:0,prog:{}};for(var u in UNITS)st.prog[u]=0;draw()}
 /* ===== Озвучка: как в старой версии (cancel → новая фраза → speak), плюс пауза 0.5 с в «Пропуске» и подсветка кнопки ===== */
+/* Голос: берём локальный (не сетевой) голос нужного языка. Сетевые голоса Chrome и «странные» голоса Safari дают задержку на https. */
+var VOICES=[],VC={};
+function loadV(){try{VOICES=speechSynthesis.getVoices()||[];VC={}}catch(e){}}
+loadV();try{speechSynthesis.addEventListener('voiceschanged',loadV)}catch(e){}
+function pickV(l){if(VC[l]!==undefined)return VC[l];var pre=l.slice(0,2),best=null,bs=-99;
+  VOICES.forEach(function(v){if(String(v.lang).replace('_','-').slice(0,2).toLowerCase()!==pre)return;var n=v.name,sc=0;
+    if(!v.localService)return;
+    if(String(v.lang).replace('_','-').toLowerCase()===l.toLowerCase())sc+=2;
+    if(/premium|enhanced|neural|natural/i.test(n))sc+=1;
+    if(/samantha|ava|allison|susan|evan|zoe|serena|karen|daniel|aria|jenny|guy|milena|yuri|katya|svetlana|dmitry|alena|microsoft/i.test(n))sc+=3;
+    if(/espeak|fred|albert|zarvox|bad news|bells|boing|bubbles|cellos|deranged|good news|hysterical|junior|organ|ralph|trinoids|whisper|wobble|superstar|jester|grandma|grandpa|reed|rocko|shelley|flo|sandy|eddy/i.test(n))sc-=10;
+    if(sc>bs){bs=sc;best=v}});
+  if(VOICES.length)VC[l]=best;return best}
 var TG=0,SEQ=false,KEEPU=null;
 function fabSp(on){var f=document.getElementById('rep');if(f)f.classList.toggle('sp',!!on)}
 function speakParts(parts,l){
-  try{speechSynthesis.cancel()}catch(e){}
+  try{if(speechSynthesis.speaking||speechSynthesis.pending)speechSynthesis.cancel()}catch(e){}
   var g=++TG;SEQ=true;fabSp(true);
   function end(){if(g===TG){SEQ=false;fabSp(false)}}
   (function step(k){
@@ -690,7 +703,7 @@ function speakParts(parts,l){
     if(typeof p==='number'){setTimeout(function(){step(k+1)},p);return}
     var done=false,u;
     function nx(){if(done)return;done=true;if(g===TG)step(k+1)}
-    try{u=new SpeechSynthesisUtterance(p);u.lang=l;u.rate=.95;KEEPU=u;
+    try{u=new SpeechSynthesisUtterance(p);u.lang=l;u.rate=.95;var vv=pickV(l);if(vv)u.voice=vv;KEEPU=u;
       u.onend=nx;u.onerror=function(e){if(e&&(e.error==='canceled'||e.error==='interrupted'))return;nx()};
       setTimeout(nx,p.length*160+4000);
       speechSynthesis.speak(u)}catch(e){nx()}
