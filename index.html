@@ -215,9 +215,6 @@ html,body{margin:0}
 #t2 button.hintb{min-height:calc(2.9em + 20px);align-items:center}
 #t2 .hintb>span{align-self:center}
 #t2 .row button.main{flex:none;width:auto;padding:0 16px;font-size:15px;border-radius:14px}
-@keyframes spk{0%{box-shadow:0 4px 14px rgba(0,0,0,.28),0 0 0 0 var(--acc)}100%{box-shadow:0 4px 14px rgba(0,0,0,.28),0 0 0 14px transparent}}
-#t2 .fab.sp{background:var(--acc-t);border-color:var(--acc);animation:spk .9s ease-out infinite}
-@media (prefers-reduced-motion:reduce){#t2 .fab.sp{animation:none}}
 #t2 .q .qs{font-size:16px;font-weight:500;color:var(--mute);margin-top:8px}
 
 /* ===== часть 4 ===== */
@@ -518,7 +515,7 @@ function micButton(inp,hint,lang){
   return b}
 function subLine(x){var d=el('div','qs'),m=/\[(.+?)\]/.exec(x);if(!m){d.textContent=x;return d}
   d.appendChild(document.createTextNode(x.slice(0,m.index)));d.appendChild(el('span','rw',m[1]));d.appendChild(document.createTextNode(x.slice(m.index+m[0].length)));return d}
-function armMic(mm,okf,delay){clearTimeout(MT);MT=setTimeout(function fire(){if(!CFG.automic||!okf())return;if(TTSON){MT=setTimeout(fire,200);return}mm.auto()},delay)}
+function armMic(mm,okf,delay){clearTimeout(MT);MT=setTimeout(function fire(){if(!CFG.automic||!okf())return;if(ttsLive()){MT=setTimeout(fire,200);return}mm.auto()},delay)}
 function micRow(mic){
   var row=el('div','microw'),sw=el('button','asw');sw.type='button';sw.setAttribute('role','switch');sw.setAttribute('aria-label','Автоматическая запись');
   sw.innerHTML='<span class="trk"><i></i></span><span class="cap">Авто</span>';
@@ -675,17 +672,13 @@ var AUTOP=false;
 function atbClear(){AUTOP=false;var x=document.getElementById('atb');if(x)x.remove()}
 function atbStart(ms){atbClear();AUTOP=true;var d=el('div','atb'),f=el('i');d.id='atb';f.style.animationDuration=ms+'ms';d.appendChild(f);stage.appendChild(d)}
 function reset(){queue=CUR.cards.map(function(c){return Object.assign({},c)});i=0;st={ok:0,bad:0,skip:0,prog:{}};for(var u in UNITS)st.prog[u]=0;draw()}
-/* ===== Озвучка слова: голос браузера по умолчанию, speak() вызывается сразу в обработчике нажатия ===== */
-var TTSON=false,lastSay=null,UT=null;
-function fabSp(on){var f=document.getElementById('rep');if(f)f.classList.toggle('sp',on)}
-function stopTts(){TTSON=false;UT=null;fabSp(false);try{if(speechSynthesis.speaking||speechSynthesis.pending)speechSynthesis.cancel()}catch(e){}}
+/* ===== Озвучка слова (как в старой версии): отменить текущую, сказать новую ===== */
+function tts(t,l){try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.lang=l;u.rate=.95;speechSynthesis.speak(u)}catch(e){}}
+function stopTts(){try{speechSynthesis.cancel()}catch(e){}}
 window.stopTts=stopTts;
-function playSay(x){if(!x||!x.t)return;stopTts();
-  try{var u=new SpeechSynthesisUtterance(x.t);u.lang=x.l;UT=u;
-    u.onstart=function(){if(UT===u){TTSON=true;fabSp(true)}};
-    u.onend=u.onerror=function(){if(UT===u){TTSON=false;fabSp(false)}};
-    speechSynthesis.speak(u)}catch(e){TTSON=false;fabSp(false)}}
-function sayTask(t){var c=queue[i],x=t.say||(c&&c.kind==='lesson'&&UNITS[c.units[0].id]&&{t:UNITS[c.units[0].id].title,l:'en-US'});lastSay=x||null;var rb=document.getElementById('rep');if(rb)rb.hidden=!lastSay;if(CFG.voice&&x)playSay(x)}
+function ttsLive(){try{return speechSynthesis.speaking}catch(e){return false}}
+var lastSay=null;
+function sayTask(t){var c=queue[i],x=t.say||(c&&c.kind==='lesson'&&UNITS[c.units[0].id]&&{t:UNITS[c.units[0].id].title,l:'en-US'});lastSay=x||null;var rb=document.getElementById('rep');if(rb)rb.hidden=!lastSay;if(CFG.voice&&x)tts(x.t,x.l)}
 var kbp=document.getElementById('kbp');
 function warmKb(){var c=queue[i],nx=(c&&ti<c.tasks.length-1)?c.tasks[ti+1]:(queue[i+1]&&queue[i+1].tasks[0]);if(CFG.kb&&nx&&nx.type==='type_word'){try{kbp.focus({preventScroll:true})}catch(e){}}}
 function head(){
@@ -793,7 +786,7 @@ document.addEventListener('keydown',function(e){if(e.key==='ArrowUp'&&!document.
   function init(){var p=P||{x:innerWidth-76,y:110};place(p.x,p.y)}init();window.addEventListener('resize',init);
   f.onpointerdown=function(e){dn=true;mv=false;sx=e.clientX;sy=e.clientY;var r=f.getBoundingClientRect();ox=r.left;oy=r.top;try{f.setPointerCapture(e.pointerId)}catch(x){}};
   f.onpointermove=function(e){if(!dn)return;var dx=e.clientX-sx,dy=e.clientY-sy;if(!mv&&Math.abs(dx)+Math.abs(dy)>8)mv=true;if(mv)place(ox+dx,oy+dy)};
-  f.onpointerup=function(){if(!dn)return;dn=false;if(mv){var r=f.getBoundingClientRect();P={x:r.left,y:r.top};try{localStorage.setItem('enFab',JSON.stringify(P))}catch(x){}}else playSay(lastSay)};
+  f.onpointerup=function(){if(!dn)return;dn=false;if(mv){var r=f.getBoundingClientRect();P={x:r.left,y:r.top};try{localStorage.setItem('enFab',JSON.stringify(P))}catch(x){}}else if(lastSay)tts(lastSay.t,lastSay.l)};
   f.onpointercancel=function(){dn=false};f.oncontextmenu=function(e){e.preventDefault()}})();
 window.t2={start:function(o){CUR=o;UNITS=o.units;reset();var c=queue[0];if(CFG.kb&&c&&c.tasks[0].type==='type_word')try{kbp.focus({preventScroll:true})}catch(e){}},stop:function(){toastHide();clearTimeout(AT);clearTimeout(MT);stopMic();atbClear();stopTts()}};
 })();</script>
