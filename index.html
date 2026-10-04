@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Тренажёры английского</title>
+<title>Engtrain</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap">
 <style>
 
@@ -84,7 +84,11 @@ html,body{margin:0}
 #t1 .slot.wd{width:auto;min-width:36px;padding:0 8px;font-size:20px}
 #t1 .letters.wd button{width:auto;padding:0 12px;font-size:17px}
 #t1 .big{font-size:44px;font-weight:700;margin:4px 0}
-#t1{min-height:100dvh}
+#t1{min-height:100dvh;padding-bottom:0}
+#t1 main{padding-bottom:0}
+#t1 .gobar{position:sticky;bottom:0;z-index:5;margin:0 -16px;padding:10px 16px max(10px,env(safe-area-inset-bottom,0px));background:var(--bg);border-top:1px solid var(--line)}
+#t1 .gobar .hint{margin:0 0 6px}
+#t1 .gobar .hint:empty{display:none}
 #t2{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
 --bg:#eef2f9;--card:#fff;--ink:#14213d;--mute:#5d6a85;--line:#d5dcea;--acc:#2f5bea;--acc-t:#e3eaff;--ok:#16825a;--ok-t:#d9f3e8;--bad:#c93a54;--bad-t:#fbe1e6}
 @media (prefers-color-scheme:dark){#t2{--bg:#0e1526;--card:#172038;--ink:#e8edf9;--mute:#93a0bf;--line:#2a3554;--acc:#7c9bff;--acc-t:#22305a;--ok:#4fd39a;--ok-t:#143a2e;--bad:#ff7b93;--bad-t:#45202b}}
@@ -236,11 +240,11 @@ html,body{margin:0}
 </head>
 <body>
 <section id="launcher"><div class="lw" id="lmain">
-<h1>Тренажёры английского</h1>
+<h1>Engtrain</h1>
 <p class="lsub">Выберите, как сегодня заниматься.</p>
 <button class="pick" id="pick1"><span class="e">📖</span><b>Тренажёр слов</b><small>Слова, выражения и сочетания. Сами выбираете, что тренировать, режим и виды заданий.</small></button>
 <h2 class="lh">Готовые тренировки</h2>
-<button class="pick" id="presetT"><span class="e">⌨️</span><b>Тренировка текстом</b><small>Перевод, сборка, вписывание, пропуски и ситуации. Без произнесения вслух.</small></button>
+<button class="pick" id="presetT"><span class="e">⌨️</span><b>Тренировка текстом</b><small>Только слова, повторение, EN → RU, без обучающих карточек. Всё можно поменять перед стартом.</small></button>
 <button class="pick" id="presetS"><span class="e">🎙️</span><b>Тренировка говорения</b><small>Произносите слова и фразы вслух по русским подсказкам.</small></button>
 <button class="pick" id="openSet"><span class="e">⚙️</span><b>Настройки</b><small>Озвучка, звуки, переходы и клавиатура.</small></button>
 </div>
@@ -309,7 +313,7 @@ const trS=w=>w.exru.replace(/\[(.+?)\]/,"$1");
 let flow="learn",showCards=true;const KS=new Set(KINDS.map(k=>k[0])),SEL=new Set(MODES.map(m=>m[0]));
 function menu(){
  const rv=flow==="review";
- $("#t1app").innerHTML=`<div class="card"><b>Что тренируем</b><div class="ml kinds">${KINDS.map(k=>`<label class="mrow"><input type="checkbox" value="${k[0]}"><span><b>${k[1]}</b> <small>${DATA[k[0]].length}</small></span></label>`).join("")}</div></div><div class="seg"><button data-f="learn" class="${rv?"":"on"}">Обучение</button><button data-f="review" class="${rv?"on":""}">Повторение</button></div><p class="sub">${rv?"Все выбранные единицы сразу, в случайном порядке: задания вперемешку с обучающими карточками. Карточка показывает только русский перевод, английское нужно вспомнить.":"Карточки идут парами: сначала знакомство с двумя единицами, затем задания на них в случайном порядке, потом следующая пара."}</p><div class="card"><label class="mrow"><input type="checkbox" id="sc"><span><b>Показывать обучающие карточки</b><br><small id="scn"></small></span></label><div class="row" style="margin:10px 0 0"><button class="btn sec" id="all">Включить все</button><button class="btn sec" id="no">Отключить все</button></div><div class="ml mods">${MODES.map(m=>`<label class="mrow"><input type="checkbox" value="${m[0]}"><span><b>${m[1]}</b><br><small>${m[2]}</small></span></label>`).join("")}</div><button class="btn" id="go" style="width:100%">Начать</button><p class="hint" id="wn"></p></div>`;
+ $("#t1app").innerHTML=`<div class="card"><b>Что тренируем</b><div class="ml kinds">${KINDS.map(k=>`<label class="mrow"><input type="checkbox" value="${k[0]}"><span><b>${k[1]}</b> <small>${DATA[k[0]].length}</small></span></label>`).join("")}</div></div><div class="seg"><button data-f="learn" class="${rv?"":"on"}">Обучение</button><button data-f="review" class="${rv?"on":""}">Повторение</button></div><p class="sub">${rv?"Все выбранные единицы сразу, в случайном порядке: задания вперемешку с обучающими карточками. Карточка показывает только русский перевод, английское нужно вспомнить.":"Карточки идут парами: сначала знакомство с двумя единицами, затем задания на них в случайном порядке, потом следующая пара."}</p><div class="card"><label class="mrow"><input type="checkbox" id="sc"><span><b>Показывать обучающие карточки</b><br><small id="scn"></small></span></label><div class="row" style="margin:10px 0 0"><button class="btn sec" id="all">Включить все</button><button class="btn sec" id="no">Отключить все</button></div><div class="ml mods">${MODES.map(m=>`<label class="mrow"><input type="checkbox" value="${m[0]}"><span><b>${m[1]}</b><br><small>${m[2]}</small></span></label>`).join("")}</div></div><div class="gobar"><p class="hint" id="wn"></p><button class="btn" id="go" style="width:100%">Начать</button></div>`;
  R.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{flow=b.dataset.f;menu()});
  const kc=[...R.querySelectorAll(".kinds input")],mc=[...R.querySelectorAll(".mods input")];
  const sync=()=>{kc.forEach(c=>c.checked=KS.has(c.value));mc.forEach(c=>c.checked=SEL.has(c.value));$("#go").disabled=!KS.size||!SEL.size;$("#wn").textContent=!KS.size?"Выберите хотя бы один вид, чтобы продолжить.":!SEL.size?"Выберите хотя бы один режим, чтобы продолжить.":""};
@@ -356,14 +360,14 @@ function feed(rv){
  if(!cards.length){$("#wn").textContent="Для выбранных видов нет подходящих заданий.";return}
  window.feedStart({cards,units:U});
 }
-window.t1={start:function(p){if(p){KS.clear();KINDS.forEach(k=>KS.add(k[0]));SEL.clear();p.modes.forEach(m=>SEL.add(m))}menu()}};
+window.t1={start:function(p){if(p){KS.clear();(p.kinds||KINDS.map(k=>k[0])).forEach(k=>KS.add(k));SEL.clear();p.modes.forEach(m=>SEL.add(m));flow=p.flow||"learn";showCards=p.cards!==false}menu();window.scrollTo(0,0)}};
 menu();
 })();</script>
 <script>(function(){
 
 /* ============ ДАННЫЕ (то, что лежало бы в БД) ============ */
 // units: учебные единицы. Повторения считаются по ним, а не по карточкам.
-var CFG=window.CFG={voice:true,sound:true,auto:false,data:false,kb:false};
+var CFG=window.CFG={voice:false,sound:true,auto:false,data:false,kb:false};
 try{Object.assign(CFG,JSON.parse(localStorage.getItem('enCfg')||'{}'))}catch(e){}
 window.cfgSave=function(){try{localStorage.setItem('enCfg',JSON.stringify(CFG))}catch(e){}};
 var UNITS={};
@@ -515,47 +519,23 @@ TASKS.speak={
  },
  check:function(a,s){var ok=said(a,s.accept[0]);return {ok:ok,score:ok?1:0}},
  show:function(s){return s.accept[0]}};
-/* ===== Звуки ответа: один общий AudioContext, перед каждым звуком проверяем, что он запущен ===== */
-var actx=null;
-function ac(){try{if(actx&&actx.state==='closed')actx=null;if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();if(actx.state!=='running'&&actx.resume)actx.resume()}catch(e){}return actx}
-function acReset(){try{actx&&actx.close()}catch(e){}actx=null}
-function run(go){var C=ac();if(!C)return;if(C.state==='running'){go(C);return}
-  var d=false,f=function(){if(!d){d=true;go(C)}};try{C.resume().then(f).catch(function(){})}catch(e){}setTimeout(function(){if(C.state==='running')f()},350)}
-function tone(list,vol,type){
-  run(function(C){var t=C.currentTime+.03;
+/* ===== Звуки ответа: не связаны с озвучкой слов. Короткий сигнал через WebAudio, без фоновых обработчиков и без <audio> ===== */
+var VOL_OK=.2,VOL_BAD=.32,actx=null;
+function beep(list,vol,type){
+  if(!CFG.sound)return;
+  try{
+    if(actx&&actx.state==='closed')actx=null;
+    var C=actx||(actx=new (window.AudioContext||window.webkitAudioContext)());
+    if(C.state!=='running')C.resume();
+    var t=C.currentTime+.02;
     list.forEach(function(n){var o=C.createOscillator(),g=C.createGain(),s=t+n[1];
-      o.type=type||'sine';o.frequency.value=n[0];o.connect(g);g.connect(C.destination);
-      g.gain.setValueAtTime(0.0001,s);g.gain.exponentialRampToValueAtTime(vol,s+0.03);g.gain.exponentialRampToValueAtTime(0.0001,s+0.35);
-      o.start(s);o.stop(s+0.4)})});
+      o.type=type;o.frequency.value=n[0];o.connect(g);g.connect(C.destination);
+      g.gain.setValueAtTime(.0001,s);g.gain.exponentialRampToValueAtTime(vol,s+.02);g.gain.exponentialRampToValueAtTime(.0001,s+.25);
+      o.start(s);o.stop(s+.3)})
+  }catch(e){}
 }
-/* Сигналы ответа. Основной путь: готовые WAV через <audio> (переживает сворачивание и режим микрофона на iPhone),
-   запасной: WebAudio. Все карточки зовут chime()/buzz() из finish(), больше нигде звук ответа не играется. */
-var VOL_OK=.2,VOL_BAD=.32;
-var SNDDEF={ok:[[[659.25,0],[783.99,.09],[1046.5,.18]],VOL_OK],bad:[[[330,0],[262,.14]],VOL_BAD,'triangle']};
-function wavUri(list,vol,type){
-  var sr=22050,dur=0,k;list.forEach(function(n){dur=Math.max(dur,n[1]+.4)});
-  var N=Math.floor(sr*dur),buf=new Float32Array(N);
-  list.forEach(function(n){var s0=Math.floor(n[1]*sr),len=Math.floor(.4*sr);
-    for(var j=0;j<len&&s0+j<N;j++){var t=j/sr,env=t<.03?t/.03:Math.exp(-(t-.03)*24),ph=2*Math.PI*n[0]*t,v=type==='triangle'?(2/Math.PI)*Math.asin(Math.sin(ph)):Math.sin(ph);buf[s0+j]+=v*env*vol}});
-  var u=new Uint8Array(44+N*2),dv=new DataView(u.buffer);
-  function w(o,x){for(var q=0;q<x.length;q++)dv.setUint8(o+q,x.charCodeAt(q))}
-  w(0,'RIFF');dv.setUint32(4,36+N*2,true);w(8,'WAVE');w(12,'fmt ');dv.setUint32(16,16,true);dv.setUint16(20,1,true);dv.setUint16(22,1,true);dv.setUint32(24,sr,true);dv.setUint32(28,sr*2,true);dv.setUint16(32,2,true);dv.setUint16(34,16,true);w(36,'data');dv.setUint32(40,N*2,true);
-  for(k=0;k<N;k++)dv.setInt16(44+k*2,Math.max(-1,Math.min(1,buf[k]))*32767,true);
-  var str='';for(k=0;k<u.length;k+=8192)str+=String.fromCharCode.apply(null,u.subarray(k,k+8192));
-  return 'data:audio/wav;base64,'+btoa(str)}
-var SND={},SNDU=false;
-function sndGet(key){if(!SND[key]){var d=SNDDEF[key],a=new Audio(wavUri(d[0],d[1],d[2]));a.preload='auto';SND[key]=a}return SND[key]}
-function sndUnlock(){if(SNDU)return;SNDU=true;
-  Object.keys(SNDDEF).forEach(function(k){try{var a=sndGet(k);a.muted=true;var p=a.play(),back=function(){try{a.pause();a.currentTime=0;a.muted=false}catch(e){}};
-    if(p&&p.then)p.then(back,function(){a.muted=false;SNDU=false});else back()}catch(e){SNDU=false}})}
-function playSnd(key){if(!CFG.sound)return;var d=SNDDEF[key],a=sndGet(key),p;
-  try{a.pause();a.currentTime=0;a.muted=false;p=a.play()}catch(e){}
-  var fb=function(){tone(d[0],d[1],d[2])};if(p&&p.catch)p.catch(fb);else if(!p)fb()}
-['pointerdown','touchend','click','keydown'].forEach(function(n){document.addEventListener(n,function(){ac();sndUnlock()},true)});
-document.addEventListener('visibilitychange',function(){if(!document.hidden){acReset();ac()}});
-window.addEventListener('pageshow',function(){acReset();ac()});
-function chime(){playSnd('ok')}
-function buzz(){playSnd('bad')}
+function chime(){beep([[880,0],[1175,.1]],VOL_OK,'sine')}
+function buzz(){beep([[220,0]],VOL_BAD,'triangle')}
 
 /* ============ ДВИЖОК ленты ============ */
 var stage=document.getElementById('stage');
@@ -699,7 +679,7 @@ function show(w){L.hidden=!(w==='l'||w==='s');LM.hidden=w!=='l';LS.hidden=w!=='s
 function home(){try{t2.stop()}catch(e){}try{window.stopTts()}catch(e){}show('l')}
 window.feedStart=function(o){show('2');t2.start(o)};
 document.getElementById('pick1').onclick=function(){show('1');t1.start()};
-document.getElementById('presetT').onclick=function(){show('1');t1.start({modes:['en2ru','ru2en','build','type','cloze','situ']})};
+document.getElementById('presetT').onclick=function(){show('1');t1.start({kinds:['word'],flow:'review',cards:false,modes:['en2ru']})};
 document.getElementById('presetS').onclick=function(){show('1');t1.start({modes:['speak']})};
 document.getElementById('openSet').onclick=function(){show('s')};
 document.getElementById('backs').onclick=function(){show('l')};
