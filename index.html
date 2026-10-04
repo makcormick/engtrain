@@ -231,6 +231,23 @@ html,body{margin:0}
 @keyframes atrun{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 #t2 .q .qs .rw{display:inline-block;font-weight:800;color:var(--acc);background:var(--acc-t);border-radius:6px;padding:0 6px;box-shadow:0 0 0 2px var(--acc) inset}
 
+
+/* ===== волна при записи голоса ===== */
+#t2 .mic .wv{display:none;align-items:center;gap:5px;height:40px;pointer-events:none}
+#t2 .mic.on .wv{display:flex}
+#t2 .mic .wv i{display:block;width:5px;height:100%;border-radius:3px;background:currentColor;transform:scaleY(.12);animation:wvi 1.6s ease-in-out infinite}
+#t2 .mic.on.talk .wv i{animation-name:wvt;animation-duration:.7s}
+#t2 .mic .wv i:nth-child(1){animation-delay:-.1s}
+#t2 .mic .wv i:nth-child(2){animation-delay:-.45s}
+#t2 .mic .wv i:nth-child(3){animation-delay:-.2s}
+#t2 .mic .wv i:nth-child(4){animation-delay:-.6s}
+#t2 .mic .wv i:nth-child(5){animation-delay:-.3s}
+#t2 .mic .wv i:nth-child(6){animation-delay:-.5s}
+#t2 .mic .wv i:nth-child(7){animation-delay:-.15s}
+@keyframes wvi{0%,100%{transform:scaleY(.12)}50%{transform:scaleY(.3)}}
+@keyframes wvt{0%,100%{transform:scaleY(.2)}50%{transform:scaleY(1)}}
+@media (prefers-reduced-motion:reduce){#t2 .mic .wv i{animation:none;transform:scaleY(.4)}}
+
 /* ===== часть 5 ===== */
 #t2 .card.split{padding:0;gap:0;overflow:hidden}
 #t2 .cbody{flex:1 1 auto;min-height:0;overflow:auto;padding:22px 20px 14px;display:flex;flex-direction:column;gap:14px;touch-action:none;overscroll-behavior:contain}
@@ -400,25 +417,30 @@ var TOASTRE=/^(Нет доступа|Ошибка|Не удалось|Микро
 function mkHint(){var v='';return {get textContent(){return v},set textContent(x){v=String(x);if(TOASTRE.test(v))toast(v)},appendChild:function(){}}}
 /* ===== Запись голоса: встроенное распознавание браузера. Нажали - слушает, нажали ещё раз - остановили ===== */
 var MIC=null;
+/* iOS: во время распознавания Safari переключает аудиосессию на «звонок» (тихий разговорный динамик).
+   Явно возвращаем режим воспроизведения, когда запись закончилась, чтобы сигналы и озвучка звучали громко. */
+function audioMode(t){try{if(navigator.audioSession)navigator.audioSession.type=t}catch(e){}}
 function stopMic(){if(MIC&&MIC.halt)MIC.halt()}
 document.addEventListener('visibilitychange',function(){if(document.hidden)stopMic()});
 function micButton(inp,hint,lang){
   var b=el('button','mic');b.type='button';b.setAttribute('aria-label','Нажмите и говорите');MIC=b;
-  b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg>';
+  b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg><span class="wv" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>';
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition,rec=null,cbs=[];
   function start(){
     if(!SR){hint.textContent='Голосовой ввод недоступен в этом браузере. Печатайте ответ.';return}
-    var r=rec=new SR();r.lang=lang;r.interimResults=true;
-    r.onresult=function(e){var t='',k;for(k=0;k<e.results.length;k++)t+=e.results[k][0].transcript;inp.value=t.trim();if(b.onpartial)b.onpartial(inp.value)};
+    audioMode('play-and-record');var r=rec=new SR();r.lang=lang;r.interimResults=true;
+    var tk=0;function talk(on){clearTimeout(tk);b.classList.toggle('talk',on)}
+    r.onspeechstart=r.onsoundstart=function(){talk(true)};r.onspeechend=r.onsoundend=function(){talk(false)};
+    r.onresult=function(e){var t='',k;for(k=0;k<e.results.length;k++)t+=e.results[k][0].transcript;inp.value=t.trim();b.classList.add('talk');clearTimeout(tk);tk=setTimeout(function(){b.classList.remove('talk')},700);if(b.onpartial)b.onpartial(inp.value)};
     r.onerror=function(e){var c=e.error;
       if(c==='not-allowed'||c==='service-not-allowed')hint.textContent='Нет доступа к микрофону. Разрешите его в браузере.';
       else if(c!=='no-speech'&&c!=='aborted')hint.textContent='Ошибка распознавания: '+c+'.'};
-    r.onend=function(){if(r!==rec)return;rec=null;b.classList.remove('on');var l=cbs;cbs=[];if(l.length)l.forEach(function(f){f()});else if(b.onfinal)b.onfinal()};
-    try{r.start();b.classList.add('on')}catch(x){rec=null}}
+    r.onend=function(){if(r!==rec)return;rec=null;clearTimeout(tk);b.classList.remove('on','talk');audioMode('playback');var l=cbs;cbs=[];if(l.length)l.forEach(function(f){f()});else if(b.onfinal)b.onfinal()};
+    try{r.start();b.classList.add('on')}catch(x){rec=null;audioMode('playback')}}
   // остановить и дождаться последнего результата, потом вызвать cb
   b.stop=function(cb){if(!rec){if(cb)cb();return}if(cb)cbs.push(cb);rec.stop()};
   // оборвать молча, без колбэков
-  b.halt=function(){var r=rec;rec=null;cbs=[];b.classList.remove('on');if(r){r.onresult=r.onerror=r.onend=null;try{r.abort()}catch(x){}}};
+  b.halt=function(){var r=rec;rec=null;cbs=[];b.classList.remove('on','talk');if(r){audioMode('playback');r.onresult=r.onerror=r.onend=r.onspeechstart=r.onsoundstart=r.onspeechend=r.onsoundend=null;try{r.abort()}catch(x){}}};
   b.onclick=function(){if(b.disabled)return;if(rec)rec.stop();else start()};
   return b}
 function subLine(x){var d=el('div','qs'),m=/\[(.+?)\]/.exec(x);if(!m){d.textContent=x;return d}
