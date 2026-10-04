@@ -232,6 +232,10 @@ html,body{margin:0}
 #t2 .q .qs .rw{display:inline-block;font-weight:800;color:var(--acc);background:var(--acc-t);border-radius:6px;padding:0 6px;box-shadow:0 0 0 2px var(--acc) inset}
 
 
+/* ===== подсказка «нажмите на микрофон» ===== */
+@keyframes nudge{50%{box-shadow:0 0 0 7px var(--acc-t)}}
+#t2 .mic.nudge:not(.on){animation:nudge 1.6s infinite}
+@media (prefers-reduced-motion:reduce){#t2 .mic.nudge:not(.on){animation:none;border-color:var(--acc)}}
 /* ===== волна при записи голоса ===== */
 #t2 .mic .wv{display:none;align-items:center;gap:5px;height:40px;pointer-events:none}
 #t2 .mic.on .wv{display:flex}
@@ -273,6 +277,7 @@ html,body{margin:0}
 <label class="srow"><span><b>Ручной переход</b><small>После ответа свайп вверх открывает следующую карточку</small></span><input type="radio" name="nm" value="manual"></label>
 <label class="srow"><span><b>Автопереход</b><small>Через 2 секунды после ответа карточка листается сама</small></span><input type="radio" name="nm" value="auto"></label>
 <label class="srow"><span><b>Автоматическая клавиатура</b><small>Открывать клавиатуру в заданиях с вводом слова</small></span><input type="checkbox" id="ck"></label>
+<label class="srow"><span><b>Автозапись микрофона</b><small>В заданиях с голосом запись включается сама после перехода к карточке. После автоперехода нужно нажать на микрофон</small></span><input type="checkbox" id="cm"></label>
 <label class="srow"><span><b>Данные карточки</b><small>Служебный JSON поверх карточки, для отладки</small></span><input type="checkbox" id="cd"></label>
 </div></section>
 <div id="t1" hidden><main><button class="lnk" id="back1">← Меню</button><h1>Тренажёр слов</h1><div id="t1app"></div></main></div>
@@ -384,7 +389,7 @@ menu();
 
 /* ============ ДАННЫЕ (то, что лежало бы в БД) ============ */
 // units: учебные единицы. Повторения считаются по ним, а не по карточкам.
-var CFG=window.CFG={voice:false,sound:true,auto:false,data:false,kb:false};
+var CFG=window.CFG={voice:false,sound:true,auto:false,data:false,kb:false,autoMic:false};
 try{Object.assign(CFG,JSON.parse(localStorage.getItem('enCfg')||'{}'))}catch(e){}
 window.cfgSave=function(){try{localStorage.setItem('enCfg',JSON.stringify(CFG))}catch(e){}};
 var UNITS={};
@@ -427,21 +432,24 @@ function micButton(inp,hint,lang){
   b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg><span class="wv" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>';
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition,rec=null,cbs=[];
   function start(){
-    if(!SR){hint.textContent='Голосовой ввод недоступен в этом браузере. Печатайте ответ.';return}
+    b.classList.remove('nudge');
+    if(!SR){if(!b.silent)hint.textContent='Голосовой ввод недоступен в этом браузере. Печатайте ответ.';return}
     audioMode('play-and-record');var r=rec=new SR();r.lang=lang;r.interimResults=true;
     var tk=0;function talk(on){clearTimeout(tk);b.classList.toggle('talk',on)}
     r.onspeechstart=r.onsoundstart=function(){talk(true)};r.onspeechend=r.onsoundend=function(){talk(false)};
     r.onresult=function(e){var t='',k;for(k=0;k<e.results.length;k++)t+=e.results[k][0].transcript;inp.value=t.trim();b.classList.add('talk');clearTimeout(tk);tk=setTimeout(function(){b.classList.remove('talk')},700);if(b.onpartial)b.onpartial(inp.value)};
     r.onerror=function(e){var c=e.error;
+      if(b.silent&&(c==='not-allowed'||c==='service-not-allowed')){b.classList.add('nudge');return}
       if(c==='not-allowed'||c==='service-not-allowed')hint.textContent='Нет доступа к микрофону. Разрешите его в браузере.';
       else if(c!=='no-speech'&&c!=='aborted')hint.textContent='Ошибка распознавания: '+c+'.'};
-    r.onend=function(){if(r!==rec)return;rec=null;clearTimeout(tk);b.classList.remove('on','talk');audioMode('playback');var l=cbs;cbs=[];if(l.length)l.forEach(function(f){f()});else if(b.onfinal)b.onfinal()};
-    try{r.start();b.classList.add('on')}catch(x){rec=null;audioMode('playback')}}
+    r.onend=function(){if(r!==rec)return;rec=null;b.silent=false;clearTimeout(tk);b.classList.remove('on','talk');audioMode('playback');var l=cbs;cbs=[];if(l.length)l.forEach(function(f){f()});else if(b.onfinal)b.onfinal()};
+    try{r.start();b.classList.add('on')}catch(x){rec=null;audioMode('playback');if(b.silent)b.classList.add('nudge')}}
   // остановить и дождаться последнего результата, потом вызвать cb
   b.stop=function(cb){if(!rec){if(cb)cb();return}if(cb)cbs.push(cb);rec.stop()};
   // оборвать молча, без колбэков
   b.halt=function(){var r=rec;rec=null;cbs=[];b.classList.remove('on','talk');if(r){audioMode('playback');r.onresult=r.onerror=r.onend=r.onspeechstart=r.onsoundstart=r.onspeechend=r.onsoundend=null;try{r.abort()}catch(x){}}};
-  b.onclick=function(){if(b.disabled)return;if(rec)rec.stop();else start()};
+  b.onclick=function(){if(b.disabled)return;if(rec)rec.stop();else{b.silent=false;start()}};
+  b.auto=function(){if(b.disabled||rec)return;b.silent=true;start()};
   return b}
 function subLine(x){var d=el('div','qs'),m=/\[(.+?)\]/.exec(x);if(!m){d.textContent=x;return d}
   d.appendChild(document.createTextNode(x.slice(0,m.index)));d.appendChild(el('span','rw',m[1]));d.appendChild(document.createTextNode(x.slice(m.index+m[0].length)));return d}
@@ -567,7 +575,7 @@ var AT_MS=2000;
 var AUTOP=false;
 function atbClear(){AUTOP=false;var x=document.getElementById('atb');if(x)x.remove()}
 function atbStart(ms){atbClear();AUTOP=true;var d=el('div','atb'),f=el('i');d.id='atb';f.style.animationDuration=ms+'ms';d.appendChild(f);stage.appendChild(d)}
-function reset(){queue=CUR.cards.map(function(c){return Object.assign({},c)});i=0;st={ok:0,bad:0,skip:0,prog:{}};for(var u in UNITS)st.prog[u]=0;draw()}
+function reset(){AUTOSKIP=false;queue=CUR.cards.map(function(c){return Object.assign({},c)});i=0;st={ok:0,bad:0,skip:0,prog:{}};for(var u in UNITS)st.prog[u]=0;draw()}
 /* ===== Озвучка: голос браузера по умолчанию. Новая фраза сразу прерывает старую; в «Пропуске» между частями пауза 0,5 с ===== */
 var TG=0,KEEPU=null;
 function fabSp(on){var f=document.getElementById('rep');if(f)f.classList.toggle('sp',!!on)}
@@ -615,6 +623,21 @@ function draw(){
 }
 function drawJson(){var o=document.getElementById('json');if(o)o.remove();
   if(CFG.data&&queue[i]){var p=el('pre','json',JSON.stringify(queue[i],null,1));p.id='json';stage.appendChild(p)}}
+/* Автозапись микрофона: только если карточка открыта действием пользователя (не автопереходом), после окончания озвучки + 0,5 с.
+   Если iOS не разрешает запуск без касания, микрофон просто мягко пульсирует. */
+var AMT=0,AUTOSKIP=false;
+function autoMic(box){
+  var tok=++AMT,m=box.querySelector('.mic'),viaAuto=AUTOSKIP;AUTOSKIP=false;
+  if(!CFG.autoMic||!m||!m.auto)return;
+  if(viaAuto){m.classList.add('nudge');return}
+  var n=0;
+  (function wait(){
+    if(tok!==AMT||answered||document.hidden||document.getElementById('t2').hidden)return;
+    var rb=document.getElementById('rep');
+    if(rb&&rb.classList.contains('sp')&&n++<40){setTimeout(wait,150);return}
+    setTimeout(function(){if(tok!==AMT||answered||!document.body.contains(m))return;m.auto()},500)
+  })()
+}
 function showTask(){
   var c=queue[i],t=c.tasks[ti],box=document.getElementById('task');box.innerHTML='';answered=false;toastHide();atbClear();
   [].forEach.call(box.parentNode.querySelectorAll('.q.prompt,.ans.top,.heard,.fb'),function(x){x.remove()});
@@ -626,7 +649,7 @@ function showTask(){
   });
   ['.q','.ans','.heard'].forEach(function(sl){var x=box.querySelector(sl);if(x){if(sl!=='.heard')x.classList.add(sl==='.q'?'prompt':'top');document.getElementById('cbody').appendChild(x)}});
   if(t.type!=='type_word'){document.getElementById('t2').classList.remove('kb');if(document.activeElement===kbp)kbp.blur()}
-  sayTask(t);
+  sayTask(t);autoMic(box);
 }
 function finish(res,t){
   var c=queue[i],box=document.getElementById('task'),T=TASKS[t.type],fb=t.feedback||{};
@@ -639,13 +662,13 @@ function finish(res,t){
   var extra=[res.note,!res.ok&&fb.wrong].filter(Boolean).join(' ');if(extra)f.appendChild(el('span','',extra));
   if(!CFG.auto||!res.ok)f.appendChild(el('div','nx','Свайп вверх — дальше'));
   document.getElementById('cbody').appendChild(f);try{f.scrollIntoView({block:'nearest'})}catch(e){}ansAt=Date.now();head();
-  if(CFG.auto&&res.ok){AT=setTimeout(skip,AT_MS);atbStart(AT_MS)}
+  if(CFG.auto&&res.ok){AT=setTimeout(function(){AUTOSKIP=true;skip()},AT_MS);atbStart(AT_MS)}
 }
 function advance(kind){
   var c=queue[i],card=document.getElementById('card');if(!card)return;
   if(kind==='skip')st.skip++;
   if((kind==='skip'||wrong)&&!c.rq)queue.splice(Math.min(i+4,queue.length),0,Object.assign({},c,{rq:true}));
-  clearTimeout(AT);atbClear();stopTts();stopMic();card.classList.add('out');var j=document.getElementById('json');if(j)j.remove();
+  AMT++;clearTimeout(AT);atbClear();stopTts();stopMic();card.classList.add('out');var j=document.getElementById('json');if(j)j.remove();
   setTimeout(function(){i++;draw()},220);
 }
 function skip(){if(i>=queue.length)return;var c=queue[i],t=c.tasks[ti];clearTimeout(AT);atbClear();warmKb();
@@ -706,7 +729,7 @@ document.getElementById('presetS').onclick=function(){show('1');t1.start({modes:
 document.getElementById('openSet').onclick=function(){show('s')};
 document.getElementById('backs').onclick=function(){show('l')};
 var C=window.CFG;
-[['cv','voice'],['cs','sound'],['cd','data'],['ck','kb']].forEach(function(p){var e=document.getElementById(p[0]);e.checked=!!C[p[1]];e.onchange=function(){C[p[1]]=e.checked;cfgSave();if(p[1]==='voice'&&!e.checked)try{window.stopTts()}catch(x){}if(p[1]==='sound'&&e.checked)chimePreview()}});
+[['cv','voice'],['cs','sound'],['cd','data'],['ck','kb'],['cm','autoMic']].forEach(function(p){var e=document.getElementById(p[0]);e.checked=!!C[p[1]];e.onchange=function(){C[p[1]]=e.checked;cfgSave();if(p[1]==='voice'&&!e.checked)try{window.stopTts()}catch(x){}if(p[1]==='sound'&&e.checked)chimePreview()}});
 [].forEach.call(document.querySelectorAll('input[name=nm]'),function(r){r.checked=(r.value==='auto')===!!C.auto;r.onchange=function(){C.auto=r.value==='auto';cfgSave()}});
 (function(){var x0=null,y0=0;
  function view(){return !LS.hidden?'s':!A.hidden?'1':!B.hidden?'2':null}
