@@ -232,6 +232,18 @@ html,body{margin:0}
 #t2 .q .qs .rw{display:inline-block;font-weight:800;color:var(--acc);background:var(--acc-t);border-radius:6px;padding:0 6px;box-shadow:0 0 0 2px var(--acc) inset}
 
 
+/* ===== переключатель автозаписи рядом с микрофоном ===== */
+#t2 .microw{display:flex;gap:8px;align-items:stretch}
+#t2 .microw .mic.big{flex:1;width:auto;min-width:0}
+#t2 .ams{position:relative;flex:none;width:64px;height:88px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border:2px solid var(--line);border-radius:14px;background:var(--card);color:var(--mute);font-size:12px;font-weight:800;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+#t2 .ams input{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+#t2 .ams:focus-within{outline:3px solid var(--acc);outline-offset:2px}
+#t2 .ams .sw{width:38px;height:22px;border-radius:11px;background:var(--line);position:relative;transition:background .2s}
+#t2 .ams .sw::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s}
+#t2 .ams:has(input:checked){border-color:var(--acc);color:var(--acc)}
+#t2 .ams input:checked+.sw{background:var(--acc)}
+#t2 .ams input:checked+.sw::after{transform:translateX(16px)}
+@media (prefers-reduced-motion:reduce){#t2 .ams .sw,#t2 .ams .sw::after{transition:none}}
 /* ===== подсказка «нажмите на микрофон» ===== */
 @keyframes nudge{50%{box-shadow:0 0 0 7px var(--acc-t)}}
 #t2 .mic.nudge:not(.on){animation:nudge 1.6s infinite}
@@ -277,7 +289,6 @@ html,body{margin:0}
 <label class="srow"><span><b>Ручной переход</b><small>После ответа свайп вверх открывает следующую карточку</small></span><input type="radio" name="nm" value="manual"></label>
 <label class="srow"><span><b>Автопереход</b><small>Через 2 секунды после ответа карточка листается сама</small></span><input type="radio" name="nm" value="auto"></label>
 <label class="srow"><span><b>Автоматическая клавиатура</b><small>Открывать клавиатуру в заданиях с вводом слова</small></span><input type="checkbox" id="ck"></label>
-<label class="srow"><span><b>Автозапись микрофона</b><small>В заданиях с голосом запись включается сама после перехода к карточке. После автоперехода нужно нажать на микрофон</small></span><input type="checkbox" id="cm"></label>
 <label class="srow"><span><b>Данные карточки</b><small>Служебный JSON поверх карточки, для отладки</small></span><input type="checkbox" id="cd"></label>
 </div></section>
 <div id="t1" hidden><main><button class="lnk" id="back1">← Меню</button><h1>Тренажёр слов</h1><div id="t1app"></div></main></div>
@@ -451,6 +462,13 @@ function micButton(inp,hint,lang){
   b.onclick=function(){if(b.disabled)return;if(rec)rec.stop();else{b.silent=false;start()}};
   b.auto=function(){if(b.disabled||rec)return;b.silent=true;start()};
   return b}
+function micRow(mic){
+  var w=el('div','microw'),l=el('label','ams'),c=el('input'),sw=el('span','sw'),tx=el('span','','Авто');
+  c.type='checkbox';c.checked=!!CFG.autoMic;c.setAttribute('aria-label','Автозапись микрофона');
+  c.onchange=function(){CFG.autoMic=c.checked;cfgSave();
+    if(c.checked){if(!mic.disabled&&!mic.classList.contains('on')&&mic.onclick)mic.onclick()}
+    else if(mic.halt)mic.halt()};
+  l.appendChild(c);l.appendChild(sw);l.appendChild(tx);w.appendChild(l);w.appendChild(mic);return w}
 function subLine(x){var d=el('div','qs'),m=/\[(.+?)\]/.exec(x);if(!m){d.textContent=x;return d}
   d.appendChild(document.createTextNode(x.slice(0,m.index)));d.appendChild(el('span','rw',m[1]));d.appendChild(document.createTextNode(x.slice(m.index+m[0].length)));return d}
 var TASKS={};
@@ -516,7 +534,7 @@ TASKS.type_word={
   b.onclick=function(){if(mic.stop)mic.stop(go);else go()};
   inp.onkeydown=function(e){if(e.key==='Enter')b.onclick()};
   hintBtns(box,t.payload.hints);
-  row.appendChild(inp);row.appendChild(b);box.appendChild(row);box.appendChild(mic);
+  row.appendChild(inp);row.appendChild(b);box.appendChild(row);box.appendChild(micRow(mic));
   box.addEventListener('mousedown',function(e){if(e.target.closest('button')&&(document.activeElement===inp||document.activeElement.id==='kbp'))e.preventDefault()});
   if(CFG.kb)inp.focus({preventScroll:true});
   return function(res){if(mic.halt)mic.halt();try{inp.blur();var kp=document.getElementById('kbp');if(kp)kp.blur()}catch(e){}inp.disabled=true;mic.disabled=true;b.style.visibility='hidden';hint.textContent='';inp.style.borderColor=res.ok?'var(--ok)':'var(--bad)'};
@@ -543,7 +561,7 @@ TASKS.speak={
   mic.onfinal=function(){if(fin||!val)return;tries++;
    if(said(val,ans)||tries>=2){submit(val);return}
    paint(heard,val,aw);hint.textContent='Не то слово. Нажмите на микрофон и попробуйте ещё раз (попытка 2 из 2).'};
-  hintBtns(box,t.payload.hints);box.appendChild(heard);box.appendChild(mic);
+  hintBtns(box,t.payload.hints);box.appendChild(heard);box.appendChild(micRow(mic));
   hint.textContent='Нажмите на микрофон и говорите.';
   return function(res){if(mic.halt)mic.halt();mic.disabled=true;hint.textContent='';paint(heard,val,aw,res.ok)};
  },
@@ -686,7 +704,7 @@ var sy=null,s0=0,ov=0,moved=false;
 function curCard(){return document.getElementById('card')}
 function scr(){return document.getElementById('cbody')||curCard()}
 stage.addEventListener('pointerdown',function(e){
-  if(e.target.closest('input,pre,.mic')||(e.pointerType==='mouse'&&e.button!==0))return;
+  if(e.target.closest('input,pre,.mic,.ams')||(e.pointerType==='mouse'&&e.button!==0))return;
   var c=curCard();if(!c)return;sy=e.clientY;s0=scr().scrollTop;ov=0;moved=false});
 window.addEventListener('pointermove',function(e){
   if(sy===null)return;var c=curCard();if(!c)return;var d=e.clientY-sy;
@@ -729,12 +747,12 @@ document.getElementById('presetS').onclick=function(){show('1');t1.start({modes:
 document.getElementById('openSet').onclick=function(){show('s')};
 document.getElementById('backs').onclick=function(){show('l')};
 var C=window.CFG;
-[['cv','voice'],['cs','sound'],['cd','data'],['ck','kb'],['cm','autoMic']].forEach(function(p){var e=document.getElementById(p[0]);e.checked=!!C[p[1]];e.onchange=function(){C[p[1]]=e.checked;cfgSave();if(p[1]==='voice'&&!e.checked)try{window.stopTts()}catch(x){}if(p[1]==='sound'&&e.checked)chimePreview()}});
+[['cv','voice'],['cs','sound'],['cd','data'],['ck','kb']].forEach(function(p){var e=document.getElementById(p[0]);e.checked=!!C[p[1]];e.onchange=function(){C[p[1]]=e.checked;cfgSave();if(p[1]==='voice'&&!e.checked)try{window.stopTts()}catch(x){}if(p[1]==='sound'&&e.checked)chimePreview()}});
 [].forEach.call(document.querySelectorAll('input[name=nm]'),function(r){r.checked=(r.value==='auto')===!!C.auto;r.onchange=function(){C.auto=r.value==='auto';cfgSave()}});
 (function(){var x0=null,y0=0;
  function view(){return !LS.hidden?'s':!A.hidden?'1':!B.hidden?'2':null}
  document.addEventListener('touchstart',function(e){x0=null;if(e.touches.length!==1||!view())return;
-  if(e.target.closest&&e.target.closest('input,textarea,.mic,.fab,pre'))return;
+  if(e.target.closest&&e.target.closest('input,textarea,.mic,.ams,.fab,pre'))return;
   x0=e.touches[0].clientX;y0=e.touches[0].clientY},{passive:true});
  document.addEventListener('touchend',function(e){if(x0===null)return;var t=e.changedTouches[0],dx=t.clientX-x0,dy=t.clientY-y0;x0=null;
   if(dx<90||Math.abs(dy)>dx*.5)return;var v=view();
