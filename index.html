@@ -544,7 +544,7 @@ function micButton(inp,hint,lang){
     if(!t){end('',peak<.01?'Речь не слышно. Говорите ближе к микрофону и попробуйте ещё раз.':'Речь не распознана. Нажмите на микрофон и попробуйте ещё раз.');return}
     end(t)}
   function startOff(){
-    var my=++sid;try{stopTts()}catch(e){}st='rec';b.classList.add('on');lvl(.2);audioMode('play-and-record');
+    var my=++sid;st='rec';b.classList.add('on');lvl(.2);audioMode('play-and-record');
     var AC=window.AudioContext||window.webkitAudioContext,ctx=null;
     // контекст создаём сразу, пока идёт нажатие: после ожидания разрешения Safari оставляет его выключенным
     try{ctx=getCtx();if(ctx.resume)ctx.resume()}catch(e){}
@@ -733,7 +733,7 @@ function speakParts(parts,l){
     if(!p){step(k+1);return}
     try{var u=KEEPU=new SpeechSynthesisUtterance(p);u.lang=l;u.rate=.95;u.onend=u.onerror=function(){step(k+1)};speechSynthesis.speak(u)}catch(e){fabSp(false)}
   })(0)}
-function playSay(x){if(!x)return;stopMic();audioMode('playback');if(x.gap)speakParts([x.gap[0],500,x.gap[1]],x.l);else speakParts([x.t],x.l)}
+function playSay(x){if(!x)return;if(x.gap)speakParts([x.gap[0],500,x.gap[1]],x.l);else speakParts([x.t],x.l)}
 function stopTts(){TG++;fabSp(false);try{speechSynthesis.cancel()}catch(e){}}
 window.stopTts=stopTts;
 var lastSay=null;
@@ -776,8 +776,6 @@ function autoMic(box){
   var n=0;
   (function wait(){
     if(tok!==AMT||answered||document.hidden||document.getElementById('t2').hidden)return;
-    var rb=document.getElementById('rep');
-    if(rb&&rb.classList.contains('sp')&&n++<40){setTimeout(wait,150);return}
     setTimeout(function(){if(tok!==AMT||answered||!document.body.contains(m))return;m.auto()},2000)
   })()
 }
