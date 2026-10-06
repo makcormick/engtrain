@@ -408,7 +408,7 @@ menu();
 /* ============ ДАННЫЕ (то, что лежало бы в БД) ============ */
 // units: учебные единицы. Повторения считаются по ним, а не по карточкам.
 var CFG=window.CFG={voice:false,sound:true,auto:false,data:false,kb:false,autoMic:false};
-try{Object.assign(CFG,JSON.parse(localStorage.getItem('enCfg')||'{}'))}catch(e){}
+try{Object.assign(CFG,JSON.parse(localStorage.getItem('enCfg')||'{}'));if(!localStorage.getItem('enCfgV2')){CFG.auto=false;localStorage.setItem('enCfgV2','1');localStorage.setItem('enCfg',JSON.stringify(CFG))}}catch(e){}
 window.cfgSave=function(){try{localStorage.setItem('enCfg',JSON.stringify(CFG))}catch(e){}};
 var UNITS={};
 
@@ -435,7 +435,7 @@ var FLIP=225;
 var TT=0;
 function toastHide(){var e=document.getElementById('toast');if(e)e.hidden=true;clearTimeout(TT)}
 function toast(m,info){var e=document.getElementById('toast');document.getElementById('toastm').textContent=m;e.classList.toggle('info',!!info);e.hidden=false;clearTimeout(TT);TT=setTimeout(toastHide,4000)}
-document.getElementById('toastx').onclick=toastHide;
+document.getElementById('toastx').onclick=toastHide;window.toast=toast;window.toastHide=toastHide;
 var TOASTRE=/^(Нет доступа|Ошибка|Не удалось|Микрофон не запустился|Запись прервана|Речь не|Офлайн|Голосовой ввод|Не то)/;
 function mkHint(){var v='';return {get textContent(){return v},set textContent(x){v=String(x);if(TOASTRE.test(v))toast(v)},appendChild:function(){}}}
 /* ===== Запись голоса: офлайн Whisper (Transformers.js, Web Worker) или системное распознавание браузера. Нажали - слушает, нажали ещё раз - остановили ===== */
@@ -483,6 +483,7 @@ var ASR=(function(){
     return {feed:function(buf){try{r.acceptWaveform(buf)}catch(e){}},close:function(){try{r.remove()}catch(e){}}}}
   return {ensure:load,retry:load,whenReady:whenReady,open:open,isReady:function(){return ready}}
 })();
+window.ASR=ASR;
 function micButton(inp,hint,lang){
   var b=el('button','mic');b.type='button';b.setAttribute('aria-label','Нажмите и говорите');MIC=b;
   b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg><span class="wv" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>';
