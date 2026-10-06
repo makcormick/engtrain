@@ -488,16 +488,17 @@ function micButton(inp,hint,lang){
   function talk(on){clearTimeout(tkTalk);b.classList.toggle('talk',on);if(!cur)lvl(on?1:.2)}
   function reset(){st='idle';b.classList.remove('on','proc','talk');b.style.removeProperty('--lv')}
   // общий финал: записать текст, вызвать ожидающих, иначе onpartial/onfinal
-  function end(text){
+  function end(text,msg){
     reset();var l=cbs;cbs=[];
-    if(text)inp.value=text.trim();
+    if(text){inp.value=text.trim();toastHide()}
     if(l.length){l.forEach(function(f){f()});return}
     if(text&&b.onpartial)b.onpartial(inp.value);
-    if(!text&&!b.silent)hint.textContent='Речь не распознана. Нажмите на микрофон и попробуйте ещё раз.';
+    if(!text&&!b.silent)hint.textContent=msg||'Речь не распознана. Нажмите на микрофон и попробуйте ещё раз.';
     b.silent=false;
     if(b.onfinal)b.onfinal()}
   /* ---- офлайн: микрофон -> буфер -> Whisper ---- */
   function teardown(s){
+    clearInterval(s.iv);
     try{s.node.onaudioprocess=null;s.node.disconnect();s.src.disconnect()}catch(e){}
     try{s.stream.getTracks().forEach(function(t){t.stop()})}catch(e){}
     try{s.ctx.close()}catch(e){}
@@ -506,46 +507,62 @@ function micButton(inp,hint,lang){
     if(cur!==s||st!=='rec')return;
     var sum=0,k;for(k=0;k<d.length;k++)sum+=d[k]*d[k];
     var rms=Math.sqrt(sum/d.length),now=Date.now();
-    s.chunks.push(d);s.n++;
-    if(s.n<=3){s.noise=Math.min(s.noise,rms);if(s.n===3)s.thr=Math.min(.05,Math.max(.018,s.noise*3))}
+    s.chunks.push(d);s.n++;if(rms>s.peak)s.peak=rms;
+    if(s.n<=3){s.noise=Math.min(s.noise,rms);if(s.n===3)s.thr=Math.min(.04,Math.max(.006,s.noise*4))}
     var v=rms>(s.first<0?s.thr:s.thr*.7);
-    lvl(Math.min(1,rms*10).toFixed(2));
-    if(v){if(s.first<0)s.first=s.chunks.length-1;s.lastV=now;b.classList.add('talk');clearTimeout(tkTalk);tkTalk=setTimeout(function(){b.classList.remove('talk')},350)}
-    var t=now-s.t0;
-    if((s.first>=0&&!v&&now-s.lastV>1000)||(s.first<0&&t>8000)||t>30000)finishRec()}
+    lvl(Math.min(1,rms*12).toFixed(2));
+    if(v){if(s.first<0)s.first=s.chunks.length-1;s.lastV=now;b.classList.add('talk');clearTimeout(tkTalk);tkTalk=setTimeout(function(){b.classList.remove('talk')},350)}}
+  // сторож: останов по тишине, по времени и если микрофон не отдаёт звук
+  function tick(s){
+    if(cur!==s||st!=='rec')return;
+    var now=Date.now(),t=now-s.t0;
+    if(s.n===0){
+      if(s.ctx.state==='suspended'){try{s.ctx.resume()}catch(e){}}
+      if(t>2500){teardown(s);reset();b.silent=false;var l=cbs;cbs=[];
+        hint.textContent='Микрофон не передаёт звук. Нажмите ещё раз или выберите системное распознавание в настройках.';
+        l.forEach(function(f){f()})}
+      return}
+    if((s.first>=0&&now-s.lastV>1000)||(s.first<0&&t>8000)||t>30000)finishRec()}
   function finishRec(){
     var s=cur;if(!s||st!=='rec')return;
     var rate=s.rate,first=s.first,chunks=s.chunks;
     teardown(s);b.classList.remove('talk');b.style.removeProperty('--lv');
-    if(first<0){end('');return}
+    if(first<0){end('','Речь не слышно (уровень '+Math.round(s.peak*1000)+'). Говорите ближе к микрофону и попробуйте ещё раз.');return}
     var parts=chunks.slice(Math.max(0,first-3)),len=0,k,o=0;
     parts.forEach(function(c){len+=c.length});
     var raw=new Float32Array(len);parts.forEach(function(c){raw.set(c,o);o+=c.length});
     var pcm=to16k(raw,rate);
     if(pcm.length<4000){end('');return}
     st='proc';b.classList.remove('on');b.classList.add('proc');
-    var my=sid;
+    var my=sid;toast('Распознаю…',true);
     ASR.run(pcm,function(err,text){
       if(my!==sid||st!=='proc')return;
       if(err){if(err==='err')toast('Ошибка распознавания. Попробуйте ещё раз.');end('');return}
       end(text)})}
   function startOff(){
     var my=++sid;st='rec';b.classList.add('on');lvl(.2);audioMode('play-and-record');
-    navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,channelCount:1}}).then(function(stream){
-      if(my!==sid){stream.getTracks().forEach(function(t){t.stop()});return}
-      var AC=window.AudioContext||window.webkitAudioContext,ctx=new AC(),src=ctx.createMediaStreamSource(stream),node=ctx.createScriptProcessor(4096,1,1),mute=ctx.createGain();
-      mute.gain.value=0;
-      var s=cur={stream:stream,ctx:ctx,src:src,node:node,chunks:[],rate:ctx.sampleRate,n:0,noise:Infinity,thr:.02,first:-1,lastV:0,t0:Date.now()};
-      node.onaudioprocess=function(e){onChunk(s,new Float32Array(e.inputBuffer.getChannelData(0)))};
-      src.connect(node);node.connect(mute);mute.connect(ctx.destination);
-      if(ctx.state==='suspended')ctx.resume()
-    }).catch(function(err){
+    var AC=window.AudioContext||window.webkitAudioContext,ctx=null;
+    // контекст создаём сразу, пока идёт нажатие: после ожидания разрешения Safari оставляет его выключенным
+    try{ctx=new AC();if(ctx.resume)ctx.resume()}catch(e){}
+    function fail(err){
       if(my!==sid)return;
+      try{if(ctx)ctx.close()}catch(e){}
       reset();audioMode('playback');
       var n=err&&err.name,denied=n==='NotAllowedError'||n==='SecurityError'||n==='PermissionDeniedError';
       if(b.silent&&denied){b.classList.add('nudge');b.silent=false;return}
       b.silent=false;
-      hint.textContent=denied?'Нет доступа к микрофону. Разрешите его в браузере.':'Микрофон не запустился. Проверьте, что он подключён.'})}
+      hint.textContent=denied?'Нет доступа к микрофону. Разрешите его в браузере.':'Микрофон не запустился. Проверьте, что он подключён.'}
+    if(!ctx){fail();return}
+    navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,channelCount:1}}).then(function(stream){
+      if(my!==sid){stream.getTracks().forEach(function(t){t.stop()});try{ctx.close()}catch(e){}return}
+      var src=ctx.createMediaStreamSource(stream),node=ctx.createScriptProcessor(4096,1,1),mute=ctx.createGain();
+      mute.gain.value=0;
+      var s=cur={stream:stream,ctx:ctx,src:src,node:node,chunks:[],rate:ctx.sampleRate,n:0,noise:Infinity,thr:.01,peak:0,first:-1,lastV:0,t0:Date.now()};
+      node.onaudioprocess=function(e){onChunk(s,new Float32Array(e.inputBuffer.getChannelData(0)))};
+      src.connect(node);node.connect(mute);mute.connect(ctx.destination);
+      if(ctx.state!=='running'&&ctx.resume)ctx.resume();
+      s.iv=setInterval(function(){tick(s)},200)
+    }).catch(fail)}
   /* ---- запасной вариант: системное распознавание браузера ---- */
   function startSys(){
     if(!SR){if(!b.silent)hint.textContent='Голосовой ввод недоступен в этом браузере. Печатайте ответ.';return}
