@@ -511,7 +511,7 @@ function micButton(inp,hint,lang){
     try{s.node.onaudioprocess=null;s.node.disconnect();s.src.disconnect()}catch(e){}
     try{s.stream.getTracks().forEach(function(t){t.stop()})}catch(e){}
     
-    if(cur===s)cur=null;audioMode('playback')}
+    if(cur===s)cur=null;audioMode('playback');setTimeout(function(){if(!cur)audioMode('playback')},400)}
   function txt(s){return (s.fin+' '+s.part).replace(/\s+/g,' ').trim()}
   // слова показываем сразу, по мере распознавания
   function live(s){
@@ -536,7 +536,7 @@ function micButton(inp,hint,lang){
         hint.textContent='Микрофон не передаёт звук. Нажмите ещё раз ';
         l.forEach(function(f){f()})}
       return}
-    if((s.tx&&now-s.tx>1500)||(!s.tx&&t>8000)||t>30000)finishRec()}
+    if((s.tx&&now-s.tx>2500)||(!s.tx&&t>15000)||t>45000)finishRec()}
   function finishRec(){
     var s=cur;if(!s||st!=='rec')return;
     var t=txt(s),peak=s.peak;
@@ -544,7 +544,7 @@ function micButton(inp,hint,lang){
     if(!t){end('',peak<.01?'Речь не слышно. Говорите ближе к микрофону и попробуйте ещё раз.':'Речь не распознана. Нажмите на микрофон и попробуйте ещё раз.');return}
     end(t)}
   function startOff(){
-    var my=++sid;st='rec';b.classList.add('on');lvl(.2);audioMode('play-and-record');
+    var my=++sid;try{stopTts()}catch(e){}st='rec';b.classList.add('on');lvl(.2);audioMode('play-and-record');
     var AC=window.AudioContext||window.webkitAudioContext,ctx=null;
     // контекст создаём сразу, пока идёт нажатие: после ожидания разрешения Safari оставляет его выключенным
     try{ctx=getCtx();if(ctx.resume)ctx.resume()}catch(e){}
@@ -587,7 +587,8 @@ function micButton(inp,hint,lang){
   b.onclick=function(){if(b.disabled)return;if(st==='rec'){b.stop();return}if(st==='proc')return;b.silent=false;start()};
   b.auto=function(){if(b.disabled||st!=='idle')return;b.silent=true;start()};
   return b}
-function micRow(mic){
+function micRow(mic,plain){
+  if(plain){var pw=el('div','microw');pw.appendChild(mic);return pw}
   var w=el('div','microw'),l=el('label','ams'),c=el('input'),sw=el('span','sw'),tx=el('span','','Авто');
   c.type='checkbox';c.checked=!!CFG.autoMic;c.setAttribute('aria-label','Автозапись микрофона');
   c.onchange=function(){CFG.autoMic=c.checked;cfgSave();
@@ -659,7 +660,7 @@ TASKS.type_word={
   b.onclick=function(){if(mic.stop)mic.stop(go);else go()};
   inp.onkeydown=function(e){if(e.key==='Enter')b.onclick()};
   hintBtns(box,t.payload.hints);
-  row.appendChild(inp);row.appendChild(b);box.appendChild(row);box.appendChild(micRow(mic));
+  row.appendChild(inp);row.appendChild(b);box.appendChild(row);box.appendChild(micRow(mic,true));
   box.addEventListener('mousedown',function(e){if(e.target.closest('button')&&(document.activeElement===inp||document.activeElement.id==='kbp'))e.preventDefault()});
   if(CFG.kb)inp.focus({preventScroll:true});
   return function(res){if(mic.halt)mic.halt();try{inp.blur();var kp=document.getElementById('kbp');if(kp)kp.blur()}catch(e){}inp.disabled=true;mic.disabled=true;b.style.visibility='hidden';hint.textContent='';inp.style.borderColor=res.ok?'var(--ok)':'var(--bad)'};
@@ -732,7 +733,7 @@ function speakParts(parts,l){
     if(!p){step(k+1);return}
     try{var u=KEEPU=new SpeechSynthesisUtterance(p);u.lang=l;u.rate=.95;u.onend=u.onerror=function(){step(k+1)};speechSynthesis.speak(u)}catch(e){fabSp(false)}
   })(0)}
-function playSay(x){if(!x)return;if(x.gap)speakParts([x.gap[0],500,x.gap[1]],x.l);else speakParts([x.t],x.l)}
+function playSay(x){if(!x)return;stopMic();audioMode('playback');if(x.gap)speakParts([x.gap[0],500,x.gap[1]],x.l);else speakParts([x.t],x.l)}
 function stopTts(){TG++;fabSp(false);try{speechSynthesis.cancel()}catch(e){}}
 window.stopTts=stopTts;
 var lastSay=null;
@@ -777,7 +778,7 @@ function autoMic(box){
     if(tok!==AMT||answered||document.hidden||document.getElementById('t2').hidden)return;
     var rb=document.getElementById('rep');
     if(rb&&rb.classList.contains('sp')&&n++<40){setTimeout(wait,150);return}
-    setTimeout(function(){if(tok!==AMT||answered||!document.body.contains(m))return;m.auto()},500)
+    setTimeout(function(){if(tok!==AMT||answered||!document.body.contains(m))return;m.auto()},2000)
   })()
 }
 function showTask(){
@@ -791,7 +792,7 @@ function showTask(){
   });
   ['.q','.ans','.heard'].forEach(function(sl){var x=box.querySelector(sl);if(x){if(sl!=='.heard')x.classList.add(sl==='.q'?'prompt':'top');document.getElementById('cbody').appendChild(x)}});
   if(t.type!=='type_word'){document.getElementById('t2').classList.remove('kb');if(document.activeElement===kbp)kbp.blur()}
-  sayTask(t);autoMic(box);
+  sayTask(t);if(t.type==='speak')autoMic(box);
 }
 function finish(res,t){
   var c=queue[i],box=document.getElementById('task'),T=TASKS[t.type],fb=t.feedback||{};
