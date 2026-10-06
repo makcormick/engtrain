@@ -442,10 +442,10 @@ function mkHint(){var v='';return {get textContent(){return v},set textContent(x
 var MIC=null;
 /* iOS: во время распознавания Safari переключает аудиосессию на «звонок» (тихий разговорный динамик).
    Явно возвращаем режим воспроизведения, когда запись закончилась, чтобы сигналы и озвучка звучали громко. */
-function audioMode(t){try{if(navigator.audioSession)navigator.audioSession.type=t}catch(e){}}
+function audioMode(t){try{if(t==='playback')t='auto';if(navigator.audioSession)navigator.audioSession.type=t}catch(e){}}
 var SHC=null;
 function getCtx(){var AC=window.AudioContext||window.webkitAudioContext;if(!SHC||SHC.state==='closed')SHC=new AC();return SHC}
-['pointerdown','touchend','click','keydown'].forEach(function(n){document.addEventListener(n,function(){try{var c=getCtx();if(c.state!=='running')c.resume()}catch(e){}},true)});
+['pointerdown','touchend','click','keydown'].forEach(function(n){document.addEventListener(n,function(){try{if(!(CFG.autoMic&&document.querySelector('#t2 .ams')))return;var c=getCtx();if(c.state!=='running')c.resume()}catch(e){}},true)});
 function stopMic(){if(MIC&&MIC.halt)MIC.halt()}
 document.addEventListener('visibilitychange',function(){if(document.hidden)stopMic()});
 try{if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
@@ -508,6 +508,7 @@ function micButton(inp,hint,lang){
   /* ---- офлайн: микрофон -> буфер -> Whisper ---- */
   function teardown(s){
     clearInterval(s.iv);if(s.vr){s.vr.close();s.vr=null}
+    if(!(CFG.autoMic&&document.querySelector('#t2 .ams'))){try{s.ctx.close()}catch(e){}}
     try{s.node.onaudioprocess=null;s.node.disconnect();s.src.disconnect()}catch(e){}
     try{s.stream.getTracks().forEach(function(t){t.stop()})}catch(e){}
     
