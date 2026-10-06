@@ -242,7 +242,7 @@ html,body{margin:0}
 #t2 .ams:focus-within{outline:none}
 #t2 .ams .sw{width:38px;height:22px;border-radius:11px;background:var(--line);position:relative;transition:background .2s}
 #t2 .ams .sw::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s}
-#t2 .ams:has(input:checked){border-color:var(--acc);color:var(--acc)}
+#t2 .ams:has(input:checked){color:var(--acc)}
 #t2 .ams input:checked+.sw{background:var(--acc)}
 #t2 .ams input:checked+.sw::after{transform:translateX(16px)}
 @media (prefers-reduced-motion:reduce){#t2 .ams .sw,#t2 .ams .sw::after{transition:none}}
@@ -443,6 +443,9 @@ var MIC=null;
 /* iOS: во время распознавания Safari переключает аудиосессию на «звонок» (тихий разговорный динамик).
    Явно возвращаем режим воспроизведения, когда запись закончилась, чтобы сигналы и озвучка звучали громко. */
 function audioMode(t){try{if(navigator.audioSession)navigator.audioSession.type=t}catch(e){}}
+var SHC=null;
+function getCtx(){var AC=window.AudioContext||window.webkitAudioContext;if(!SHC||SHC.state==='closed')SHC=new AC();return SHC}
+['pointerdown','touchend','click','keydown'].forEach(function(n){document.addEventListener(n,function(){try{var c=getCtx();if(c.state!=='running')c.resume()}catch(e){}},true)});
 function stopMic(){if(MIC&&MIC.halt)MIC.halt()}
 document.addEventListener('visibilitychange',function(){if(document.hidden)stopMic()});
 try{if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
@@ -507,7 +510,7 @@ function micButton(inp,hint,lang){
     clearInterval(s.iv);if(s.vr){s.vr.close();s.vr=null}
     try{s.node.onaudioprocess=null;s.node.disconnect();s.src.disconnect()}catch(e){}
     try{s.stream.getTracks().forEach(function(t){t.stop()})}catch(e){}
-    try{s.ctx.close()}catch(e){}
+    
     if(cur===s)cur=null;audioMode('playback')}
   function txt(s){return (s.fin+' '+s.part).replace(/\s+/g,' ').trim()}
   // слова показываем сразу, по мере распознавания
@@ -544,10 +547,9 @@ function micButton(inp,hint,lang){
     var my=++sid;st='rec';b.classList.add('on');lvl(.2);audioMode('play-and-record');
     var AC=window.AudioContext||window.webkitAudioContext,ctx=null;
     // контекст создаём сразу, пока идёт нажатие: после ожидания разрешения Safari оставляет его выключенным
-    try{ctx=new AC();if(ctx.resume)ctx.resume()}catch(e){}
+    try{ctx=getCtx();if(ctx.resume)ctx.resume()}catch(e){}
     function fail(err){
       if(my!==sid)return;
-      try{if(ctx)ctx.close()}catch(e){}
       reset();audioMode('playback');
       var n=err&&err.name,denied=n==='NotAllowedError'||n==='SecurityError'||n==='PermissionDeniedError';
       if(b.silent&&denied){b.classList.add('nudge');b.silent=false;return}
@@ -555,7 +557,7 @@ function micButton(inp,hint,lang){
       hint.textContent=denied?'Нет доступа к микрофону. Разрешите его в браузере.':'Микрофон не запустился. Проверьте, что он подключён.'}
     if(!ctx){fail();return}
     navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,channelCount:1}}).then(function(stream){
-      if(my!==sid){stream.getTracks().forEach(function(t){t.stop()});try{ctx.close()}catch(e){}return}
+      if(my!==sid){stream.getTracks().forEach(function(t){t.stop()});return}
       var src=ctx.createMediaStreamSource(stream),node=ctx.createScriptProcessor(4096,1,1),mute=ctx.createGain();
       mute.gain.value=0;
       var s=cur={stream:stream,ctx:ctx,src:src,node:node,rate:ctx.sampleRate,n:0,peak:0,fin:'',part:'',last:'',tx:0,t0:Date.now()};
@@ -770,7 +772,6 @@ var AMT=0,AUTOSKIP=false;
 function autoMic(box){
   var tok=++AMT,m=box.querySelector('.mic'),viaAuto=AUTOSKIP;AUTOSKIP=false;
   if(!CFG.autoMic||!m||!m.auto)return;
-  if(viaAuto){m.classList.add('nudge');return}
   var n=0;
   (function wait(){
     if(tok!==AMT||answered||document.hidden||document.getElementById('t2').hidden)return;
