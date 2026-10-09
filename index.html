@@ -387,7 +387,7 @@ function feed(rv){
   const b=[{type:"meaning",payload:{en:w.def,ru:w.defru}},{type:"sentences",payload:{items:[[exs(w),trS2(w)]]}}];
   if(w.sit)b.push({type:"situation",payload:{text:w.sit}});
   b.push({type:"collocs",payload:{items:w.col}},{type:"assoc",payload:{items:w.as}});
-  return {id:++n,kind:"lesson",units:[{id:w.en,role:"teaches"}],blocks:b,tasks:[{type:"ack",payload:{}}]}};
+  return {id:++n,kind:"lesson",units:[{id:w.en,role:"teaches"}],blocks:b,tasks:[{type:"ack",payload:{},say:EN(w.en)}]}};
  const STOP=new Set(["если","тебе","меня","этого","чтобы","себя","свой","своей"]);
  const stems=t=>(t.toLowerCase().match(/[a-zа-яё']+/g)||[]).filter(x=>x.length>3&&!STOP.has(x)).map(x=>x.slice(0,5));
  const leaks=(txt,ans)=>{const l=txt.toLowerCase();return stems(ans).some(x=>l.includes(x))};
