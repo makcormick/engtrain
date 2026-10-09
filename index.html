@@ -287,6 +287,12 @@ html,body{margin:0}
 #t2 .cbody{flex:1 1 auto;min-height:0;overflow:auto;padding:22px 20px 14px;display:flex;flex-direction:column;gap:14px;touch-action:none;overscroll-behavior:contain}
 #t2 .cbody>*{flex-shrink:0}
 #t2 .card.split>.dock{flex:none;margin:0;position:static;padding:12px 20px 22px}
+
+/* ===== русские словосочетания под основным словом ===== */
+#t2 .q .qc{white-space:normal;margin-top:12px;padding:11px 12px 12px;border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:12px;background:linear-gradient(180deg,var(--acc-t),transparent 140%)}
+#t2 .q .qc .qh{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin-bottom:8px}
+#t2 .q .qc ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+#t2 .q .qc li{font-size:15px;font-weight:600;line-height:1.3;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 12px}
 </style>
 </head>
 <body>
@@ -395,15 +401,16 @@ function feed(rv){
  const opts=w=>{let r=sh((w.dist||[]).map(x=>({en:x[0],ru:x[1]})).filter(x=>x.en!==w.en)).slice(0,3);if(r.length<3){const have=new Set(r.map(x=>x.en));r=r.concat(sh(DATA[w.k].filter(x=>x!==w&&!have.has(x.en))).slice(0,3-r.length))}return r};
  const ch=(w,prompt,pick,say,orig)=>{const os=sh([w,...opts(w)]),fl={};os.forEach(x=>fl[pick(x)]=orig(x));return {type:"choice",payload:{prompt,options:os.map(pick),flip:fl,hints:ass(w,pick(w)+" "+(pick(w)===w.ru?"":w.en),pick(w)!==w.ru)},answer_spec:{correct:pick(w)},say:say||undefined}};
  const pl=(k,a,b,c)=>k%10===1&&k%100!==11?a:(k%10>=2&&k%10<=4&&(k%100<10||k%100>=20)?b:c);
+ const rc=w=>{const m=norm(w.ru),seen=new Set([m]);return (w.col||[]).map(c=>c[1]).filter(r=>r&&!seen.has(norm(r))&&seen.add(norm(r)))};
  const hint=t=>{const p=t.split(" "),L=(t.match(/[a-zа-яё]/gi)||[]).length;return ["Сколько букв",(p.length>1?p.length+" "+pl(p.length,"слово","слова","слов")+", ":"")+L+" "+pl(L,"буква","буквы","букв")+", начинается на «"+t[0]+"»"]};
  const MK={
   en2ru:w=>ch(w,w.en,x=>x.ru,EN(w.en),x=>x.en),
-  ru2en:w=>ch(w,w.ru,x=>x.en,null,x=>x.ru),
+  ru2en:w=>{const t=ch(w,w.ru,x=>x.en,null,x=>x.ru);t.payload.cols=rc(w);return t},
   situ:w=>ch(w,"Ситуация: "+w.sit+"\n\nВыберите фразу, которую уместно сказать:",x=>x.en,null,x=>x.ru),
-  build:w=>{const one=!/\s/.test(w.en.trim());return {type:"build",payload:Object.assign({prompt:w.ru,words:one?w.en.split(""):w.en.split(" "),hints:ass(w,w.en,1)},one?{join:"",cls:"l"}:{}),answer_spec:{accept:[w.en]}}},
-  type:w=>({type:"type_word",payload:{prompt:w.ru,placeholder:"по-английски",hints:[hint(w.en)].concat(ass(w,w.en,1))},answer_spec:{accept:[w.en]}}),
+  build:w=>{const one=!/\s/.test(w.en.trim());return {type:"build",payload:Object.assign({prompt:w.ru,cols:rc(w),words:one?w.en.split(""):w.en.split(" "),hints:ass(w,w.en,1)},one?{join:"",cls:"l"}:{}),answer_spec:{accept:[w.en]}}},
+  type:w=>({type:"type_word",payload:{prompt:w.ru,cols:rc(w),placeholder:"по-английски",hints:[hint(w.en)].concat(ass(w,w.en,1))},answer_spec:{accept:[w.en]}}),
   cloze:w=>({type:"type_word",payload:{prompt:w.ex.replace(/\[.+?\]/,"_____"),sub:w.exru,placeholder:"пропущенное слово",hints:[hint(form(w))].concat(ass(w,w.en+" "+form(w),1))},answer_spec:{accept:[form(w)]},say:{l:"en-US",gap:[w.ex.slice(0,w.ex.indexOf("[")).trim(),w.ex.slice(w.ex.indexOf("]")+1).trim()]}}),
-  speak:w=>({type:"speak",payload:{prompt:"Скажите по-английски:\n«"+w.ru+"»"+(w.sit?" ("+w.sit+")":""),hints:[hint(w.en)].concat(ass(w,w.en,1))},answer_spec:{accept:[w.en]}})};
+  speak:w=>({type:"speak",payload:{prompt:"Скажите по-английски:\n«"+w.ru+"»"+(w.sit?" ("+w.sit+")":""),cols:rc(w),hints:[hint(w.en)].concat(ass(w,w.en,1))},answer_spec:{accept:[w.en]}})};
  const prac=(w,m)=>{const t=MK[m](w);t.feedback={right:"Верно!\n"+exs(w),wrong:exs(w)+" — "+trS2(w)};U[w.en]=U[w.en]||{kind:w.k,title:w.en,data:{tr:w.ru}};
   return {id:++n,kind:"practice",units:[{id:w.en,role:"tests"}],blocks:[],tasks:[t]}};
  if(rv){cards=sh(W.flatMap(w=>ms.filter(m=>ok(m,w)).map(m=>prac(w,m[0]))));
@@ -636,12 +643,16 @@ function micRow(mic,plain){
     if(c.checked){if(!mic.disabled&&!mic.classList.contains('on')&&mic.onclick)mic.onclick()}
     else if(mic.halt)mic.halt()};
   l.appendChild(c);l.appendChild(sw);l.appendChild(tx);w.appendChild(l);w.appendChild(mic);return w}
+function qEl(t){var d=el('div','q',t.payload.prompt),c=t.payload.cols;
+  if(c&&c.length){var b=el('div','qc'),u=el('ul');b.appendChild(el('div','qh','Словосочетания'));
+   c.forEach(function(x){u.appendChild(el('li','',x))});b.appendChild(u);d.appendChild(b)}
+  return d}
 function subLine(x){var d=el('div','qs'),m=/\[(.+?)\]/.exec(x);if(!m){d.textContent=x;return d}
   d.appendChild(document.createTextNode(x.slice(0,m.index)));d.appendChild(el('span','rw',m[1]));d.appendChild(document.createTextNode(x.slice(m.index+m[0].length)));return d}
 var TASKS={};
 TASKS.choice={
  render:function(t,box,submit){
-  box.appendChild(el('div','q',t.payload.prompt));hintBtns(box,t.payload.hints);var o=el('div','opts');
+  box.appendChild(qEl(t));hintBtns(box,t.payload.hints);var o=el('div','opts');
   shuffle(t.payload.options).forEach(function(v){var b=el('button','',v);b.onclick=function(){submit(v,b)};o.appendChild(b)});
   box.appendChild(o);
   return function(res,t,chosen){[].forEach.call(o.children,function(x){x.classList.add('dn');if(x.textContent===t.answer_spec.correct)x.className='ok dn'});if(!res.ok&&chosen)chosen.className='bad dn';
@@ -656,7 +667,7 @@ TASKS.choice={
 };
 TASKS.build={
  render:function(t,box,submit){
-  box.appendChild(el('div','q',t.payload.prompt));hintBtns(box,t.payload.hints);
+  box.appendChild(qEl(t));hintBtns(box,t.payload.hints);
   var cls=t.payload.cls?' '+t.payload.cls:'',ans=el('div','ans'),pool=el('div','pool'),locked=false,chk=el('button','main','Проверить');
   shuffle(t.payload.words).forEach(function(w){var b=el('button','chip'+cls,w);b.type='button';
    b.onclick=function(){if(locked||b.dataset.u)return;b.dataset.u=1;b.style.visibility='hidden';
@@ -688,7 +699,7 @@ function flipHint(items){
 function hintBtns(box,items){if(!items||!items.length)return;box.appendChild(flipHint(items))}
 TASKS.type_word={
  render:function(t,box,submit){
-  var qd=el('div','q',t.payload.prompt);if(t.payload.sub)qd.appendChild(subLine(t.payload.sub));box.appendChild(qd);
+  var qd=qEl(t);if(t.payload.sub)qd.appendChild(subLine(t.payload.sub));box.appendChild(qd);
   var inp=el('input','txt');inp.placeholder=t.payload.placeholder||'';inp.autocomplete='off';inp.autocapitalize='off';inp.spellcheck=false;
   var b=el('button','main','Проверить'),hint=mkHint(),row=el('div','row'),mic=micButton(inp,hint,'en-US');mic.classList.add('big');mic.setAttribute('aria-label','Нажмите и говорите');
   var voiced=false,auto=false,acc=t.answer_spec.accept;
@@ -728,7 +739,7 @@ function okSay(h,a){return covers(h,a)||said(h,a)}
 function paint(box,txt,aw,all){box.innerHTML='';cleanS(txt).split(' ').forEach(function(w){if(w)box.appendChild(el('span',all||aw.indexOf(w)>=0?'ok':'bad',w+' '))})}
 TASKS.speak={
  render:function(t,box,submit){
-  box.appendChild(el('div','q',t.payload.prompt));
+  box.appendChild(qEl(t));
   var ans=t.answer_spec.accept[0],aw=cleanS(ans).split(' '),tries=0,heard=el('div','heard'),hint=mkHint(),val='';
   var o={get value(){return val},set value(v){val=v;heard.textContent=v}};
   var mic=micButton(o,hint,'en-US');mic.classList.add('big');mic.setAttribute('aria-label','Нажмите и скажите');
