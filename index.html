@@ -304,8 +304,8 @@ html,body{margin:0}
 <h1>Настройки</h1>
 <label class="srow"><span><b>Озвучка слов</b><small>Произносить слово, когда появляется карточка</small></span><input type="checkbox" id="cv"></label>
 <label class="srow"><span><b>Звуки ответов</b><small>Мягкий сигнал за верный и неверный ответ</small></span><input type="checkbox" id="cs"></label>
-<div class="srow ar" id="arow"><label class="at"><input type="checkbox" id="ca"><b>Авто</b></label><input type="range" id="cr" min="0" max="4" step="1" aria-label="Задержка автоперехода"><span class="av" id="crv"></span></div>
-<p class="ahelp">Авто выключено — после ответа свайп вверх открывает следующую карточку. Включено — карточка листается сама через выбранное время (от 0,1 до 2 секунд).</p>
+<div class="srow ar" id="arow"><label class="at"><input type="checkbox" id="ca"><b>Авто</b></label><input type="range" id="cr" min="0" max="3" step="1" aria-label="Задержка автоперехода"><span class="av" id="crv"></span></div>
+<p class="ahelp">Авто выключено — после ответа свайп вверх открывает следующую карточку. Включено — карточка листается сама через выбранное время (от 0,5 до 2 секунд).</p>
 <label class="srow"><span><b>Автоматическая клавиатура</b><small>Открывать клавиатуру в заданиях с вводом слова</small></span><input type="checkbox" id="ck"></label>
 <div class="srow" id="preload" role="button" tabindex="0"><span><b>Распознавание речи офлайн</b><small id="preloadS">Модель Vosk хранится на устройстве. Нажмите, чтобы загрузить её заранее (около 40 МБ, лучше по Wi-Fi). Дальше интернет не нужен.</small></span><span aria-hidden="true">⬇️</span></div>
 <label class="srow"><span><b>Данные карточки</b><small>Служебный JSON поверх карточки, для отладки</small></span><input type="checkbox" id="cd"></label>
@@ -419,7 +419,7 @@ menu();
 
 /* ============ ДАННЫЕ (то, что лежало бы в БД) ============ */
 // units: учебные единицы. Повторения считаются по ним, а не по карточкам.
-var CFG=window.CFG={voice:false,sound:true,auto:false,autoMs:2000,data:false,kb:false,autoMic:false};
+var CFG=window.CFG={voice:false,sound:true,auto:false,autoMs:500,data:false,kb:false,autoMic:false};
 try{Object.assign(CFG,JSON.parse(localStorage.getItem('enCfg')||'{}'));if(!localStorage.getItem('enCfgV2')){CFG.auto=false;localStorage.setItem('enCfgV2','1');localStorage.setItem('enCfg',JSON.stringify(CFG))}}catch(e){}
 window.cfgSave=function(){try{localStorage.setItem('enCfg',JSON.stringify(CFG))}catch(e){}};
 var UNITS={};
@@ -854,7 +854,7 @@ function finish(res,t){
   var extra=[res.note,!res.ok&&fb.wrong].filter(Boolean).join(' ');if(extra)f.appendChild(el('span','',extra));
   if(!CFG.auto||!res.ok)f.appendChild(el('div','nx','Свайп вверх — дальше'));
   document.getElementById('cbody').appendChild(f);try{f.scrollIntoView({block:'nearest'})}catch(e){}ansAt=Date.now();head();
-  if(CFG.auto&&res.ok){var ams=Math.max(100,Math.min(2000,+CFG.autoMs||2000));AT=setTimeout(function(){AUTOSKIP=true;skip()},ams);atbStart(ams)}
+  if(CFG.auto&&res.ok){var ams=Math.max(500,Math.min(2000,+CFG.autoMs||500));AT=setTimeout(function(){AUTOSKIP=true;skip()},ams);atbStart(ams)}
 }
 function advance(kind){
   var c=queue[i],card=document.getElementById('card');if(!card)return;
@@ -927,8 +927,8 @@ var C=window.CFG;
   t.textContent='Загрузка модели…';ASR.whenReady(function(){t.textContent='Готово: модель на устройстве, интернет не нужен.';toast('Модель загружена. Распознавание работает офлайн.',true)})}
  p.onclick=go;p.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}};
  if(ASR.isReady())t.textContent='Готово: модель на устройстве, интернет не нужен.'})();
-(function(){var ca=document.getElementById('ca'),cr=document.getElementById('cr'),cv=document.getElementById('crv'),row=document.getElementById('arow'),S=[100,500,1000,1500,2000];
- function idx(){var m=+C.autoMs||2000,k=0,d=1e9;S.forEach(function(v,j){var e=Math.abs(v-m);if(e<d){d=e;k=j}});return k}
+(function(){var ca=document.getElementById('ca'),cr=document.getElementById('cr'),cv=document.getElementById('crv'),row=document.getElementById('arow'),S=[500,1000,1500,2000];
+ function idx(){var m=+C.autoMs||500,k=0,d=1e9;S.forEach(function(v,j){var e=Math.abs(v-m);if(e<d){d=e;k=j}});return k}
  function paint(){cr.value=idx();cr.disabled=!ca.checked;row.classList.toggle('off',!ca.checked);cv.textContent=String(S[idx()]/1000).replace('.',',')+' с'}
  ca.checked=!!C.auto;
  ca.onchange=function(){C.auto=ca.checked;cfgSave();paint()};
