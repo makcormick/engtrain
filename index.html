@@ -19,6 +19,12 @@ html,body{margin:0}
 #launcher .srow{display:flex;justify-content:space-between;align-items:center;gap:14px;background:var(--card);border:2px solid var(--line);border-radius:16px;padding:12px 16px;margin-bottom:10px;cursor:pointer}
 #launcher .srow small{display:block;color:var(--mut);font-size:14px;line-height:1.35;margin-top:2px}
 #launcher .srow input{flex:none;width:24px;height:24px;accent-color:var(--acc)}
+#launcher .srow.ar{justify-content:flex-start;gap:12px;cursor:default}
+#launcher .srow.ar .at{display:flex;align-items:center;gap:10px;flex:none;cursor:pointer}
+#launcher .srow.ar input[type=range]{flex:1 1 auto;width:auto;min-width:0;height:28px;margin:0}
+#launcher .srow.ar .av{flex:none;min-width:44px;text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+#launcher .srow.ar.off input[type=range],#launcher .srow.ar.off .av{opacity:.4}
+#launcher .ahelp{color:var(--mut);font-size:14px;line-height:1.35;margin:-4px 4px 12px}
 #launcher .pick{display:block;width:100%;text-align:left;background:var(--card);border:2px solid var(--line);border-radius:20px;padding:18px;margin-bottom:14px;color:inherit;font:inherit;cursor:pointer}
 #launcher .pick:hover,#launcher .pick:focus-visible{border-color:var(--acc);outline:none}
 #launcher .pick .e{font-size:32px;line-height:1}
@@ -298,8 +304,8 @@ html,body{margin:0}
 <h1>Настройки</h1>
 <label class="srow"><span><b>Озвучка слов</b><small>Произносить слово, когда появляется карточка</small></span><input type="checkbox" id="cv"></label>
 <label class="srow"><span><b>Звуки ответов</b><small>Мягкий сигнал за верный и неверный ответ</small></span><input type="checkbox" id="cs"></label>
-<label class="srow"><span><b>Ручной переход</b><small>После ответа свайп вверх открывает следующую карточку</small></span><input type="radio" name="nm" value="manual"></label>
-<label class="srow"><span><b>Автопереход</b><small>Через 2 секунды после ответа карточка листается сама</small></span><input type="radio" name="nm" value="auto"></label>
+<div class="srow ar" id="arow"><label class="at"><input type="checkbox" id="ca"><b>Авто</b></label><input type="range" id="cr" min="0" max="4" step="1" aria-label="Задержка автоперехода"><span class="av" id="crv"></span></div>
+<p class="ahelp">Авто выключено — после ответа свайп вверх открывает следующую карточку. Включено — карточка листается сама через выбранное время (от 0,1 до 2 секунд).</p>
 <label class="srow"><span><b>Автоматическая клавиатура</b><small>Открывать клавиатуру в заданиях с вводом слова</small></span><input type="checkbox" id="ck"></label>
 <div class="srow" id="preload" role="button" tabindex="0"><span><b>Распознавание речи офлайн</b><small id="preloadS">Модель Vosk хранится на устройстве. Нажмите, чтобы загрузить её заранее (около 40 МБ, лучше по Wi-Fi). Дальше интернет не нужен.</small></span><span aria-hidden="true">⬇️</span></div>
 <label class="srow"><span><b>Данные карточки</b><small>Служебный JSON поверх карточки, для отладки</small></span><input type="checkbox" id="cd"></label>
@@ -381,23 +387,23 @@ function feed(rv){
   const b=[{type:"meaning",payload:{en:w.def,ru:w.defru}},{type:"sentences",payload:{items:[[exs(w),trS2(w)]]}}];
   if(w.sit)b.push({type:"situation",payload:{text:w.sit}});
   b.push({type:"collocs",payload:{items:w.col}},{type:"assoc",payload:{items:w.as}});
-  return {id:++n,kind:"lesson",units:[{id:w.en,role:"teaches"}],blocks:b,tasks:[{type:"ack",payload:{},say:EN(w.en)}]}};
+  return {id:++n,kind:"lesson",units:[{id:w.en,role:"teaches"}],blocks:b,tasks:[{type:"ack",payload:{}}]}};
  const STOP=new Set(["если","тебе","меня","этого","чтобы","себя","свой","своей"]);
  const stems=t=>(t.toLowerCase().match(/[a-zа-яё']+/g)||[]).filter(x=>x.length>3&&!STOP.has(x)).map(x=>x.slice(0,5));
  const leaks=(txt,ans)=>{const l=txt.toLowerCase();return stems(ans).some(x=>l.includes(x))};
  const ass=(w,ans,eng)=>w.as.filter(a=>!leaks(a[1],ans)&&!(eng&&a[0]==="Созвучие"));
  const opts=w=>{let r=sh((w.dist||[]).map(x=>({en:x[0],ru:x[1]})).filter(x=>x.en!==w.en)).slice(0,3);if(r.length<3){const have=new Set(r.map(x=>x.en));r=r.concat(sh(DATA[w.k].filter(x=>x!==w&&!have.has(x.en))).slice(0,3-r.length))}return r};
- const ch=(w,prompt,pick,say,orig)=>{const os=sh([w,...opts(w)]),fl={};os.forEach(x=>fl[pick(x)]=orig(x));return {type:"choice",payload:{prompt,options:os.map(pick),flip:fl,hints:ass(w,pick(w)+" "+(pick(w)===w.ru?"":w.en),pick(w)!==w.ru)},answer_spec:{correct:pick(w)},say}};
+ const ch=(w,prompt,pick,say,orig)=>{const os=sh([w,...opts(w)]),fl={};os.forEach(x=>fl[pick(x)]=orig(x));return {type:"choice",payload:{prompt,options:os.map(pick),flip:fl,hints:ass(w,pick(w)+" "+(pick(w)===w.ru?"":w.en),pick(w)!==w.ru)},answer_spec:{correct:pick(w)},say:say||undefined}};
  const pl=(k,a,b,c)=>k%10===1&&k%100!==11?a:(k%10>=2&&k%10<=4&&(k%100<10||k%100>=20)?b:c);
  const hint=t=>{const p=t.split(" "),L=(t.match(/[a-zа-яё]/gi)||[]).length;return ["Сколько букв",(p.length>1?p.length+" "+pl(p.length,"слово","слова","слов")+", ":"")+L+" "+pl(L,"буква","буквы","букв")+", начинается на «"+t[0]+"»"]};
  const MK={
   en2ru:w=>ch(w,w.en,x=>x.ru,EN(w.en),x=>x.en),
-  ru2en:w=>ch(w,w.ru,x=>x.en,RU(w.ru),x=>x.ru),
-  situ:w=>ch(w,"Ситуация: "+w.sit+"\n\nВыберите фразу, которую уместно сказать:",x=>x.en,RU(w.sit),x=>x.ru),
-  build:w=>{const one=!/\s/.test(w.en.trim());return {type:"build",payload:Object.assign({prompt:w.ru,words:one?w.en.split(""):w.en.split(" "),hints:ass(w,w.en,1)},one?{join:"",cls:"l"}:{}),answer_spec:{accept:[w.en]},say:RU(w.ru)}},
-  type:w=>({type:"type_word",payload:{prompt:w.ru,placeholder:"по-английски",hints:[hint(w.en)].concat(ass(w,w.en,1))},answer_spec:{accept:[w.en]},say:RU(w.ru)}),
+  ru2en:w=>ch(w,w.ru,x=>x.en,null,x=>x.ru),
+  situ:w=>ch(w,"Ситуация: "+w.sit+"\n\nВыберите фразу, которую уместно сказать:",x=>x.en,null,x=>x.ru),
+  build:w=>{const one=!/\s/.test(w.en.trim());return {type:"build",payload:Object.assign({prompt:w.ru,words:one?w.en.split(""):w.en.split(" "),hints:ass(w,w.en,1)},one?{join:"",cls:"l"}:{}),answer_spec:{accept:[w.en]}}},
+  type:w=>({type:"type_word",payload:{prompt:w.ru,placeholder:"по-английски",hints:[hint(w.en)].concat(ass(w,w.en,1))},answer_spec:{accept:[w.en]}}),
   cloze:w=>({type:"type_word",payload:{prompt:w.ex.replace(/\[.+?\]/,"_____"),sub:w.exru,placeholder:"пропущенное слово",hints:[hint(form(w))].concat(ass(w,w.en+" "+form(w),1))},answer_spec:{accept:[form(w)]},say:{l:"en-US",gap:[w.ex.slice(0,w.ex.indexOf("[")).trim(),w.ex.slice(w.ex.indexOf("]")+1).trim()]}}),
-  speak:w=>({type:"speak",payload:{prompt:"Скажите по-английски:\n«"+w.ru+"»"+(w.sit?" ("+w.sit+")":""),hints:[hint(w.en)].concat(ass(w,w.en,1))},answer_spec:{accept:[w.en]},say:RU(w.ru)})};
+  speak:w=>({type:"speak",payload:{prompt:"Скажите по-английски:\n«"+w.ru+"»"+(w.sit?" ("+w.sit+")":""),hints:[hint(w.en)].concat(ass(w,w.en,1))},answer_spec:{accept:[w.en]}})};
  const prac=(w,m)=>{const t=MK[m](w);t.feedback={right:"Верно!\n"+exs(w),wrong:exs(w)+" — "+trS2(w)};U[w.en]=U[w.en]||{kind:w.k,title:w.en,data:{tr:w.ru}};
   return {id:++n,kind:"practice",units:[{id:w.en,role:"tests"}],blocks:[],tasks:[t]}};
  if(rv){cards=sh(W.flatMap(w=>ms.filter(m=>ok(m,w)).map(m=>prac(w,m[0]))));
@@ -413,7 +419,7 @@ menu();
 
 /* ============ ДАННЫЕ (то, что лежало бы в БД) ============ */
 // units: учебные единицы. Повторения считаются по ним, а не по карточкам.
-var CFG=window.CFG={voice:false,sound:true,auto:false,data:false,kb:false,autoMic:false};
+var CFG=window.CFG={voice:false,sound:true,auto:false,autoMs:2000,data:false,kb:false,autoMic:false};
 try{Object.assign(CFG,JSON.parse(localStorage.getItem('enCfg')||'{}'));if(!localStorage.getItem('enCfgV2')){CFG.auto=false;localStorage.setItem('enCfgV2','1');localStorage.setItem('enCfg',JSON.stringify(CFG))}}catch(e){}
 window.cfgSave=function(){try{localStorage.setItem('enCfg',JSON.stringify(CFG))}catch(e){}};
 var UNITS={};
@@ -520,8 +526,10 @@ function micButton(inp,hint,lang){
     
     if(cur===s)cur=null;audioMode('playback');setTimeout(function(){if(!cur)audioMode('playback')},400)}
   function txt(s){return (s.fin+' '+s.part).replace(/\s+/g,' ').trim()}
-  /* --- фильтр слов: показываем всё, что слышит распознавание, но раз в секунду убираем слова не из ответа.
-         Подходящие слова остаются, порядок не важен. Включается вызовом mic.target([варианты ответа]) --- */
+  /* --- фильтр слов: показываем всё, что слышит распознавание. Подходящие слова (из ответа) остаются всегда
+         и в счёт лимита не входят. Неподходящие остаются, пока их не больше KEEP_W слов и KEEP_C букв:
+         когда набегает больше, самые старые неподходящие убираются. Таймера нет. Включается вызовом mic.target([варианты]) --- */
+  var KEEP_W=4,KEEP_C=24;
   function wk(w){return w.replace(/'/g,'')}
   function toks(x){x=cleanS(x);return x?x.split(' '):[]}
   b.target=function(list){
@@ -529,22 +537,17 @@ function micButton(inp,hint,lang){
     list.forEach(function(a){var c={};toks(a).forEach(function(w){w=wk(w);c[w]=(c[w]||0)+1});for(var k in c)if(c[k]>(need[k]||0))need[k]=c[k]});
     b.need=need};
   function fitOn(){return !!b.need}
-  function take(s,ws){
-    ws.forEach(function(w){var k=wk(w);
-      if(b.need[k]&&(s.kc[k]||0)<b.need[k]){s.kept.push(w);s.kc[k]=(s.kc[k]||0)+1}
-      else if(s.drop.length<40)s.drop.push(w)})}
-  // перенести устоявшиеся слова текущей фразы в «оставленные»; последнее слово ещё может меняться, его не трогаем
-  function sweep(s,all){
-    var T=toks(s.part),upto=all?T.length:Math.max(0,T.length-1);
-    if(T.length<s.pc)s.pc=T.length;
-    if(upto>s.pc){take(s,T.slice(s.pc,upto));s.pc=upto}
-    s.pr=Date.now()}
-  // что показать сейчас: оставленные слова + слова текущей фразы (подходящие отмечены)
+  // что показать: [[слово, подходит?], ...] в порядке речи
   function items(s){
-    var out=[],kc={},k;
-    s.kept.forEach(function(w){out.push([w,1]);k=wk(w);kc[k]=(kc[k]||0)+1});
-    toks(s.part).slice(s.pc).forEach(function(w){k=wk(w);var ok=!!b.need[k]&&(kc[k]||0)<b.need[k];if(ok)kc[k]=(kc[k]||0)+1;out.push([w,ok?1:0])});
-    return out}
+    var out=[],kc={},k,i,nw=0,nc=0,cut=false;
+    toks(txt(s)).forEach(function(w){k=wk(w);var ok=!!b.need[k]&&(kc[k]||0)<b.need[k];if(ok)kc[k]=(kc[k]||0)+1;out.push([w,ok?1:0,1])});
+    for(i=out.length-1;i>=0;i--){
+      if(out[i][1])continue;
+      var L=wk(out[i][0]).length;
+      // самое свежее неподходящее слово показываем всегда, остальные пока влезают в лимит
+      if(cut||(nw>0&&(nw>=KEEP_W||nc+L>KEEP_C))){cut=true;out[i][2]=0;continue}
+      nw++;nc+=L}
+    return out.filter(function(x){return x[2]}).map(function(x){return [x[0],x[1]]})}
   // слова показываем сразу, по мере распознавания
   function live(s){
     if(cur!==s||st!=='rec')return;
@@ -572,12 +575,11 @@ function micButton(inp,hint,lang){
         hint.textContent='Микрофон не передаёт звук. Нажмите ещё раз ';
         l.forEach(function(f){f()})}
       return}
-    if(fitOn()&&now-s.pr>1000){sweep(s,false);live(s);if(cur!==s||st!=='rec')return}
     if((s.tx&&now-s.tx>2500)||(!s.tx&&t>15000)||t>45000)finishRec()}
   function finishRec(){
     var s=cur;if(!s||st!=='rec')return;
     var t=txt(s),peak=s.peak;
-    if(fitOn()){sweep(s,true);if(s.kept.length)t=s.kept.join(' ')}
+    if(fitOn()){t=items(s).map(function(x){return x[0]}).join(' ')}
     teardown(s);b.classList.remove('talk');b.style.removeProperty('--lv');
     if(!t){end('',peak<.01?'Речь не слышно. Говорите ближе к микрофону и попробуйте ещё раз.':'Речь не распознана. Нажмите на микрофон и попробуйте ещё раз.');return}
     end(t)}
@@ -598,9 +600,9 @@ function micButton(inp,hint,lang){
       if(my!==sid){stream.getTracks().forEach(function(t){t.stop()});return}
       var src=ctx.createMediaStreamSource(stream),node=ctx.createScriptProcessor(4096,1,1),mute=ctx.createGain();
       mute.gain.value=0;
-      var s=cur={stream:stream,ctx:ctx,src:src,node:node,rate:ctx.sampleRate,n:0,peak:0,fin:'',part:'',last:'',shown:'',tx:0,t0:Date.now(),kept:[],kc:{},drop:[],pc:0,pr:Date.now()};
+      var s=cur={stream:stream,ctx:ctx,src:src,node:node,rate:ctx.sampleRate,n:0,peak:0,fin:'',part:'',last:'',shown:'',tx:0,t0:Date.now()};
       if(fitOn()&&b.onshow){inp.value='';b.onshow([])}
-      s.vr=ASR.open(ctx.sampleRate,function(p){s.part=p;live(s)},function(r){if(fitOn()&&r)take(s,toks(r).slice(s.pc));s.pc=0;if(r)s.fin=(s.fin+' '+r).trim();s.part='';live(s)});
+      s.vr=ASR.open(ctx.sampleRate,function(p){s.part=p;live(s)},function(r){if(r)s.fin=(s.fin+' '+r).trim();s.part='';live(s)});
       node.onaudioprocess=function(e){onChunk(s,e.inputBuffer)};
       src.connect(node);node.connect(mute);mute.connect(ctx.destination);
       if(ctx.state!=='running'&&ctx.resume)ctx.resume();
@@ -764,7 +766,6 @@ function buzz(){beep([[220,0]],VOL_BAD,'triangle')}
 var stage=document.getElementById('stage');
 var queue=[],i=0,ti=0,st,wrong,answered,AT=0,ansAt=0;
 var CUR={cards:[]};
-var AT_MS=2000;
 var AUTOP=false;
 function atbClear(){AUTOP=false;var x=document.getElementById('atb');if(x)x.remove()}
 function atbStart(ms){atbClear();AUTOP=true;var d=el('div','atb'),f=el('i');d.id='atb';f.style.animationDuration=ms+'ms';d.appendChild(f);stage.appendChild(d)}
@@ -786,7 +787,7 @@ function playSay(x){if(!x)return;if(x.gap)speakParts([x.gap[0],500,x.gap[1]],x.l
 function stopTts(){TG++;fabSp(false);try{speechSynthesis.cancel()}catch(e){}}
 window.stopTts=stopTts;
 var lastSay=null;
-function sayTask(t){var c=queue[i],x=t.say||(c&&c.kind==='lesson'&&UNITS[c.units[0].id]&&{t:UNITS[c.units[0].id].title,l:'en-US'});lastSay=x||null;var rb=document.getElementById('rep');if(rb)rb.hidden=!lastSay;if(CFG.voice&&x)playSay(x)}
+function sayTask(t){var x=t.say;lastSay=x||null;var rb=document.getElementById('rep');if(rb)rb.hidden=!lastSay;if(CFG.voice&&x)playSay(x)}
 var kbp=document.getElementById('kbp');
 function warmKb(){var c=queue[i],nx=(c&&ti<c.tasks.length-1)?c.tasks[ti+1]:(queue[i+1]&&queue[i+1].tasks[0]);if(CFG.kb&&nx&&nx.type==='type_word'){try{kbp.focus({preventScroll:true})}catch(e){}}}
 function head(){
@@ -797,6 +798,7 @@ function head(){
 function draw(){
   head();stage.innerHTML='';
   if(i>=queue.length){
+    lastSay=null;stopTts();var rb0=document.getElementById('rep');if(rb0)rb0.hidden=true;
     var e=el('div','card end');e.appendChild(el('h2','','Готово на сегодня'));
     var s=el('div','stat');
     [['Верно',st.ok],['Ошибки',st.bad],['Пропуски',st.skip]].forEach(function(p){var d=el('div');d.appendChild(el('b','',p[1]));d.appendChild(el('span','',p[0]));s.appendChild(d)});
@@ -852,7 +854,7 @@ function finish(res,t){
   var extra=[res.note,!res.ok&&fb.wrong].filter(Boolean).join(' ');if(extra)f.appendChild(el('span','',extra));
   if(!CFG.auto||!res.ok)f.appendChild(el('div','nx','Свайп вверх — дальше'));
   document.getElementById('cbody').appendChild(f);try{f.scrollIntoView({block:'nearest'})}catch(e){}ansAt=Date.now();head();
-  if(CFG.auto&&res.ok){AT=setTimeout(function(){AUTOSKIP=true;skip()},AT_MS);atbStart(AT_MS)}
+  if(CFG.auto&&res.ok){var ams=Math.max(100,Math.min(2000,+CFG.autoMs||2000));AT=setTimeout(function(){AUTOSKIP=true;skip()},ams);atbStart(ams)}
 }
 function advance(kind){
   var c=queue[i],card=document.getElementById('card');if(!card)return;
@@ -925,7 +927,13 @@ var C=window.CFG;
   t.textContent='Загрузка модели…';ASR.whenReady(function(){t.textContent='Готово: модель на устройстве, интернет не нужен.';toast('Модель загружена. Распознавание работает офлайн.',true)})}
  p.onclick=go;p.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}};
  if(ASR.isReady())t.textContent='Готово: модель на устройстве, интернет не нужен.'})();
-[].forEach.call(document.querySelectorAll('input[name=nm]'),function(r){r.checked=(r.value==='auto')===!!C.auto;r.onchange=function(){C.auto=r.value==='auto';cfgSave()}});
+(function(){var ca=document.getElementById('ca'),cr=document.getElementById('cr'),cv=document.getElementById('crv'),row=document.getElementById('arow'),S=[100,500,1000,1500,2000];
+ function idx(){var m=+C.autoMs||2000,k=0,d=1e9;S.forEach(function(v,j){var e=Math.abs(v-m);if(e<d){d=e;k=j}});return k}
+ function paint(){cr.value=idx();cr.disabled=!ca.checked;row.classList.toggle('off',!ca.checked);cv.textContent=String(S[idx()]/1000).replace('.',',')+' с'}
+ ca.checked=!!C.auto;
+ ca.onchange=function(){C.auto=ca.checked;cfgSave();paint()};
+ cr.oninput=function(){C.autoMs=S[+cr.value];cfgSave();paint()};
+ paint()})();
 (function(){var x0=null,y0=0,fin=false;
  function view(){return !LS.hidden?'s':!A.hidden?'1':!B.hidden?'2':null}
  function back(){var v=view();if(v==='s')show('l');else if(v==='1')home();else if(v==='2')document.getElementById('back2').onclick()}
